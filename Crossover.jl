@@ -145,7 +145,7 @@ function Crossover_PMX(parent1::Vector{Int64}, parent2::Vector{Int64}, n_nodes::
 end
 
 
-function Crossover_HX(parent1::Vector{Int64}, parent2::Vector{Int64}, n_nodes::Int64)   #heuristic crossover 
+function Crossover_HX(TT::Matrix{Float64}, parent1::Vector{Int64}, parent2::Vector{Int64}, n_nodes::Int64)   #heuristic crossover 
     
     remaining_cities = copy(parent1)
     current_city = rand(1:n_nodes)

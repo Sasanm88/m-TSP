@@ -44,7 +44,7 @@ function Select_parents(Population::Vector{Chromosome}, k_tournament::Int64, pop
     return Parent_Selection_TS(Population, k_tournament, popsize), Parent_Selection_TS(Population, k_tournament, popsize)
 end
 
-function Reproduce(parent1::Vector{Int64}, parent2::Vector{Int64}, n_nodes::Int64)
+function Reproduce(TT::Matrix{Float64}, parent1::Vector{Int64}, parent2::Vector{Int64}, n_nodes::Int64)
     #     r = sample(1:length(crsovr_chances), Weights(crsovr_chances),1)
     r = rand(1:6)
     if r == 1
@@ -56,7 +56,7 @@ function Reproduce(parent1::Vector{Int64}, parent2::Vector{Int64}, n_nodes::Int6
     elseif r == 4
         return Crossover_CX(parent1, parent2, n_nodes)
     elseif r == 5
-        return Crossover_HX(parent1, parent2, n_nodes)
+        return Crossover_HX(TT, parent1, parent2, n_nodes)
     else
         return Crossover_PMX(parent1, parent2, n_nodes)
     end
@@ -158,7 +158,7 @@ function Generate_new_generation(TT::Matrix{Float64}, demands::Vector{Int}, K::I
     psize = length(Population)
     parent1, parent2 = Select_parents(Population, k_tournament, psize)
 
-    child = Reproduce(parent1.genes, parent2.genes, n_nodes)
+    child = Reproduce(TT, parent1.genes, parent2.genes, n_nodes)
     Mutate(child, Mutation_Chance)
     
     
@@ -179,22 +179,23 @@ function Generate_new_generation(TT::Matrix{Float64}, demands::Vector{Int}, K::I
         improve_count += 1
     end
     t2 = time()
-    Gen_num += 1
+    
 
     if Gen_num % 1000 == 0
         println("Generation ", Gen_num, " the best objective is: ", old_best)
     end
+    Gen_num += 1
     return Gen_num, old_best, Population, improve_count
 end
 
-function Perform_Genetic_Algorithm(TT::Matrix{Float64}, h::Float64, popsize::Tuple{Int64,Int64},
+function Perform_Genetic_Algorithm(TT::Matrix{Float64}, demands::Vector{Int}, h::Float64, popsize::Tuple{Int64,Int64},
     k_tournament::Int64, num_iter::Int64, Mutation_Chance::Float64)
     n_nodes = size(TT)[1] - 2
     t1 = time()
     ClosenessT= Find_Closeness(TT, h) 
     mu, sigma = popsize
     improve_count = 0
-    Gen_num = 1
+    Gen_num = 0
     old_best = 0.0
     Population, old_best = Generate_initial_population(TT, demands, K, W, mu) 
     count = 0

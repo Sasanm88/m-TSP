@@ -1,9 +1,14 @@
+mutable struct Tour
+    Sequence::Vector{Int}
+    cost::Float64
+end
+
 mutable struct Chromosome
     genes::Vector{Int64}
     fitness::Float64
 #     feasible::Bool        #We will consider the infeasible chromosomes later
     power::Float64
-    tours::Vector{Vector{Int64}}
+    tours::Vector{Tour}
 end
 
 
@@ -135,7 +140,7 @@ end
 
 function best_route(Population::Vector{Chromosome})
     for tour in Population[1].tours
-        for i in tour
+        for i in tour.Sequence
             print(i, ", ")
         end
         println()
@@ -188,7 +193,7 @@ function Generate_new_generation(TT::Matrix{Float64}, demands::Vector{Int}, K::I
     return Gen_num, old_best, Population, improve_count
 end
 
-function Perform_Genetic_Algorithm(TT::Matrix{Float64}, demands::Vector{Int}, h::Float64, popsize::Tuple{Int64,Int64},
+function Perform_Genetic_Algorithm(TT::Matrix{Float64}, demands::Vector{Int}, K::Int, W::Int,h::Float64, popsize::Tuple{Int64,Int64},
     k_tournament::Int64, num_iter::Int64, Mutation_Chance::Float64)
     n_nodes = size(TT)[1] - 2
     t1 = time()

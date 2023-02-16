@@ -30,8 +30,8 @@ end
 function Find_Closeness(TT::Matrix{Float64}, h::Float64)
     n_nodes = size(TT)[1] - 2
     num = Int(ceil(h * n_nodes))
-    ClosenessT = zeros(Int, n_nodes, num)
-    @inbounds for i = 2:n_nodes+1
+    ClosenessT = zeros(Int, n_nodes+1, num)
+    @inbounds for i = 2:n_nodes+2
         a = copy(TT[i, 2:n_nodes+1])
         b = sortperm(a)
         ClosenessT[i-1, :] = b[2:num+1]

@@ -147,7 +147,7 @@ function best_route(Population::Vector{Chromosome})
     end
 end
 
-function Generate_new_generation(TT::Matrix{Float64}, demands::Vector{Int}, K::Int, W::Int,
+function Generate_new_generation(TT::Matrix{Float64}, Close_nodes::Matrix{Int}, demands::Vector{Int}, K::Int, W::Int,
         Population::Vector{Chromosome}, popsize::Tuple{Int64,Int64}, k_tournament::Int64, 
         ClosenessT::Matrix{Int64}, Gen_num::Int64, old_best::Float64, improve_count::Int64, Mutation_Chance::Float64)
     t1 = time()
@@ -165,13 +165,11 @@ function Generate_new_generation(TT::Matrix{Float64}, demands::Vector{Int}, K::I
 
     child = Reproduce(TT, parent1.genes, parent2.genes, n_nodes)
     Mutate(child, Mutation_Chance)
-    
-    
-    #Improvement(Local Search)
-    
-    
+
     obj, trips = SPLIT(TT, demands, K, W, child)
-    push!(Population, Chromosome(child, obj, 0.0, trips))
+    offspring = Chromosome(child, obj, 0.0, trips)
+    offspring = Improve_chromosome(offspring, TT, Close_nodes, demands, W, n_nodes)
+    push!(Population, offspring)
     sort!(Population, by=x -> x.fitness)
 
     Perform_Survival_Plan(Population, mu, sigma)
@@ -186,7 +184,7 @@ function Generate_new_generation(TT::Matrix{Float64}, demands::Vector{Int}, K::I
     t2 = time()
     
 
-    if Gen_num % 1000 == 0
+    if Gen_num % 10000 == 0
         println("Generation ", Gen_num, " the best objective is: ", old_best)
     end
     Gen_num += 1
@@ -206,15 +204,15 @@ function Perform_Genetic_Algorithm(TT::Matrix{Float64}, demands::Vector{Int}, K:
     count = 0
 
     @inbounds while improve_count < num_iter
-            Gen_num, old_best, Population, improve_count = Generate_new_generation(TT, demands, K, W,
+            Gen_num, old_best, Population, improve_count = Generate_new_generation(TT, ClosenessT, demands, K, W,
         Population, popsize, k_tournament, ClosenessT, Gen_num, old_best, improve_count, Mutation_Chance)
         count += 1
     end
     t2 = time()
 
     println("The best objective achieved in ", Gen_num, " generations is: ", Population[1].fitness, " and it took ", t2 - t1, " seconds.")
-    println("And the best route is: ")
-    best_route(Population)
+#     println("And the best route is: ")
+#     best_route(Population)
     return Population
 end
 

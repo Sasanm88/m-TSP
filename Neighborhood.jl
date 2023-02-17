@@ -128,23 +128,36 @@ function N1(Chrm::Chromosome, TT::Matrix{Float64}, Close_nodes::Matrix{Int}, dem
     cost2 = Chrm.tours[r1].cost
     k1 = rand(1:length(tour1))
     city1 = tour1[k1]
-    candidates = intersect(tour2, Close_nodes[city1,:])
-    if length(tour2) == 0
-        candidates = [1]
+    Candidates = Int[] 
+    nt = length(tour2)
+    if nt == 1
+        Candidates = [1,2]
+    elseif nt == 2
+        Candidates = [1,2,3]
+    else
+        if city1 in Close_nodes[n_nodes+1,:] || tour2[1] in Close_nodes[city1,:] 
+            push!(Candidates, 1)
+        end
+        for i=2:nt
+            if tour2[i-1] in Close_nodes[city1,:] || tour2[i] in Close_nodes[city1,:]
+                push!(Candidates, i)
+            end
+        end
+        if city1 in Close_nodes[n_nodes+1,:] || tour2[nt] in Close_nodes[city1,:] 
+            push!(Candidates, nt+1)
+        end
     end
-    if length(candidates) == 0
+    # Candidates = collect(setdiff(Set(Candidates),Set([k1])))
+    
+    if length(Candidates) == 0
         return Chrm
     end
-    city = candidates[rand(1:length(candidates))]
-    k2 = findfirst(x->x==city, tour2)
-    if rand()<0.5
-        k2 +=1
-    end
+    k2 = Candidates[rand(1:length(Candidates))]
     new_cost2 = Calculate_new_cost_add_one(tour2, cost2, city1, k2, TT, n_nodes)
     if new_cost2 >= cost1
         return Chrm
     end
-    insert!(tour2, city1, k2)
+    insert!(tour2, k2, city1)
     new_cost1 = Calculate_new_cost_remove_one(tour1, cost1, k1, TT, n_nodes)
     deleteat!(tour1, k1)
     Chrm.tours[r1].cost = new_cost1
@@ -271,8 +284,8 @@ function N3(Chrm::Chromosome, TT::Matrix{Float64}, Close_nodes::Matrix{Int}, dem
         return Chrm
     end
     print("A")
-    insert!(tour2, city1, k2)
-    insert!(tour2, city2, k2+1)
+    insert!(tour2, k2, city1)
+    insert!(tour2, k2+1, city2)
     
     new_cost1 = Calculate_new_cost_remove_two(tour1, cost1, k1, TT, n_nodes)
     deleteat!(tour1, [k1, k1+1])
@@ -352,12 +365,12 @@ function N4(Chrm::Chromosome, TT::Matrix{Float64}, Close_nodes::Matrix{Int}, dem
     for tour in Chrm.tours
         Chrm.genes = vcat(Chrm.genes, tour.Sequence)
     end
-#     print("N4  ")
+    print("N4  ")
     return Chrm
 end
 
 function Improve_chromosome(chrm::Chromosome, TT::Matrix{Float64}, Close_nodes::Matrix{Int}, demands::Vector{Int}, W::Int, n_nodes::Int)
-    Search_methods = [N1, N2, N3, N4]
+    Search_methods = [N1, N2, N3, N4, Ni1]
     shuffle!(Search_methods)
     for search in Search_methods
         # @code_warntype N5(chrm, TT, DD, ClosenessT, ClosenessD, n_nodes)

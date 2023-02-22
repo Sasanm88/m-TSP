@@ -101,21 +101,52 @@ function Calculate_new_cost_swap_two(tour1::Vector{Int}, cost1::Float64, city11:
         elseif position1 == nt1-1
             new_cost1 += T[tour1[nt1-2]+1, city21+1] + T[city21+1, city22+1] + T[city22+1, n_nodes+2] - T[tour1[nt1-2]+1, city11+1] - T[city11+1, city12+1] - T[city12+1, n_nodes+2]
         else
-            new_cost1 += T[tour1[position1-1]+1, city21+1] + T[city21+1, city22+1] + T[city22+1, tour1[position1+1]+1] - T[tour1[position1-1]+1, city11+1] - T[city11+1, city12+1] - T[city12+1, tour1[position1+1]+1]
+            new_cost1 += T[tour1[position1-1]+1, city21+1] + T[city21+1, city22+1] + T[city22+1, tour1[position1+2]+1] - T[tour1[position1-1]+1, city11+1] - T[city11+1, city12+1] - T[city12+1, tour1[position1+2]+1]
         end
     end
-    if nt2 == 2
-        new_cost2 = T[1, city11+1] + T[city11+1, city12+1] + T[city12+1, n_nodes+2] 
-    else
-        if position2 == 1
-            new_cost2 += T[1, city11+1] + T[city11+1, city12+1]  + T[city12+1, tour2[3]+1] - T[1, city21+1] - T[city21+1, city22+1] - T[city22+1, tour2[3]+1]
-        elseif position2 == nt2-1
-            new_cost2 += T[tour2[nt2-2]+1, city11+1] + T[city11+1, city12+1] + T[city12+1, n_nodes+2] - T[tour2[nt2-2]+1, city21+1] - T[city21+1, city22+1] - T[city22+1, n_nodes+2]
-        else
-            new_cost2 += T[tour2[position2-1]+1, city11+1] + T[city11+1, city12+1] + T[city12+1, tour2[position2+1]+1] - T[tour2[position2-1]+1, city21+1] - T[city21+1, city22+1] - T[city22+1, tour2[position2+1]+1]
-        end
+    
+#     t1 = copy(tour1)
+    t2 = copy(tour2)
+#     t1[position1] = city21
+#     t1[position1+1] = city22
+    t2[position2] = city11
+    t2[position2+1] = city12
+
+#     pushfirst!(t1, 0)
+#     push!(t1, n_nodes+1)
+    pushfirst!(t2, 0)
+    push!(t2, n_nodes+1)
+#     z1 = 0.0
+#     for i=1:length(t1)-1
+#         z1 += T[t1[i]+1, t1[i+1]+1]
+#     end
+    z2 = 0.0
+    for i=1:length(t2)-1
+        z2 += T[t2[i]+1, t2[i+1]+1]
     end
-    return new_cost1, new_cost2
+#     if nt2 == 2
+#         new_cost2 = T[1, city11+1] + T[city11+1, city12+1] + T[city12+1, n_nodes+2] 
+#     else
+#         if position2 == 1
+#             new_cost2 += T[1, city11+1] + T[city11+1, city12+1]  + T[city12+1, tour2[3]+1] - T[1, city21+1] - T[city21+1, city22+1] - T[city22+1, tour2[3]+1]
+#             if round(z2, digits=0) != round(new_cost2, digits=0)
+#                 print("A ")
+#             end
+#         elseif position2 == nt2-1
+#             new_cost2 += T[tour2[nt2-2]+1, city11+1] + T[city11+1, city12+1] + T[city12+1, n_nodes+2] - T[tour2[nt2-2]+1, city21+1] - T[city21+1, city22+1] - T[city22+1, n_nodes+2]
+#             if round(z2, digits=0) != round(new_cost2, digits=0)
+#                 print("B ")
+#             end
+#         else
+#             new_cost2 += T[tour2[position2-1]+1, city11+1] + T[city11+1, city12+1] + T[city12+1, tour2[position2+2]+1] - T[tour2[position2-1]+1, city21+1] - T[city21+1, city22+1] - T[city22+1, tour2[position2+2]+1]
+#             if round(z2, digits=0) != round(new_cost2, digits=0)
+#                 print("C ")
+#             end
+#         end
+#     end
+
+    
+    return new_cost1, z2
 end
 
 function N1(Chrm::Chromosome, TT::Matrix{Float64}, Close_nodes::Matrix{Int}, demands::Vector{Int}, W::Int, n_nodes::Int)   #Shift(0,1)
@@ -125,7 +156,7 @@ function N1(Chrm::Chromosome, TT::Matrix{Float64}, Close_nodes::Matrix{Int}, dem
     tour1 = Chrm.tours[r1].Sequence
     tour2 = Chrm.tours[r2].Sequence
     cost1 = Chrm.tours[r1].cost
-    cost2 = Chrm.tours[r1].cost
+    cost2 = Chrm.tours[r2].cost
     k1 = rand(1:length(tour1))
     city1 = tour1[k1]
     Candidates = Int[] 
@@ -153,7 +184,22 @@ function N1(Chrm::Chromosome, TT::Matrix{Float64}, Close_nodes::Matrix{Int}, dem
         return Chrm
     end
     k2 = Candidates[rand(1:length(Candidates))]
+#     k2 = rand(1:length(tour2)+1)
+    
     new_cost2 = Calculate_new_cost_add_one(tour2, cost2, city1, k2, TT, n_nodes)
+#     t1 = copy(tour2)
+#     insert!(t1, k2, city1)
+#     pushfirst!(t1, 0)
+#     push!(t1, n+1)
+#     z1 = 0.0
+#     for i=1:length(t1)-1
+#         z1 += TT[t1[i]+1, t1[i+1]+1]
+#     end
+#     if round(new_cost2, digits=4) != round(z1, digits=4)
+#         println(k1, "   ", k2)
+#         println("max=", cost1 , "   , cost2=", cost2,"  ,Real cost=", z1, "  , calculated=", new_cost2)
+#     end
+    
     if new_cost2 >= cost1
         return Chrm
     end
@@ -167,7 +213,7 @@ function N1(Chrm::Chromosome, TT::Matrix{Float64}, Close_nodes::Matrix{Int}, dem
     for tour in Chrm.tours
         Chrm.genes = vcat(Chrm.genes, tour.Sequence)
     end
-    print("N1")
+#     print("N1")
     return Chrm
 end
 
@@ -179,7 +225,7 @@ function N2(Chrm::Chromosome, TT::Matrix{Float64}, Close_nodes::Matrix{Int}, dem
     tour1 = Chrm.tours[r1].Sequence
     tour2 = Chrm.tours[r2].Sequence
     cost1 = Chrm.tours[r1].cost
-    cost2 = Chrm.tours[r1].cost
+    cost2 = Chrm.tours[r2].cost
     k1 = rand(1:length(tour1))
     city1 = tour1[k1]
     if length(tour2) == 0
@@ -208,9 +254,35 @@ function N2(Chrm::Chromosome, TT::Matrix{Float64}, Close_nodes::Matrix{Int}, dem
     end
     Candidates = collect(Set(Candidates))
     k2 = Candidates[rand(1:length(Candidates))]
+#     k2 = rand(1:length(tour2))
     city2 = tour2[k2]
 
     new_cost1, new_cost2 = Calculate_new_cost_swap_one(tour1, cost1, city1, k1, tour2, cost2, city2, k2, TT, n_nodes)
+#     t1 = copy(tour1)
+#     t2 = copy(tour2)
+#     t1[k1] = city2
+#     t2[k2] = city1
+
+#     pushfirst!(t1, 0)
+#     push!(t1, n+1)
+#     pushfirst!(t2, 0)
+#     push!(t2, n+1)
+#     z1 = 0.0
+#     for i=1:length(t1)-1
+#         z1 += TT[t1[i]+1, t1[i+1]+1]
+#     end
+#     z2 = 0.0
+#     for i=1:length(t2)-1
+#         z2 += TT[t2[i]+1, t2[i+1]+1]
+#     end
+#     if round(new_cost2, digits=4) != round(z2, digits=4)
+#         println(k1, "   ", k2)
+#         println("cost2=", cost2,"  ,Real cost=", z2, "  , calculated=", new_cost2)
+#     end
+#     if round(new_cost1, digits=4) != round(z1, digits=4)
+#         println(k1, "   ", k2)
+#         println("cost1=", cost1,"  ,Real cost=", z1, "  , calculated=", new_cost1)
+#     end
     if new_cost1 >= cost1 || new_cost2 >= cost1
         return Chrm
     end
@@ -237,7 +309,7 @@ function N3(Chrm::Chromosome, TT::Matrix{Float64}, Close_nodes::Matrix{Int}, dem
     end
     tour2 = Chrm.tours[r2].Sequence
     cost1 = Chrm.tours[r1].cost
-    cost2 = Chrm.tours[r1].cost
+    cost2 = Chrm.tours[r2].cost
     k1 = rand(1:length(tour1)-1)
     city1 = tour1[k1]
     city2 = tour1[k1+1]
@@ -278,12 +350,28 @@ function N3(Chrm::Chromosome, TT::Matrix{Float64}, Close_nodes::Matrix{Int}, dem
         return Chrm
     end
     k2 = Candidates[rand(1:length(Candidates))]
+#     k2 = rand(1:length(tour2)+1)
 
     new_cost2 = Calculate_new_cost_add_two(tour2, cost2, city1, city2, k2, TT, n_nodes)
+    
+#     t1 = copy(tour2)
+#     insert!(t1, k2, city1)
+#     insert!(t1, k2+1, city2)
+#     pushfirst!(t1, 0)
+#     push!(t1, n+1)
+#     z1 = 0.0
+#     for i=1:length(t1)-1
+#         z1 += TT[t1[i]+1, t1[i+1]+1]
+#     end
+#     if round(new_cost2, digits=4) != round(z1, digits=4)
+#         println(k1, "   ", k2)
+#         println("max=", cost1 , "   , cost2=", cost2,"  ,Real cost=", z1, "  , calculated=", new_cost2)
+#     end
+    
     if new_cost2 >= cost1
         return Chrm
     end
-    print("A")
+#     print("AAA   ")
     insert!(tour2, k2, city1)
     insert!(tour2, k2+1, city2)
     
@@ -347,10 +435,48 @@ function N4(Chrm::Chromosome, TT::Matrix{Float64}, Close_nodes::Matrix{Int}, dem
     end
     Candidates = collect(Set(Candidates))
     k2 = Candidates[rand(1:length(Candidates))]
+#     k2 = rand(1:length(tour2)-1)
     city21 = tour2[k2]
     city22 = tour2[k2+1]
     
+    t2 = copy(tour2)
+    pushfirst!(t2, 0)
+    push!(t2, n_nodes+1)
+    oldz2 = 0.0
+    for i=1:length(t2)-1
+        oldz2 += TT[t2[i]+1, t2[i+1]+1]
+    end
+    
     new_cost1, new_cost2 = Calculate_new_cost_swap_two(tour1, cost1, city11, city12, k1, tour2, cost2, city21, city22, k2, TT, n_nodes)
+    
+#     t1 = copy(tour1)
+#     t2 = copy(tour2)
+#     t1[k1] = city21
+#     t1[k1+1] = city22
+#     t2[k2] = city11
+#     t2[k2+1] = city12
+
+#     pushfirst!(t1, 0)
+#     push!(t1, n_nodes+1)
+#     pushfirst!(t2, 0)
+#     push!(t2, n_nodes+1)
+#     z1 = 0.0
+#     for i=1:length(t1)-1
+#         z1 += TT[t1[i]+1, t1[i+1]+1]
+#     end
+#     z2 = 0.0
+#     for i=1:length(t2)-1
+#         z2 += TT[t2[i]+1, t2[i+1]+1]
+#     end
+#     if round(new_cost2, digits=4) != round(z2, digits=4)
+# #         println(k1, "   ", k2)
+#         println("old cost2=", oldz2, "  cost2=", cost2,"  ,Real cost=", z2, "  , calculated=", new_cost2)
+#     end
+#     if round(new_cost1, digits=4) != round(z1, digits=4)
+#         println(k1, "   ", k2)
+#         println("cost1=", cost1,"  ,Real cost=", z1, "  , calculated=", new_cost1)
+#     end
+    
     if new_cost1 >= cost1 || new_cost2 >= cost1
         return Chrm
     end
@@ -365,12 +491,12 @@ function N4(Chrm::Chromosome, TT::Matrix{Float64}, Close_nodes::Matrix{Int}, dem
     for tour in Chrm.tours
         Chrm.genes = vcat(Chrm.genes, tour.Sequence)
     end
-    print("N4  ")
+#     print("N4  ")
     return Chrm
 end
 
 function Improve_chromosome(chrm::Chromosome, TT::Matrix{Float64}, Close_nodes::Matrix{Int}, demands::Vector{Int}, W::Int, n_nodes::Int)
-    Search_methods = [N1, N2, N3, N4, Ni1]
+    Search_methods = [N1, N2, N3, N4, Ni1, Ni2, Ni3, Ni4, Ni5, Ni6, Ni7]
     shuffle!(Search_methods)
     for search in Search_methods
         # @code_warntype N5(chrm, TT, DD, ClosenessT, ClosenessD, n_nodes)
@@ -378,7 +504,7 @@ function Improve_chromosome(chrm::Chromosome, TT::Matrix{Float64}, Close_nodes::
         chrm = search(chrm, TT, Close_nodes, demands, W, n_nodes)
 #         f2 = chrm.fitness
 #         if f2<f1
-#             print("A")
+#             print(string(search), "  ")
 #         end
     end
     return chrm

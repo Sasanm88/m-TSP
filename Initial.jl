@@ -1,11 +1,11 @@
-using Concorde
+using LKH
 
 function find_tsp_tour1(Ct::Matrix{Float64})
     scale_factor = 1000
     dist_mtx = round.(Int, Ct .* scale_factor)
 
     # tsp_tour, tsp_tour_len = Concorde.solve_tsp(dist_mtx)
-    tsp_tour, _ = Concorde.solve_tsp(dist_mtx)
+    tsp_tour, _ = LKH.solve_tsp(dist_mtx)
 
     @assert tsp_tour[1] == 1
 
@@ -14,18 +14,19 @@ end
 
 function Change_initial(c::Vector{Int64}, n_nodes::Int64)
     cc = copy(c)
-    idx1 = rand(1:n_nodes)
-    idx2 = rand(1:n_nodes)
-    if idx1 > idx2
-        temp = idx1
-        idx1 = idx2
-        idx2 = temp
-    end
     r = rand()
     if r < 0.5
+        idx1 = rand(1:n_nodes)
+        idx2 = rand(1:n_nodes)
+        if idx1 > idx2
+            temp = idx1
+            idx1 = idx2
+            idx2 = temp
+        end
         cc[idx1:idx2] = reverse(cc[idx1:idx2])
     else
-        cc[idx1:idx2] = shuffle(cc[idx1:idx2])
+        idx = sample(1:n_nodes, rand(2:Int(floor(n_nodes/2))), replace = false) 
+        cc[idx] = shuffle(cc[idx])
     end
     return cc
 end
@@ -59,7 +60,7 @@ function Diversify(Population::Vector{Chromosome}, TT::Matrix{Float64}, demands:
     n_best = Int(round(0.3 * mu)) 
     for i=n_best+1:length(Population)
         S = Int[]
-        if rand() < 0.5
+        if rand() < 0.2
             S = Change_initial(tsp_tour, n_nodes)
         else
             S = Creat_Random_Cromosome(n_nodes)

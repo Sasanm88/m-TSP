@@ -164,6 +164,10 @@ function Calculate_new_cost_exchange_two(tour::Vector{Int}, cost::Float64, city1
     if position1 == position2
         return cost
     end
+    if nt==2
+        cost = T[1, tour[2]+1] + T[tour[2]+1, tour[1]+1] + T[tour[1]+1, n_nodes+2]
+        return cost
+    end
     if position2 == position1 +1
         if position1 == 1
             cost = cost - T[1, city1+1] - T[city2+1, tour[3]+1] + T[1,city2+1] + T[city1+1, tour[3]+1]
@@ -308,6 +312,7 @@ function Calculate_new_cost_3_permute(tour::Vector{Int}, cost::Float64, S1::Vect
     nt = length(tour)
     if nt == 3
         cost = T[1, S2[1]+1] + T[S2[1]+1, S2[2]+1] + T[S2[2]+1, S2[3]+1] + T[S2[3]+1, n_nodes+2]
+        return cost
     end
     cost = cost - T[S1[1]+1, S1[2]+1] - T[S1[2]+1, S1[3]+1] + T[S2[1]+1, S2[2]+1] + T[S2[2]+1, S2[3]+1]
     

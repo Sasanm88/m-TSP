@@ -60,7 +60,7 @@ function Diversify(Population::Vector{Chromosome}, TT::Matrix{Float64}, demands:
     n_best = Int(round(0.3 * mu)) 
     for i=n_best+1:length(Population)
         S = Int[]
-        if rand() < 0.2
+        if rand() < 0.0
             S = Change_initial(tsp_tour, n_nodes)
         else
             S = Creat_Random_Cromosome(n_nodes)

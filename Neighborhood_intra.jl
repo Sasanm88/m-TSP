@@ -120,7 +120,29 @@ function Ni3(Chrm::Chromosome, T::Matrix{Float64}, Close_nodes::Matrix{Int}, dem
     city1 = tour1[k1]
     city2 = tour1[k1+1]
 
-    k2 = rand(1:length(tour1)-1)   #Way to improve 
+    Candidates = Int[] 
+    if nt == 3
+        Candidates = [1,2]
+    else
+        if city1 in Close_nodes[n_nodes+1,:] || tour1[1] in Close_nodes[city2,:] 
+            push!(Candidates, 1)
+        end
+        for i=2:nt-2
+            if tour1[i-1] in Close_nodes[city1,:] || tour1[i+1] in Close_nodes[city2,:]
+                push!(Candidates, i)
+            end
+        end
+        if city2 in Close_nodes[n_nodes+1,:] || tour1[nt] in Close_nodes[city1,:] 
+            push!(Candidates, nt-1)
+        end
+    end
+    Candidates = collect(setdiff(Set(Candidates),Set([k1])))
+    if length(Candidates) == 0
+        return Chrm
+    end
+    
+#     k2 = rand(1:length(tour1)-1)   #Way to improve 
+    k2 = Candidates[rand(1:length(Candidates))]
 
     z1 = Calculate_new_cost_or_opt2(tour1, cost1, city1, k1, city2, k2, T, n_nodes)
 
@@ -153,7 +175,28 @@ function Ni4(Chrm::Chromosome, T::Matrix{Float64}, Close_nodes::Matrix{Int}, dem
     city1 = tour1[k1]
     city2 = tour1[k1+1]
     city3 = tour1[k1+2]
-    k2 = rand(1:length(tour1)-2)
+    Candidates = Int[] 
+    if nt == 4
+        Candidates = [1,2]
+    else
+        if city1 in Close_nodes[n_nodes+1,:] || tour1[1] in Close_nodes[city3,:] 
+            push!(Candidates, 1)
+        end
+        for i=2:nt-3
+            if tour1[i-1] in Close_nodes[city1,:] || tour1[i+2] in Close_nodes[city3,:]
+                push!(Candidates, i)
+            end
+        end
+        if city3 in Close_nodes[n_nodes+1,:] || tour1[nt] in Close_nodes[city1,:] 
+            push!(Candidates, nt-2)
+        end
+    end
+    Candidates = collect(setdiff(Set(Candidates),Set([k1])))
+    if length(Candidates) == 0
+        return Chrm
+    end
+
+    k2 = Candidates[rand(1:length(Candidates))]
     new_cost1 = Calculate_new_cost_or_opt3(tour1, cost1, city1, city2, city3, k1, k2, T, n_nodes)
 
     if new_cost1 >= cost1 
@@ -182,7 +225,48 @@ function Ni5(Chrm::Chromosome, T::Matrix{Float64}, Close_nodes::Matrix{Int}, dem
     cost1 = Chrm.tours[r1].cost
     nt = length(tour1)
     indices = sample(1:length(tour1), 2, replace = false)
-    k1, k2 = minimum(indices), maximum(indices)
+    i1 = rand(1:length(tour1))
+    
+    Candidates = Int[] 
+    
+    if i1 == 1
+        for i=2:nt-1
+            if tour1[i] in Close_nodes[n_nodes+1,:] || tour1[1] in Close_nodes[tour1[i1+1],:] 
+                push!(Candidates, i)
+            end
+        end
+    elseif i1 == nt 
+        for i=2:nt-1
+            if tour1[i] in Close_nodes[n_nodes+1,:] || tour1[nt] in Close_nodes[tour1[i1-1],:] 
+                push!(Candidates, i)
+            end
+        end
+    else
+        if tour1[i1] in Close_nodes[n_nodes+1,:] || tour1[1] in Close_nodes[tour1[i1+1],:] 
+            push!(Candidates, 1)
+        end
+        if tour1[i1] in Close_nodes[n_nodes+1,:] || tour1[nt] in Close_nodes[tour1[i1-1],:] 
+            push!(Candidates, nt)
+        end
+        for i=2:nt-1
+            if i > i1 
+                if tour1[i1] in Close_nodes[tour1[i+1],:] || tour1[i] in Close_nodes[tour1[i1-1],:]
+                    push!(Candidates, i)
+                end
+            elseif i < i1
+                if tour1[i1] in Close_nodes[tour1[i-1],:] || tour1[i] in Close_nodes[tour1[i1+1],:]
+                    push!(Candidates, i)
+                end
+            end
+        end
+    end
+
+    if length(Candidates) == 0
+        return Chrm
+    end
+    Candidates = collect(Set(Candidates))
+    i2 = Candidates[rand(1:length(Candidates))]
+    k1, k2 = min(i1, i2), max(i1,i2)
     new_cost = Calculate_new_cost_2_opt(tour1, cost1, k1, k2, T, n_nodes)
 
     if new_cost >= cost1 

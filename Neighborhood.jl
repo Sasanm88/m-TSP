@@ -268,20 +268,21 @@ function N4(Chrm::Chromosome, TT::Matrix{Float64}, Close_nodes::Matrix{Int}, dem
     return Chrm
 end
 
-function Improve_chromosome(chrm::Chromosome, TT::Matrix{Float64}, Close_nodes::Matrix{Int}, demands::Vector{Int}, W::Int, n_nodes::Int)
-    Search_methods = [N1, N2, N3, N4, Ni1, Ni2, Ni3, Ni4, Ni5, Ni6, Ni7]
-#     for i=1:10
-    shuffle!(Search_methods)
-    for search in Search_methods
-        # @code_warntype N5(chrm, TT, DD, ClosenessT, ClosenessD, n_nodes)
-        f1 = chrm.fitness
-        chrm = search(chrm, TT, Close_nodes, demands, W, n_nodes)
-#         f2 = chrm.fitness
-#         if f2<f1
-#             print(string(search), "  ")
-#         end
+function Improve_chromosome(chrm::Chromosome, TT::Matrix{Float64}, Close_nodes::Matrix{Int}, demands::Vector{Int}, W::Int, n_nodes::Int, roullet::Vector{Int})
+    #     Search_methods = [N1, N2, N3, N4, Ni1, Ni2, Ni3, Ni4, Ni5, Ni6, Ni7]
+        Search_methods = [N1, Ni1, Ni2, Ni3, Ni4, Ni5]    #Ni4 not great
+        for i=1:100
+    #     shuffle!(Search_methods)
+    #         for search in Search_methods
+            r = sample(1:length(Search_methods), weights(roullet))
+            search = Search_methods[r]
+            f1 = chrm.fitness
+            chrm = search(chrm, TT, Close_nodes, demands, W, n_nodes)
+            if chrm.fitness < f1
+    #             println("AA")
+                roullet[r] +=1
+            end
         end
-#     end
-    return chrm
-end
+        return chrm
+    end
         

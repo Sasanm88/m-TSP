@@ -1,6 +1,5 @@
 using StatsBase
 
-
 function Crossover_OX1(parent1::Vector{Int64}, parent2::Vector{Int64}, n_nodes::Int64)   #order crossover
     child = zeros(Int64, n_nodes)
     idx1 = rand(2:n_nodes-1)

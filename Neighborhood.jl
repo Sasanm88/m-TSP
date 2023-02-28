@@ -1,5 +1,5 @@
 
-function N1(Chrm::Chromosome, TT::Matrix{Float64}, Close_nodes::Matrix{Int}, demands::Vector{Int}, W::Int, n_nodes::Int)   #Shift(0,1)
+function N1(Chrm::Chromosome, TT::Matrix{Float64}, Close_nodes::Matrix{Int}, demands::Vector{Int}, W::Int, n_nodes::Int, escape::Bool)   #Shift(0,1)
     r1 = argmax([Chrm.tours[i].cost for i=1:length(Chrm.tours)])
     routes = [i for i=1:length(Chrm.tours)]
     r2 = setdiff(routes, r1)[rand(1:length(Chrm.tours)-1)]
@@ -37,7 +37,21 @@ function N1(Chrm::Chromosome, TT::Matrix{Float64}, Close_nodes::Matrix{Int}, dem
 #     k2 = rand(1:length(tour2)+1)
     
     new_cost2 = Calculate_new_cost_add_one(tour2, cost2, city1, k2, TT, n_nodes)
-
+    
+    if escape 
+        new_chrm = deepcopy(Chrm)
+        insert!(new_chrm.tours[r2].Sequence, k2, city1)
+        new_cost1 = Calculate_new_cost_remove_one(tour1, cost1, k1, TT, n_nodes)
+        deleteat!(new_chrm.tours[r1].Sequence, k1)
+        new_chrm.tours[r1].cost = new_cost1
+        new_chrm.tours[r2].cost = new_cost2
+        new_chrm.genes = Int[]
+        new_chrm.fitness = maximum([new_chrm.tours[i].cost for i=1:length(Chrm.tours)])
+        for tour in new_chrm.tours
+            new_chrm.genes = vcat(new_chrm.genes, tour.Sequence)
+        end
+        return new_chrm
+    end
     
     if new_cost2 >= cost1
         return Chrm
@@ -56,7 +70,7 @@ function N1(Chrm::Chromosome, TT::Matrix{Float64}, Close_nodes::Matrix{Int}, dem
 end
 
 
-function N2(Chrm::Chromosome, TT::Matrix{Float64}, Close_nodes::Matrix{Int}, demands::Vector{Int}, W::Int, n_nodes::Int)   #Swap(1,1)
+function N2(Chrm::Chromosome, TT::Matrix{Float64}, Close_nodes::Matrix{Int}, demands::Vector{Int}, W::Int, n_nodes::Int, escape::Bool)   #Swap(1,1)
     r1 = argmax([Chrm.tours[i].cost for i=1:length(Chrm.tours)])
     routes = [i for i=1:length(Chrm.tours)]
     r2 = setdiff(routes, r1)[rand(1:length(Chrm.tours)-1)]
@@ -95,7 +109,21 @@ function N2(Chrm::Chromosome, TT::Matrix{Float64}, Close_nodes::Matrix{Int}, dem
     city2 = tour2[k2]
 
     new_cost1, new_cost2 = Calculate_new_cost_swap_one(tour1, cost1, city1, k1, tour2, cost2, city2, k2, TT, n_nodes)
-
+    
+    if escape 
+        new_chrm = deepcopy(Chrm)
+        new_chrm.tours[r2].Sequence[k2] = city1
+        new_chrm.tours[r1].Sequence[k1] = city2
+        new_chrm.tours[r1].cost = new_cost1
+        new_chrm.tours[r2].cost = new_cost2
+        new_chrm.genes = Int[]
+        new_chrm.fitness = maximum([new_chrm.tours[i].cost for i=1:length(Chrm.tours)])
+        for tour in new_chrm.tours
+            new_chrm.genes = vcat(new_chrm.genes, tour.Sequence)
+        end
+        return new_chrm
+    end
+    
     if new_cost1 >= cost1 || new_cost2 >= cost1
         return Chrm
     end
@@ -111,7 +139,7 @@ function N2(Chrm::Chromosome, TT::Matrix{Float64}, Close_nodes::Matrix{Int}, dem
     return Chrm
 end
 
-function N3(Chrm::Chromosome, TT::Matrix{Float64}, Close_nodes::Matrix{Int}, demands::Vector{Int}, W::Int, n_nodes::Int)   #Shift(0,2)
+function N3(Chrm::Chromosome, TT::Matrix{Float64}, Close_nodes::Matrix{Int}, demands::Vector{Int}, W::Int, n_nodes::Int, escape::Bool)   #Shift(0,2)
     r1 = argmax([Chrm.tours[i].cost for i=1:length(Chrm.tours)])
     routes = [i for i=1:length(Chrm.tours)]
     r2 = setdiff(routes, r1)[rand(1:length(Chrm.tours)-1)]
@@ -166,6 +194,22 @@ function N3(Chrm::Chromosome, TT::Matrix{Float64}, Close_nodes::Matrix{Int}, dem
 
     new_cost2 = Calculate_new_cost_add_two(tour2, cost2, city1, city2, k2, TT, n_nodes)
     
+    if escape 
+        new_chrm = deepcopy(Chrm)
+        insert!(new_chrm.tours[r2].Sequence, k2, city1)
+        insert!(new_chrm.tours[r2].Sequence, k2+1, city2)
+        new_cost1 = Calculate_new_cost_remove_two(tour1, cost1, k1, TT, n_nodes)
+        deleteat!(new_chrm.tours[r1].Sequence, [k1, k1+1])
+        new_chrm.tours[r1].cost = new_cost1
+        new_chrm.tours[r2].cost = new_cost2
+        new_chrm.genes = Int[]
+        new_chrm.fitness = maximum([new_chrm.tours[i].cost for i=1:length(Chrm.tours)])
+        for tour in new_chrm.tours
+            new_chrm.genes = vcat(new_chrm.genes, tour.Sequence)
+        end
+        return new_chrm
+    end
+    
     if new_cost2 >= cost1
         return Chrm
     end
@@ -185,7 +229,7 @@ function N3(Chrm::Chromosome, TT::Matrix{Float64}, Close_nodes::Matrix{Int}, dem
     return Chrm
 end
 
-function N4(Chrm::Chromosome, TT::Matrix{Float64}, Close_nodes::Matrix{Int}, demands::Vector{Int}, W::Int, n_nodes::Int)   #Swap(2,2)
+function N4(Chrm::Chromosome, TT::Matrix{Float64}, Close_nodes::Matrix{Int}, demands::Vector{Int}, W::Int, n_nodes::Int, escape::Bool)   #Swap(2,2)
     r1 = argmax([Chrm.tours[i].cost for i=1:length(Chrm.tours)])
     routes = [i for i=1:length(Chrm.tours)]
     r2 = setdiff(routes, r1)[rand(1:length(Chrm.tours)-1)]
@@ -238,19 +282,23 @@ function N4(Chrm::Chromosome, TT::Matrix{Float64}, Close_nodes::Matrix{Int}, dem
     city22 = tour2[k2+1]
 
     new_cost1, new_cost2 = Calculate_new_cost_swap_two(tour1, cost1, city11, city12, k1, tour2, cost2, city21, city22, k2, TT, n_nodes)
-#     t2 = copy(tour2)
-#     t2[k2] = city11
-#     t2[k2+1] = city12
-#     pushfirst!(t2, 0)
-#     push!(t2, n_nodes+1)
 
-#     z2 = 0.0
-#     for i=1:length(t2)-1
-#         z2 += T[t2[i]+1, t2[i+1]+1]
-#     end
-#     if round(new_cost2, digits = 6) != round(z2, digits = 6)
-#         print("BBB   ")
-#     end
+    if escape 
+        new_chrm = deepcopy(Chrm)
+        new_chrm.tours[r2].Sequence[k2] = city11
+        new_chrm.tours[r2].Sequence[k2+1] = city12
+        new_chrm.tours[r1].Sequence[k1] = city21
+        new_chrm.tours[r1].Sequence[k1+1] = city22
+        new_chrm.tours[r1].cost = new_cost1
+        new_chrm.tours[r2].cost = new_cost2
+        new_chrm.genes = Int[]
+        new_chrm.fitness = maximum([new_chrm.tours[i].cost for i=1:length(Chrm.tours)])
+        for tour in new_chrm.tours
+            new_chrm.genes = vcat(new_chrm.genes, tour.Sequence)
+        end
+        return new_chrm
+    end
+    
     if new_cost1 >= cost1 || new_cost2 >= cost1
         return Chrm
     end
@@ -268,20 +316,51 @@ function N4(Chrm::Chromosome, TT::Matrix{Float64}, Close_nodes::Matrix{Int}, dem
     return Chrm
 end
 
-function Improve_chromosome(chrm::Chromosome, TT::Matrix{Float64}, Close_nodes::Matrix{Int}, demands::Vector{Int}, W::Int, n_nodes::Int)
-    Search_methods = [N1, N2, N3, N4, Ni1, Ni2, Ni3, Ni4, Ni5, Ni6, Ni7]
-#     for i=1:10
-    shuffle!(Search_methods)
-    for search in Search_methods
-        # @code_warntype N5(chrm, TT, DD, ClosenessT, ClosenessD, n_nodes)
+function Improve_chromosome(chrm::Chromosome, TT::Matrix{Float64}, Close_nodes::Matrix{Int}, demands::Vector{Int}, W::Int, n_nodes::Int, roullet::Vector{Int})
+#     Search_methods = [N1, N2, N3, N4, Ni1, Ni2, Ni3, Ni4, Ni5, Ni6, Ni7]
+    Search_methods = [N1, Ni1, Ni2, Ni3, Ni4, Ni5]    #Ni4 not great
+    for i=1:100
+#     shuffle!(Search_methods)
+#         for search in Search_methods
+        r = sample(1:length(Search_methods), weights(roullet))
+        search = Search_methods[r]
         f1 = chrm.fitness
-        chrm = search(chrm, TT, Close_nodes, demands, W, n_nodes)
-#         f2 = chrm.fitness
-#         if f2<f1
-#             print(string(search), "  ")
-#         end
+        chrm = search(chrm, TT, Close_nodes, demands, W, n_nodes, false)
+        if chrm.fitness < f1
+#             println("AA")
+            roullet[r] +=1
         end
-#     end
+    end
     return chrm
 end
         
+
+function Final_Improvement(chrm::Chromosome, TT::Matrix{Float64}, Close_nodes::Matrix{Int}, demands::Vector{Int}, W::Int, n_nodes::Int)
+    Search_methods = [N1, N2, N3, N4, Ni1, Ni2, Ni3, Ni4, Ni5, Ni6, Ni7]
+    Substitutes = Chromosome[]
+    push!(Substitutes, chrm)
+    best_f = chrm.fitness
+    max_size = 40
+    Allowed_diff = 0.05
+    for i=1:500000
+        r = rand(1:length(Search_methods))
+        search = Search_methods[r]
+        c = Substitutes[rand(1:length(Substitutes))]
+        cc = search(c, TT, Close_nodes, demands, W, n_nodes, true)
+        new_f = cc.fitness
+        if new_f < best_f || (best_f-new_f)/new_f < Allowed_diff
+            if new_f < best_f
+                best_f = new_f
+#                 counts[rr] += 1
+            end
+            if length(Substitutes) < max_size
+                push!(Substitutes, cc)
+            else
+                sort!(Substitutes, by = x -> x.fitness, rev = false)
+                Substitutes[max_size] = cc
+            end
+        end
+    end
+    sort!(Substitutes, by = x -> x.fitness, rev = false)
+    return Substitutes[1]
+end

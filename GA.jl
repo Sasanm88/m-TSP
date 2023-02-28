@@ -150,7 +150,8 @@ end
 
 function Generate_new_generation(TT::Matrix{Float64}, Close_nodes::Matrix{Int}, demands::Vector{Int}, K::Int, W::Int,
         Population::Vector{Chromosome}, popsize::Tuple{Int64,Int64}, k_tournament::Int64, 
-        ClosenessT::Matrix{Int64}, Gen_num::Int64, old_best::Float64, improve_count::Int64, Mutation_Chance::Float64,tsp_tour::Vector{Int})
+        ClosenessT::Matrix{Int64}, Gen_num::Int64, old_best::Float64, improve_count::Int64, Mutation_Chance::Float64, 
+        tsp_tour::Vector{Int}, roullet::Vector{Int})
     t1 = time()
 
     mu, sigma = popsize
@@ -171,7 +172,7 @@ function Generate_new_generation(TT::Matrix{Float64}, Close_nodes::Matrix{Int}, 
     offspring = Chromosome(child, obj, 0.0, trips)
     
     
-    offspring = Improve_chromosome(offspring, TT, Close_nodes, demands, W, n_nodes)
+    offspring = Improve_chromosome(offspring, TT, Close_nodes, demands, W, n_nodes, roullet)
     
     for tour in offspring.tours
         t1 = copy(tour.Sequence);
@@ -219,18 +220,26 @@ function Perform_Genetic_Algorithm(TT::Matrix{Float64}, demands::Vector{Int}, K:
     improve_count = 0
     Gen_num = 0
     old_best = 0.0
+    roullet = ones(Int, 6) * 100
     tsp_tour = find_tsp_tour1(TT[1:n_nodes+1, 1:n_nodes+1])
     Population, old_best = Generate_initial_population(TT, demands, K, W, mu, tsp_tour) 
     count = 0
 
     @inbounds while improve_count < num_iter
             Gen_num, old_best, Population, improve_count = Generate_new_generation(TT, ClosenessT, demands, K, W,
-        Population, popsize, k_tournament, ClosenessT, Gen_num, old_best, improve_count, Mutation_Chance, tsp_tour)
+        Population, popsize, k_tournament, ClosenessT, Gen_num, old_best, improve_count, Mutation_Chance, tsp_tour, roullet)
         count += 1
     end
     t2 = time()
 
-    println("The best objective achieved in ", Gen_num, " generations is: ", Population[1].fitness, " and it took ", t2 - t1, " seconds.")
+#     println("The best objective achieved in ", Gen_num, " generations is: ", Population[1].fitness, " and it took ", t2 - t1, " seconds.")
+#     println()
+#     chrm = Final_Improvement(Population[1], TT, ClosenessT, demands, W, n_nodes)
+#     t3 = time()
+#     println("The best objective after final improvement is ", chrm.fitness, " and it took ", t3 - t2, " seconds.")
+#     println()
+#     println(roullet)
+#     println()
 #     println("And the best route is: ")
 #     best_route(Population)
     return Population

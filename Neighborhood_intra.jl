@@ -224,7 +224,7 @@ function Ni5(Chrm::Chromosome, T::Matrix{Float64}, Close_nodes::Matrix{Int}, dem
     end
     cost1 = Chrm.tours[r1].cost
     nt = length(tour1)
-    indices = sample(1:length(tour1), 2, replace = false)
+    # indices = sample(1:length(tour1), 2, replace = false)
     i1 = rand(1:length(tour1))
     
     Candidates = Int[] 

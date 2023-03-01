@@ -22,25 +22,31 @@ function test(instances::Vector{Symbol}, Ms::Vector{Int})
             num_iter = 2000
             Mutation_Chance = 0.1
             num_runs = 10
-            avg = 0.0
-            best = Inf
-            worst = 0.0
-            t1 = time() 
+            
+            
             P = Chromosome[]
-            for i=1:num_runs
-                P = Perform_Genetic_Algorithm(T, demands,K, W, h, popsize, k_tournament, num_iter, Mutation_Chance);
-                avg += P[1].fitness
-                if P[1].fitness < best
-                    best = P[1].fitness
+            Mutation_Chances = [0.0]
+            for Mutation_Chance in Mutation_Chances
+                avg = 0.0
+                best = Inf
+                worst = 0.0
+                # println("Mutation Chance: ", Mutation_Chance)
+                t1 = time() 
+                for i=1:num_runs
+                    P = Perform_Genetic_Algorithm(T, demands,K, W, h, popsize, k_tournament, num_iter, Mutation_Chance);
+                    avg += P[1].fitness
+                    if P[1].fitness < best
+                        best = P[1].fitness
+                    end
+                    if P[1].fitness > worst
+                        worst = P[1].fitness
+                    end
                 end
-                if P[1].fitness > worst
-                    worst = P[1].fitness
-                end
+                t2 = time()
+                println("Results for ", instance, " ,m=", K)
+                println("Best: ", round(best, digits = 1), "  Average: ", round(avg/num_runs, digits = 1), 
+                    "  Worst: ", round(worst, digits = 1), " , run time= ", round((t2-t1)/num_runs, digits=1))
             end
-            t2 = time()
-            println("Results for ", instance, " ,m=", K)
-            println("Best: ", round(best, digits = 1), "  Average: ", round(avg/num_runs, digits = 1), 
-                "  Worst: ", round(worst, digits = 1), " , run time= ", round((t2-t1)/num_runs, digits=0))
         end
     end
 end

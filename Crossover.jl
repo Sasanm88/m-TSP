@@ -225,3 +225,152 @@ function Crossover_HX(TT::Matrix{Float64}, parent1::Vector{Int64}, parent2::Vect
     end
     return child
 end
+
+
+function Remove_one_city(tours::Vector{Tour}, city::Int, T::Matrix{Float64}, n_nodes::Int)
+    for (t,tour) in enumerate(tours)
+        nt = length(tour.Sequence)
+        k = findfirst(x->x==city, tour.Sequence)
+        if !isnothing(k)
+            if k == 1
+                if nt == 1
+                    deleteat!(tours, t)
+                else
+                    tour.cost = tour.cost - T[1, city+1] - T[city+1, tour.Sequence[2]+1] + T[1, tour.Sequence[2]+1]
+                    deleteat!(tour.Sequence, 1)
+                end
+            elseif k == nt
+                tour.cost = tour.cost - T[city+1, n_nodes+2] - T[tour.Sequence[nt-1]+1, city+1] + T[tour.Sequence[nt-1]+1, n_nodes+2]
+                deleteat!(tour.Sequence, nt)
+            else
+                tour.cost = tour.cost - T[tour.Sequence[k-1]+1, city+1] - T[city+1, tour.Sequence[k+1]+1] + T[tour.Sequence[k-1]+1, tour.Sequence[k+1]+1]
+                deleteat!(tour.Sequence, k)
+            end
+        end
+    end
+end
+
+function put_city_in_tour(c::Vector{Tour}, city::Int, T::Matrix{Float64}, n_nodes::Int)
+    least_increase = Inf
+    best_tour = 0
+    best_position = 0
+    for i=2:length(c)
+        tour = c[i].Sequence
+        nt = length(tour)
+        if nt==0
+            increase = T[1, city+1] + T[city+1, n_nodes+2]
+            best_tour = i
+            best_position = 1
+            break
+        end
+        increase = T[1, city+1] + T[city+1, tour[1]+1] - T[1, tour[1]+1]
+        if increase < least_increase
+            least_increase = increase
+            best_tour = i
+            best_position = 1
+        end
+        for j = 2:nt
+            increase = T[tour[j-1]+1, city+1] + T[city+1, tour[j]+1] - T[tour[j-1]+1, tour[j]+1]
+            if increase < least_increase
+                least_increase = increase
+                best_tour = i
+                best_position = j
+            end
+        end
+        increase = T[tour[nt]+1, city+1] + T[city+1, n_nodes+2] - T[tour[nt]+1, n_nodes+2]
+        if increase < least_increase
+            least_increase = increase
+            best_tour = i
+            best_position = nt+1
+        end
+    end
+    insert!(c[best_tour].Sequence, best_position, city)
+    c[best_tour].cost += least_increase
+    if c[best_tour].cost > c[1].cost
+        temp = deepcopy(c[1])
+        c[1] = c[best_tour]
+        c[best_tour] = temp
+    end
+end          
+
+function new_crossover(parent1::Chromosome, parent2::Chromosome, T::Matrix{Float64}, n_nodes::Int64)
+    P1 = deepcopy(parent1)
+    P2 = deepcopy(parent2)
+    if length(P1.tours) == 0
+        println(P1)
+    end
+    c = Tour[]
+    max_tour_length = 0.0
+#     m = min(length(P1.tours), length(P2.tours)) - 1
+    m = length(P1.tours)
+    for i=1:m
+        if length(P1.tours) + length(P2.tours) == 0
+            break
+        end
+        if length(P2.tours) == 0
+            pr = 1
+        elseif length(P1.tours) == 0
+            pr = 2
+        else
+            if rand() < 0.5
+                pr = 1
+            else
+                pr = 2
+            end
+        end
+        
+        if pr == 1
+            if length(P1.tours) + length(P2.tours) == 0
+                println("It Happened")
+            end
+            r = argmin([tour.cost for tour in P1.tours])
+#             println("tour ", r, " chosen from parent 1")
+            if P1.tours[r].cost > max_tour_length
+                max_tour_length = P1.tours[r].cost
+                pushfirst!(c, P1.tours[r])
+            else
+                push!(c, P1.tours[r])
+            end
+            for city in P1.tours[r].Sequence
+                Remove_one_city(P2.tours, city, T, n_nodes)
+            end
+            deleteat!(P1.tours, r)
+        else
+            r = argmin([tour.cost for tour in P2.tours])
+#             println("tour ", r, " chosen from parent 2")
+            if P2.tours[r].cost > max_tour_length
+                max_tour_length = P2.tours[r].cost
+                pushfirst!(c, P2.tours[r])
+            else
+                push!(c, P2.tours[r])
+            end
+            
+            for city in P2.tours[r].Sequence
+                Remove_one_city(P1.tours, city, T, n_nodes)
+            end
+            deleteat!(P2.tours, r)
+        end
+    end
+    Remaining = Int[]
+    for tour in P1.tours
+        for city in tour.Sequence
+            push!(Remaining, city)
+        end
+    end
+    for tour in P2.tours
+        for city in tour.Sequence
+            push!(Remaining, city)
+        end
+    end
+    R = collect(Set(Remaining))
+    for city in R 
+        put_city_in_tour(c, city, T, n_nodes)
+    end
+    child = Int[]
+    for tour in c
+        for city in tour.Sequence
+            push!(child, city)
+        end
+    end
+    return child
+end

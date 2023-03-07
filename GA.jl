@@ -49,22 +49,24 @@ function Select_parents(Population::Vector{Chromosome}, k_tournament::Int64, pop
     return Parent_Selection_TS(Population, k_tournament, popsize), Parent_Selection_TS(Population, k_tournament, popsize)
 end
 
-function Reproduce(TT::Matrix{Float64}, parent1::Vector{Int64}, parent2::Vector{Int64}, n_nodes::Int64)
+function Reproduce(TT::Matrix{Float64}, parent1::Chromosome, parent2::Chromosome, n_nodes::Int64)
     #     r = sample(1:length(crsovr_chances), Weights(crsovr_chances),1)
-    r1 = rand(1:2)
-    r = 5
-    if r == 1
-        return Crossover_OX1(parent1, parent2, n_nodes)  #4730
-    elseif r == 2
-        return Crossover_OX2(parent1, parent2, n_nodes)  #4618
-    elseif r == 3
-        return Crossover_POS(parent1, parent2, n_nodes)  #4712
-    elseif r == 4
-        return Crossover_CX(parent1, parent2, n_nodes)  #4706
-    elseif r == 5
-        return Crossover_HX(TT, parent1, parent2, n_nodes) #4244
+    r = rand(1:2)
+#     r = 1
+    if r == 10
+        return Crossover_OX1(parent1.genes, parent2.genes, n_nodes)  #4730
+    elseif r == 20
+        return Crossover_OX2(parent1.genes, parent2.genes, n_nodes)  #4618
+    elseif r == 30
+        return Crossover_POS(parent1.genes, parent2.genes, n_nodes)  #4712
+    elseif r == 40
+        return Crossover_CX(parent1.genes, parent2.genes, n_nodes)  #4706
+    elseif r == 1
+        return Crossover_HX(TT, parent1.genes, parent2.genes, n_nodes) #4244
+    elseif r==6
+        return Crossover_PMX(parent1.genes, parent2.genes, n_nodes)  #4695
     else
-        return Crossover_PMX(parent1, parent2, n_nodes)  #4695
+        return new_crossover(parent1, parent2, TT, n_nodes)
     end
 end
 
@@ -165,12 +167,10 @@ function Generate_new_generation(TT::Matrix{Float64}, Close_nodes::Matrix{Int}, 
     psize = length(Population)
     parent1, parent2 = Select_parents(Population, k_tournament, psize)
 
-    child = Reproduce(TT, parent1.genes, parent2.genes, n_nodes)
-    Mutate(child, Mutation_Chance)
+    child = Reproduce(TT, parent1, parent2, n_nodes)
 
     obj, trips = SPLIT(TT, demands, K, W, child)
     offspring = Chromosome(child, obj, 0.0, trips)
-    
     
     offspring = Improve_chromosome(offspring, TT, Close_nodes, demands, W, n_nodes, roullet)
     
@@ -232,7 +232,7 @@ function Perform_Genetic_Algorithm(TT::Matrix{Float64}, demands::Vector{Int}, K:
     end
     t2 = time()
 
-    println("The best objective achieved in ", Gen_num, " generations is: ", Population[1].fitness, " and it took ", t2 - t1, " seconds.")
+#     println("The best objective achieved in ", Gen_num, " generations is: ", Population[1].fitness, " and it took ", t2 - t1, " seconds.")
 #     println("And the best route is: ")
 #     best_route(Population)
     return Population

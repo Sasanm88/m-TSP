@@ -9,6 +9,7 @@ end
 function SPLIT(TT::Matrix{Float64}, demands::Vector{Int}, K::Int, W::Int, S::Vector{Int}) #In m-TSP, demands is a vector of ones and W is infinity
     n = length(demands)
     Labels = Label[]
+#     println("A")
     for i=1:n
         R = Int[]
         if i==n
@@ -27,7 +28,7 @@ function SPLIT(TT::Matrix{Float64}, demands::Vector{Int}, K::Int, W::Int, S::Vec
         push!(Labels, Label(R, V, P, C))
     end
 
-
+#     println("B")
     for i=1:n
         R = [0]
         if i > 1
@@ -66,7 +67,7 @@ function SPLIT(TT::Matrix{Float64}, demands::Vector{Int}, K::Int, W::Int, S::Vec
             end
         end
     end
-
+#     println("C")
     trips = Vector{Tour}()
 
     rs = argmin(Labels[n].Vir)
@@ -85,7 +86,24 @@ function SPLIT(TT::Matrix{Float64}, demands::Vector{Int}, K::Int, W::Int, S::Vec
         j = i
     end
     obj = minimum(Labels[n].Vir)
+#     println("D")
     return obj, trips
 end
 
-
+function SPLIT_offspring(TT::Matrix{Float64}, demands::Vector{Int}, K::Int, W::Int, S::Vector{Int}, penalty::Float64, max_inf::Int)
+    obj, trips = SPLIT(TT, demands, K, W, S)
+    feasible_child = Chromosome(S, true, obj, 0.0, trips)
+    best_obj = obj
+    best_trips = trips
+    feasible = true
+    for m=1:max_inf
+        obj, trips = SPLIT(TT, demands, K+m, W, S)
+        obj1 = obj*penalty^((K+m)/K)
+        if obj1 < best_obj
+            best_obj = obj1
+            best_trips = trips
+            feasible = false
+        end
+    end
+    return Chromosome(S, feasible, best_obj, 0.0, best_trips), feasible_child
+end

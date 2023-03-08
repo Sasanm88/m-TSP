@@ -276,6 +276,7 @@ function Improve_chromosome(chrm::Chromosome, TT::Matrix{Float64}, Close_nodes::
     #         for search in Search_methods
             r = sample(1:length(Search_methods), weights(roullet))
             search = Search_methods[r]
+#             println(string(search))
             f1 = chrm.fitness
             chrm = search(chrm, TT, Close_nodes, demands, W, n_nodes)
             if chrm.fitness < f1

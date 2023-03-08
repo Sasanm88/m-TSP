@@ -36,11 +36,11 @@ function Creat_Random_Cromosome(n_nodes::Int64)
     chromosome
 end
 
-function Generate_initial_population(TT::Matrix{Float64}, demands::Vector{Int}, K::Int, W::Int, mu::Int, tsp_tour::Vector{Int})
+function Generate_initial_population(TT::Matrix{Float64}, demands::Vector{Int}, K::Int, W::Int, mu::Int, tsp_tour::Vector{Int}, penalty::Float64, max_inf::Int)
     Population = Chromosome[]
     n_nodes = length(demands)
     obj, trips = SPLIT(TT, demands, K, W, tsp_tour)
-    push!(Population, Chromosome(tsp_tour, obj, 0.0, trips))
+    push!(Population, Chromosome(tsp_tour, true, obj, 0.0, trips))
     S = Int[]
     for i=1:mu-1
         if rand() < 0.5
@@ -49,28 +49,63 @@ function Generate_initial_population(TT::Matrix{Float64}, demands::Vector{Int}, 
             S = Creat_Random_Cromosome(n_nodes)
         end
         obj, trips = SPLIT(TT, demands, K, W, S)
-        push!(Population, Chromosome(S, obj, 0.0, trips))
+        push!(Population, Chromosome(S, true, obj, 0.0, trips))
+    end
+    for i=1:mu
+        if rand() < 0.5
+            S = Change_initial(tsp_tour, n_nodes)
+        else
+            S = Creat_Random_Cromosome(n_nodes)
+        end
+        m = rand(1:max_inf)
+        obj, trips = SPLIT(TT, demands, K+m, W, S)
+        push!(Population, Chromosome(S, false, obj*penalty^((K+m)/K), 0.0, trips))
     end
     sort!(Population, by=x -> x.fitness)
     return Population, Population[1].fitness
 end
 
-function Diversify(Population::Vector{Chromosome}, TT::Matrix{Float64}, demands::Vector{Int}, K::Int, W::Int, mu::Int, tsp_tour::Vector{Int})
+
+function Diversify(Population::Vector{Chromosome}, TT::Matrix{Float64}, demands::Vector{Int}, K::Int, W::Int, mu::Int, tsp_tour::Vector{Int}, penalty::Float64, max_inf::Int)
     n_nodes = length(demands)
     n_best = Int(round(0.3 * mu)) 
-    for i=n_best+1:length(Population)
-        S = Int[]
-        if rand() < 0.0
-            S = Change_initial(tsp_tour, n_nodes)
+    feas_count = 0
+    infeas_count = 0
+    for i=1:length(Population)
+        if Population[i].feasible
+            if feas_count < n_best
+                feas_count += 1
+            else
+                S = Int[]
+                if rand() < 0.0
+                    S = Change_initial(tsp_tour, n_nodes)
+                else
+                    S = Creat_Random_Cromosome(n_nodes)
+                end
+                obj, trips = SPLIT(TT, demands, K, W, S)
+                Population[i].genes = S
+                Population[i].fitness = obj
+                Population[i].tours = trips
+            end
         else
-            S = Creat_Random_Cromosome(n_nodes)
-        end
-        obj, trips = SPLIT(TT, demands, K, W, S)
-        Population[i] = Chromosome(S, obj, 0.0, trips)
+            if infeas_count < n_best
+                infeas_count += 1
+            else
+                S = Int[]
+                if rand() < 0.0
+                    S = Change_initial(tsp_tour, n_nodes)
+                else
+                    S = Creat_Random_Cromosome(n_nodes)
+                end
+                m = rand(1:max_inf)
+                obj, trips = SPLIT(TT, demands, K+m, W, S)
+                Population[i].genes = S
+                Population[i].fitness = obj*penalty^((K+m)/K)
+                Population[i].tours = trips
+            end
+        end            
     end
-    sort!(Population, by=x -> x.fitness)
 end
-
 
 function Find_Closeness(TT::Matrix{Float64}, h::Float64)
     n_nodes = size(TT)[1] - 2

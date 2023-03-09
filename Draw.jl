@@ -1,0 +1,53 @@
+using Plots
+
+
+function Draw_Solution(chrm::Chromosome, depot::Vector{Float64}, Customers::Matrix{Float64})
+    x = Vector{Vector{Float64}}()
+    y = Vector{Vector{Float64}}()
+    labels = Vector{Vector{String}}()
+    m = length(chrm.tours)
+    min_x = Inf
+    max_x = 0.0
+    min_y = Inf
+    max_y = 0.0
+    for j=1:m 
+        seq = chrm.tours[j].Sequence
+        x1 = [depot[1]]
+        y1 = [depot[2]]
+        labels1 = ["0"]
+        for i in seq
+            push!(x1, Customers[i,1])
+            push!(y1, Customers[i,2])
+            push!(labels1, string(i))
+        end
+        push!(x1, depot[1])
+        push!(y1, depot[2])
+        push!(x, x1)
+        push!(y, y1)
+        push!(labels, labels1)
+        if minimum(x1) < min_x
+            min_x = minimum(x1)
+        end
+        if minimum(y1) < min_y
+            min_y = minimum(y1)
+        end
+        if maximum(x1) > max_x
+            max_x = maximum(x1)
+        end
+        if maximum(y1) > max_y
+            max_y = maximum(y1)
+        end
+    end
+    min_x = min_x - 0.1*(max_x-min_x)
+    max_x = max_x + 0.1*(max_x-min_x)
+    min_y = min_y - 0.1*(max_y-min_y)
+    max_y = max_y + 0.1*(max_y-min_y)
+    p = plot(x[1], y[1], marker =:circle, title = "mTSP path", label = "salesman1", xlim=(min_x, max_x), ylim=(min_y, max_y))
+    for i=1:m
+        annotate!.(x[i][1:length(x[i])-1], y[i][1:length(y[i])-1], text.(labels[i], :left,8))
+    end
+    for i=2:m
+        p = plot!(x[i], y[i], marker =:circle, label = "salesman"*string(i))
+    end 
+    return p
+end

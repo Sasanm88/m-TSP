@@ -85,21 +85,39 @@ function find_difference(c1::Vector{Int64}, c2::Vector{Int64})  #range between z
     return min(diff1, diff2) / length(c1)
 end
 
-function Sort_based_on_power(Population::Vector{Chromosome})
+function find_neighbors(a::Int, i::Int, m::Int)
+    neighbors = Int[]
+    for j=max(1, i-m):i-1
+        push!(neighbors, j)
+    end
+    for j=i+1:min(a, i+m)
+        push!(neighbors, j)
+    end
+    return neighbors
+end
+
+function Sort_based_on_power(Population::Vector{Chromosome}, num_nei::Int)
     popsize = length(Population)
     diff1 = 0.0
     diff2 = 0.0
     for i = 1:popsize
-        if i == 1
-            diff1 = find_difference(Population[1].genes, Population[2].genes)
-            Population[i].power = Population[i].fitness * 0.8^diff1 #(2-diff1)
-        elseif i == popsize
-            Population[i].power = Population[i].fitness * 0.8^diff1 #(2-diff1)
-        else
-            diff2 = find_difference(Population[i].genes, Population[i+1].genes)
-            Population[i].power = Population[i].fitness * 0.8^((diff1 + diff2) / 2) #(2-(diff1+diff2)/2)
-            diff1 = diff2
+        neighbors = find_neighbors(popsize, i, num_nei)
+        diff = 0.0
+        for j in neighbors
+            diff1 = find_difference(Population[i].genes, Population[j].genes)
+            diff += diff1
         end
+        Population[i].power = Population[i].fitness * 0.8^(diff/length(neighbors))
+#         if i == 1
+#             diff1 = find_difference(Population[1].genes, Population[2].genes)
+#             Population[i].power = Population[i].fitness * 0.8^diff1 #(2-diff1)
+#         elseif i == popsize
+#             Population[i].power = Population[i].fitness * 0.8^diff1 #(2-diff1)
+#         else
+#             diff2 = find_difference(Population[i].genes, Population[i+1].genes)
+#             Population[i].power = Population[i].fitness * 0.8^((diff1 + diff2) / 2) #(2-(diff1+diff2)/2)
+#             diff1 = diff2
+#         end
     end
     sort!(Population, by=x -> x.power)
 end
@@ -153,7 +171,7 @@ end
 function Generate_new_generation(TT::Matrix{Float64}, Close_nodes::Matrix{Int}, demands::Vector{Int}, K::Int, W::Int,
         Population::Vector{Chromosome}, popsize::Tuple{Int64,Int64}, k_tournament::Int64, 
         ClosenessT::Matrix{Int64}, Gen_num::Int64, old_best::Float64, improve_count::Int64, Mutation_Chance::Float64,
-        tsp_tour::Vector{Int}, roullet::Vector{Int})
+        tsp_tour::Vector{Int}, roullet::Vector{Int}, num_nei::Int)
     t1 = time()
 
     mu, sigma = popsize
@@ -163,31 +181,16 @@ function Generate_new_generation(TT::Matrix{Float64}, Close_nodes::Matrix{Int}, 
         Diversify(Population, TT, demands, K, W, mu, tsp_tour)
     end
     
-    Sort_based_on_power(Population)
+    Sort_based_on_power(Population, num_nei)
     psize = length(Population)
     parent1, parent2 = Select_parents(Population, k_tournament, psize)
 
     child = Reproduce(TT, parent1, parent2, n_nodes)
-
+    Mutate(child, Mutation_Chance)
     obj, trips = SPLIT(TT, demands, K, W, child)
     offspring = Chromosome(child, obj, 0.0, trips)
     
     offspring = Improve_chromosome(offspring, TT, Close_nodes, demands, W, n_nodes, roullet)
-    
-    for tour in offspring.tours
-        t1 = copy(tour.Sequence);
-        pushfirst!(t1, 0)
-        push!(t1, n_nodes+1)
-
-        z1 = 0.0
-        for i=1:length(t1)-1
-            z1 += TT[t1[i]+1, t1[i+1]+1]
-        end
-
-        if round(z1, digits=0) != round(tour.cost, digits=0)
-            println(round(z1, digits=0), "   " , round(tour.cost, digits=0))
-        end
-    end
     
     push!(Population, offspring)
     sort!(Population, by=x -> x.fitness)
@@ -212,7 +215,7 @@ function Generate_new_generation(TT::Matrix{Float64}, Close_nodes::Matrix{Int}, 
 end
 
 function Perform_Genetic_Algorithm(TT::Matrix{Float64}, demands::Vector{Int}, K::Int, W::Int,h::Float64, popsize::Tuple{Int64,Int64},
-    k_tournament::Int64, num_iter::Int64, Mutation_Chance::Float64)
+    k_tournament::Int64, num_iter::Int64, Mutation_Chance::Float64, num_nei::Int)
     n_nodes = size(TT)[1] - 2
     t1 = time()
     ClosenessT= Find_Closeness(TT, h) 
@@ -227,7 +230,7 @@ function Perform_Genetic_Algorithm(TT::Matrix{Float64}, demands::Vector{Int}, K:
 
     @inbounds while improve_count < num_iter
             Gen_num, old_best, Population, improve_count = Generate_new_generation(TT, ClosenessT, demands, K, W,
-        Population, popsize, k_tournament, ClosenessT, Gen_num, old_best, improve_count, Mutation_Chance, tsp_tour, roullet)
+        Population, popsize, k_tournament, ClosenessT, Gen_num, old_best, improve_count, Mutation_Chance, tsp_tour, roullet, num_nei)
         count += 1
     end
     t2 = time()

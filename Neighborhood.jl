@@ -269,7 +269,7 @@ function N4(Chrm::Chromosome, TT::Matrix{Float64}, Close_nodes::Matrix{Int}, dem
 end
 
 function Improve_chromosome(chrm::Chromosome, TT::Matrix{Float64}, Close_nodes::Matrix{Int}, demands::Vector{Int}, W::Int, n_nodes::Int, roullet::Vector{Int})
-    #     Search_methods = [N1, N2, N3, N4, Ni1, Ni2, Ni3, Ni4, Ni5, Ni6, Ni7]
+#         Search_methods = [N1, N2, N3, N4, Ni1, Ni2, Ni3, Ni4, Ni5, Ni6, Ni7]
         Search_methods = [N1, Ni1, Ni2, Ni3, Ni4, Ni5]    #Ni4 not great
         for i=1:100
     #     shuffle!(Search_methods)

@@ -108,16 +108,7 @@ function Sort_based_on_power(Population::Vector{Chromosome}, num_nei::Int)
             diff += diff1
         end
         Population[i].power = Population[i].fitness * 0.8^(diff/length(neighbors))
-#         if i == 1
-#             diff1 = find_difference(Population[1].genes, Population[2].genes)
-#             Population[i].power = Population[i].fitness * 0.8^diff1 #(2-diff1)
-#         elseif i == popsize
-#             Population[i].power = Population[i].fitness * 0.8^diff1 #(2-diff1)
-#         else
-#             diff2 = find_difference(Population[i].genes, Population[i+1].genes)
-#             Population[i].power = Population[i].fitness * 0.8^((diff1 + diff2) / 2) #(2-(diff1+diff2)/2)
-#             diff1 = diff2
-#         end
+
     end
     sort!(Population, by=x -> x.power)
 end
@@ -223,7 +214,7 @@ function Perform_Genetic_Algorithm(TT::Matrix{Float64}, demands::Vector{Int}, K:
     improve_count = 0
     Gen_num = 0
     old_best = 0.0
-    roullet = ones(Int, 6) * 100
+    roullet = ones(Int, 3) * 100
     tsp_tour = find_tsp_tour1(TT[1:n_nodes+1, 1:n_nodes+1])
     Population, old_best = Generate_initial_population(TT, demands, K, W, mu, tsp_tour) 
     count = 0
@@ -238,6 +229,7 @@ function Perform_Genetic_Algorithm(TT::Matrix{Float64}, demands::Vector{Int}, K:
 #     println("The best objective achieved in ", Gen_num, " generations is: ", Population[1].fitness, " and it took ", t2 - t1, " seconds.")
 #     println("And the best route is: ")
 #     best_route(Population)
+    println(roullet)
     return Population
 end
 

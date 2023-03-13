@@ -1,7 +1,12 @@
 
 
 function Ni1(Chrm::Chromosome, TT::Matrix{Float64}, Close_nodes::Matrix{Int}, demands::Vector{Int}, W::Int, n_nodes::Int)   #Reinsert
-    r1 = argmax([Chrm.tours[i].cost for i=1:length(Chrm.tours)])
+    r1 = 1
+    if rand() < 0.5
+        r1 = argmax([Chrm.tours[i].cost for i=1:length(Chrm.tours)])
+    else
+        r1 = rand(1:length(Chrm.tours))
+    end
 
     tour1 = Chrm.tours[r1].Sequence
     cost1 = Chrm.tours[r1].cost
@@ -56,7 +61,12 @@ end
 
 
 function Ni2(Chrm::Chromosome, TT::Matrix{Float64}, Close_nodes::Matrix{Int}, demands::Vector{Int}, W::Int, n_nodes::Int)   #Exchange (permutation between two customers)
-    r1 = argmax([Chrm.tours[i].cost for i=1:length(Chrm.tours)])
+    r1 = 1
+    if rand() < 0.5
+        r1 = argmax([Chrm.tours[i].cost for i=1:length(Chrm.tours)])
+    else
+        r1 = rand(1:length(Chrm.tours))
+    end
     tour1 = Chrm.tours[r1].Sequence
     if length(tour1) <= 1
         return Chrm
@@ -109,7 +119,12 @@ function Ni2(Chrm::Chromosome, TT::Matrix{Float64}, Close_nodes::Matrix{Int}, de
 end
 
 function Ni3(Chrm::Chromosome, T::Matrix{Float64}, Close_nodes::Matrix{Int}, demands::Vector{Int}, W::Int, n_nodes::Int)   #Or-opt2 
-    r1 = argmax([Chrm.tours[i].cost for i=1:length(Chrm.tours)])
+    r1 = 1
+    if rand() < 0.5
+        r1 = argmax([Chrm.tours[i].cost for i=1:length(Chrm.tours)])
+    else
+        r1 = rand(1:length(Chrm.tours))
+    end
     tour1 = Chrm.tours[r1].Sequence
     if length(tour1) <= 2
         return Chrm
@@ -164,7 +179,12 @@ end
 
 
 function Ni4(Chrm::Chromosome, T::Matrix{Float64}, Close_nodes::Matrix{Int}, demands::Vector{Int}, W::Int, n_nodes::Int)   #Or-opt3 
-    r1 = argmax([Chrm.tours[i].cost for i=1:length(Chrm.tours)])
+    r1 = 1
+    if rand() < 0.5
+        r1 = argmax([Chrm.tours[i].cost for i=1:length(Chrm.tours)])
+    else
+        r1 = rand(1:length(Chrm.tours))
+    end
     tour1 = Chrm.tours[r1].Sequence
     if length(tour1) <= 3
         return Chrm
@@ -217,7 +237,12 @@ function Ni4(Chrm::Chromosome, T::Matrix{Float64}, Close_nodes::Matrix{Int}, dem
 end
 
 function Ni5(Chrm::Chromosome, T::Matrix{Float64}, Close_nodes::Matrix{Int}, demands::Vector{Int}, W::Int, n_nodes::Int)   #2-opt 
-    r1 = argmax([Chrm.tours[i].cost for i=1:length(Chrm.tours)])
+    r1 = 1
+    if rand() < 0.5
+        r1 = argmax([Chrm.tours[i].cost for i=1:length(Chrm.tours)])
+    else
+        r1 = rand(1:length(Chrm.tours))
+    end
     tour1 = Chrm.tours[r1].Sequence
     if length(tour1) <= 2
         return Chrm
@@ -284,7 +309,12 @@ function Ni5(Chrm::Chromosome, T::Matrix{Float64}, Close_nodes::Matrix{Int}, dem
 end
 
 function Ni6(Chrm::Chromosome, T::Matrix{Float64}, Close_nodes::Matrix{Int}, demands::Vector{Int}, W::Int, n_nodes::Int)   #3-opt 
-    r1 = argmax([Chrm.tours[i].cost for i=1:length(Chrm.tours)])
+    r1 = 1
+    if rand() < 0.5
+        r1 = argmax([Chrm.tours[i].cost for i=1:length(Chrm.tours)])
+    else
+        r1 = rand(1:length(Chrm.tours))
+    end
     tour1 = Chrm.tours[r1].Sequence
     if length(tour1) <= 2
         return Chrm
@@ -314,7 +344,12 @@ function Ni6(Chrm::Chromosome, T::Matrix{Float64}, Close_nodes::Matrix{Int}, dem
 end
 
 function Ni7(Chrm::Chromosome, T::Matrix{Float64}, Close_nodes::Matrix{Int}, demands::Vector{Int}, W::Int, n_nodes::Int)   #3-permute 
-    r1 = argmax([Chrm.tours[i].cost for i=1:length(Chrm.tours)])
+    r1 = 1
+    if rand() < 0.5
+        r1 = argmax([Chrm.tours[i].cost for i=1:length(Chrm.tours)])
+    else
+        r1 = rand(1:length(Chrm.tours))
+    end
     tour1 = Chrm.tours[r1].Sequence
     if length(tour1) <= 2
         return Chrm

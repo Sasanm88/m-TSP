@@ -330,6 +330,7 @@ function N4(Chrm::Chromosome, TT::Matrix{Float64}, Close_nodes::Matrix{Int}, dem
     return Chrm
 end
 
+
 function N4rs(Chrm::Chromosome, TT::Matrix{Float64}, Close_nodes::Matrix{Int}, demands::Vector{Int}, W::Int, n_nodes::Int)   #Swap(2,2)
     r1 = argmax([Chrm.tours[i].cost for i=1:length(Chrm.tours)])
     routes = [i for i=1:length(Chrm.tours)]

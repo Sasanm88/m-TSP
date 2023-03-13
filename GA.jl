@@ -108,6 +108,7 @@ function Sort_based_on_power(Population::Vector{Chromosome}, num_nei::Int)
             diff += diff1
         end
         Population[i].power = Population[i].fitness * 0.8^(diff/length(neighbors))
+
     end
     sort!(Population, by=x -> x.power)
 end
@@ -176,26 +177,11 @@ function Generate_new_generation(TT::Matrix{Float64}, Close_nodes::Matrix{Int}, 
     parent1, parent2 = Select_parents(Population, k_tournament, psize)
 
     child = Reproduce(TT, parent1, parent2, n_nodes)
-
+    Mutate(child, Mutation_Chance)
     obj, trips = SPLIT(TT, demands, K, W, child)
     offspring = Chromosome(child, obj, 0.0, trips)
     
     offspring = Improve_chromosome(offspring, TT, Close_nodes, demands, W, n_nodes, roullet)
-    
-    for tour in offspring.tours
-        t1 = copy(tour.Sequence);
-        pushfirst!(t1, 0)
-        push!(t1, n_nodes+1)
-
-        z1 = 0.0
-        for i=1:length(t1)-1
-            z1 += TT[t1[i]+1, t1[i+1]+1]
-        end
-
-        if round(z1, digits=0) != round(tour.cost, digits=0)
-            println(round(z1, digits=0), "   " , round(tour.cost, digits=0))
-        end
-    end
     
     push!(Population, offspring)
     sort!(Population, by=x -> x.fitness)

@@ -366,6 +366,130 @@ function Calculate_new_cost_swap_three_reverse_reverse(tour1::Vector{Int}, cost1
     return new_cost1, new_cost2
 end
 
+function Calculate_new_cost_swap_three_with_two(tour1::Vector{Int}, cost1::Float64, city11::Int, city12::Int, city13::Int, position1::Int, tour2::Vector{Int}, cost2::Float64, city21::Int, city22::Int, position2::Int,T::Matrix{Float64}, n_nodes::Int)
+    nt1 = length(tour1)
+    nt2 = length(tour2)
+    new_cost1 = cost1
+    new_cost2 = cost2
+    if nt1 == 3
+        new_cost1 = T[1, city21+1] + T[city21+1, city22+1] + T[city22+1, n_nodes+2] 
+    else
+        if position1 == 1
+            new_cost1 += T[1, city21+1] + T[city21+1, city22+1] + T[city22+1, tour1[4]+1] - T[1, city11+1] - T[city11+1, city12+1] - T[city12+1, city13+1] - T[city13+1, tour1[4]+1]
+        elseif position1 == nt1-2
+            new_cost1 += T[tour1[nt1-3]+1, city21+1] + T[city21+1, city22+1] + T[city22+1, n_nodes+2] - T[tour1[nt1-3]+1, city11+1] - T[city11+1, city12+1] - T[city12+1, city13+1] - T[city13+1, n_nodes+2]
+        else
+            new_cost1 += T[tour1[position1-1]+1, city21+1] + T[city21+1, city22+1] + T[city22+1, tour1[position1+3]+1] - T[tour1[position1-1]+1, city11+1] - T[city11+1, city12+1] - T[city12+1, city13+1] - T[city13+1, tour1[position1+3]+1]
+        end
+    end
+
+    if nt2 == 3
+        new_cost2 = T[1, city11+1] + T[city11+1, city12+1] + T[city12+1, city13+1] + T[city13+1, n_nodes+2] 
+    else
+        if position2 == 1
+            new_cost2 += T[1, city11+1] + T[city11+1, city12+1] + T[city12+1, city13+1]  + T[city13+1, tour2[3]+1] - T[1, city21+1] - T[city21+1, city22+1] - T[city22+1, tour2[3]+1]
+        elseif position2 == nt2-1
+            new_cost2 += T[tour2[nt2-2]+1, city11+1] + T[city11+1, city12+1] + T[city12+1, city13+1] + T[city13+1, n_nodes+2] - T[tour2[nt2-2]+1, city21+1] - T[city21+1, city22+1] - T[city22+1, n_nodes+2]
+        else
+            new_cost2 += T[tour2[position2-1]+1, city11+1] + T[city11+1, city12+1]  + T[city12+1, city13+1] + T[city13+1, tour2[position2+2]+1] - T[tour2[position2-1]+1, city21+1] - T[city21+1, city22+1] - T[city22+1, tour2[position2+2]+1]
+        end
+    end
+    return new_cost1, new_cost2
+end
+
+function Calculate_new_cost_swap_three_with_two_reverse_straight(tour1::Vector{Int}, cost1::Float64, city11::Int, city12::Int, city13::Int, position1::Int, tour2::Vector{Int}, cost2::Float64, city21::Int, city22::Int, position2::Int,T::Matrix{Float64}, n_nodes::Int)
+    nt1 = length(tour1)
+    nt2 = length(tour2)
+    new_cost1 = cost1
+    new_cost2 = cost2
+    if nt1 == 3
+        new_cost1 = T[1, city21+1] + T[city21+1, city22+1] + T[city22+1, n_nodes+2] 
+    else
+        if position1 == 1
+            new_cost1 += T[1, city21+1] + T[city21+1, city22+1] + T[city22+1, tour1[4]+1] - T[1, city11+1] - T[city11+1, city12+1] - T[city12+1, city13+1] - T[city13+1, tour1[4]+1]
+        elseif position1 == nt1-2
+            new_cost1 += T[tour1[nt1-3]+1, city21+1] + T[city21+1, city22+1] + T[city22+1, n_nodes+2] - T[tour1[nt1-3]+1, city11+1] - T[city11+1, city12+1] - T[city12+1, city13+1] - T[city13+1, n_nodes+2]
+        else
+            new_cost1 += T[tour1[position1-1]+1, city21+1] + T[city21+1, city22+1] + T[city22+1, tour1[position1+3]+1] - T[tour1[position1-1]+1, city11+1] - T[city11+1, city12+1] - T[city12+1, city13+1] - T[city13+1, tour1[position1+3]+1]
+        end
+    end
+
+    if nt2 == 3
+        new_cost2 = T[1, city13+1] + T[city13+1, city12+1] + T[city12+1, city11+1] + T[city11+1, n_nodes+2] 
+    else
+        if position2 == 1
+            new_cost2 += T[1, city13+1] + T[city13+1, city12+1] + T[city12+1, city11+1]  + T[city11+1, tour2[3]+1] - T[1, city21+1] - T[city21+1, city22+1] - T[city22+1, tour2[3]+1]
+        elseif position2 == nt2-1
+            new_cost2 += T[tour2[nt2-2]+1, city13+1] + T[city13+1, city12+1] + T[city12+1, city11+1] + T[city11+1, n_nodes+2] - T[tour2[nt2-2]+1, city21+1] - T[city21+1, city22+1] - T[city22+1, n_nodes+2]
+        else
+            new_cost2 += T[tour2[position2-1]+1, city13+1] + T[city13+1, city12+1]  + T[city12+1, city11+1] + T[city11+1, tour2[position2+2]+1] - T[tour2[position2-1]+1, city21+1] - T[city21+1, city22+1] - T[city22+1, tour2[position2+2]+1]
+        end
+    end
+    return new_cost1, new_cost2
+end
+
+function Calculate_new_cost_swap_three_with_two_straight_reverse(tour1::Vector{Int}, cost1::Float64, city11::Int, city12::Int, city13::Int, position1::Int, tour2::Vector{Int}, cost2::Float64, city21::Int, city22::Int, position2::Int,T::Matrix{Float64}, n_nodes::Int)
+    nt1 = length(tour1)
+    nt2 = length(tour2)
+    new_cost1 = cost1
+    new_cost2 = cost2
+    if nt1 == 3
+        new_cost1 = T[1, city22+1] + T[city22+1, city21+1] + T[city21+1, n_nodes+2] 
+    else
+        if position1 == 1
+            new_cost1 += T[1, city22+1] + T[city22+1, city21+1] + T[city21+1, tour1[4]+1] - T[1, city11+1] - T[city11+1, city12+1] - T[city12+1, city13+1] - T[city13+1, tour1[4]+1]
+        elseif position1 == nt1-2
+            new_cost1 += T[tour1[nt1-3]+1, city22+1] + T[city22+1, city21+1] + T[city21+1, n_nodes+2] - T[tour1[nt1-3]+1, city11+1] - T[city11+1, city12+1] - T[city12+1, city13+1] - T[city13+1, n_nodes+2]
+        else
+            new_cost1 += T[tour1[position1-1]+1, city22+1] + T[city22+1, city21+1] + T[city21+1, tour1[position1+3]+1] - T[tour1[position1-1]+1, city11+1] - T[city11+1, city12+1] - T[city12+1, city13+1] - T[city13+1, tour1[position1+3]+1]
+        end
+    end
+
+    if nt2 == 3
+        new_cost2 = T[1, city11+1] + T[city11+1, city12+1] + T[city12+1, city13+1] + T[city13+1, n_nodes+2] 
+    else
+        if position2 == 1
+            new_cost2 += T[1, city11+1] + T[city11+1, city12+1] + T[city12+1, city13+1]  + T[city13+1, tour2[3]+1] - T[1, city21+1] - T[city21+1, city22+1] - T[city22+1, tour2[3]+1]
+        elseif position2 == nt2-1
+            new_cost2 += T[tour2[nt2-2]+1, city11+1] + T[city11+1, city12+1] + T[city12+1, city13+1] + T[city13+1, n_nodes+2] - T[tour2[nt2-2]+1, city21+1] - T[city21+1, city22+1] - T[city22+1, n_nodes+2]
+        else
+            new_cost2 += T[tour2[position2-1]+1, city11+1] + T[city11+1, city12+1]  + T[city12+1, city13+1] + T[city13+1, tour2[position2+2]+1] - T[tour2[position2-1]+1, city21+1] - T[city21+1, city22+1] - T[city22+1, tour2[position2+2]+1]
+        end
+    end
+    return new_cost1, new_cost2
+end
+
+function Calculate_new_cost_swap_three_with_two_reverse_reverse(tour1::Vector{Int}, cost1::Float64, city11::Int, city12::Int, city13::Int, position1::Int, tour2::Vector{Int}, cost2::Float64, city21::Int, city22::Int, position2::Int,T::Matrix{Float64}, n_nodes::Int)
+    nt1 = length(tour1)
+    nt2 = length(tour2)
+    new_cost1 = cost1
+    new_cost2 = cost2
+    if nt1 == 3
+        new_cost1 = T[1, city22+1] + T[city22+1, city21+1] + T[city21+1, n_nodes+2] 
+    else
+        if position1 == 1
+            new_cost1 += T[1, city22+1] + T[city22+1, city21+1] + T[city21+1, tour1[4]+1] - T[1, city11+1] - T[city11+1, city12+1] - T[city12+1, city13+1] - T[city13+1, tour1[4]+1]
+        elseif position1 == nt1-2
+            new_cost1 += T[tour1[nt1-3]+1, city22+1] + T[city22+1, city21+1] + T[city21+1, n_nodes+2] - T[tour1[nt1-3]+1, city11+1] - T[city11+1, city12+1] - T[city12+1, city13+1] - T[city13+1, n_nodes+2]
+        else
+            new_cost1 += T[tour1[position1-1]+1, city22+1] + T[city22+1, city21+1] + T[city21+1, tour1[position1+3]+1] - T[tour1[position1-1]+1, city11+1] - T[city11+1, city12+1] - T[city12+1, city13+1] - T[city13+1, tour1[position1+3]+1]
+        end
+    end
+
+    if nt2 == 3
+        new_cost2 = T[1, city13+1] + T[city13+1, city12+1] + T[city12+1, city11+1] + T[city11+1, n_nodes+2] 
+    else
+        if position2 == 1
+            new_cost2 += T[1, city13+1] + T[city13+1, city12+1] + T[city12+1, city11+1]  + T[city11+1, tour2[3]+1] - T[1, city21+1] - T[city21+1, city22+1] - T[city22+1, tour2[3]+1]
+        elseif position2 == nt2-1
+            new_cost2 += T[tour2[nt2-2]+1, city13+1] + T[city13+1, city12+1] + T[city12+1, city11+1] + T[city11+1, n_nodes+2] - T[tour2[nt2-2]+1, city21+1] - T[city21+1, city22+1] - T[city22+1, n_nodes+2]
+        else
+            new_cost2 += T[tour2[position2-1]+1, city13+1] + T[city13+1, city12+1]  + T[city12+1, city11+1] + T[city11+1, tour2[position2+2]+1] - T[tour2[position2-1]+1, city21+1] - T[city21+1, city22+1] - T[city22+1, tour2[position2+2]+1]
+        end
+    end
+    return new_cost1, new_cost2
+end
+
 function Calculate_new_cost_exchange_one(tour1::Vector{Int}, cost::Float64, city::Int, position1::Int, 
     position2::Int, T::Matrix{Float64}, n_nodes::Int)
     tour = copy(tour1)

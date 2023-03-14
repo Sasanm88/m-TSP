@@ -965,7 +965,7 @@ function N6rr(Chrm::Chromosome, TT::Matrix{Float64}, Close_nodes::Matrix{Int}, d
     city22 = tour2[k2+1]
     city23 = tour2[k2+2]
     
-    new_cost1, new_cost2 = Calculate_new_cost_swap_three_reverse(tour1, cost1, city11, city12, city13, k1, tour2, cost2, city21, city22, city23, k2, TT, n_nodes)
+    new_cost1, new_cost2 = Calculate_new_cost_swap_three_reverse_reverse(tour1, cost1, city11, city12, city13, k1, tour2, cost2, city21, city22, city23, k2, TT, n_nodes)
     if new_cost1 >= cost1 || new_cost2 >= cost1
         return Chrm
     end
@@ -985,9 +985,293 @@ function N6rr(Chrm::Chromosome, TT::Matrix{Float64}, Close_nodes::Matrix{Int}, d
     return Chrm
 end
 
+function N7(Chrm::Chromosome, TT::Matrix{Float64}, Close_nodes::Matrix{Int}, demands::Vector{Int}, W::Int, n_nodes::Int)   #Swap(3,2)
+    r1 = argmax([Chrm.tours[i].cost for i=1:length(Chrm.tours)])
+    routes = [i for i=1:length(Chrm.tours)]
+    r2 = setdiff(routes, r1)[rand(1:length(Chrm.tours)-1)]
+    tour1 = Chrm.tours[r1].Sequence
+    tour2 = Chrm.tours[r2].Sequence
+    cost1 = Chrm.tours[r1].cost
+    cost2 = Chrm.tours[r2].cost
+    if length(tour1) < 3 || length(tour2) < 2
+        return Chrm
+    end
+    k1 = rand(1:length(tour1)-2)
+    city11 = tour1[k1]
+    city12 = tour1[k1+1]
+    city13 = tour1[k1+2]
+
+    nt2 = length(tour2)
+    Candidates = Int[] 
+    if nt2 <= 2  
+        if city11 in Close_nodes[n_nodes+1,:] || city13 in Close_nodes[n_nodes+1,:]
+            push!(Candidates, 1)
+        end
+    elseif nt2 == 4  
+        if city11 in Close_nodes[n_nodes+1,:] || tour2[4] in Close_nodes[city13,:] 
+            push!(Candidates, 1)
+        end
+        if city11 in Close_nodes[tour2[nt2-3],:] || city13 in Close_nodes[n_nodes+1,:] 
+            push!(Candidates, 2)
+        end
+    else
+        if city11 in Close_nodes[n_nodes+1,:] || tour2[4] in Close_nodes[city13,:] 
+            push!(Candidates, 1)
+        end
+        for i=2:nt2-3
+            if tour2[i-1] in Close_nodes[city11,:] || tour2[i+3] in Close_nodes[city13,:]
+                push!(Candidates, i)
+            end
+        end
+        if city11 in Close_nodes[tour2[nt2-3],:] || city13 in Close_nodes[n_nodes+1,:] 
+            push!(Candidates, nt2-2)
+        end
+    end
+    if length(Candidates) == 0
+        return Chrm
+    end
+    Candidates = collect(Set(Candidates))
+    k2 = Candidates[rand(1:length(Candidates))]
+    city21 = tour2[k2]
+    city22 = tour2[k2+1]
+    
+    new_cost1, new_cost2 = Calculate_new_cost_swap_three_with_two(tour1, cost1, city11, city12, city13, k1, tour2, cost2, city21, city22,  k2, TT, n_nodes)
+    if new_cost1 >= cost1 || new_cost2 >= cost1
+        return Chrm
+    end
+    tour1[k1] = city21
+    tour1[k1+1] = city22
+    deleteat!(tour1, k1+2)
+    tour2[k2] = city11
+    tour2[k2+1] = city12
+    insert!(tour2, k2+2, city13)
+
+    Chrm.tours[r1].cost = new_cost1
+    Chrm.tours[r2].cost = new_cost2
+    Chrm.genes = Int[]
+    Chrm.fitness = maximum([Chrm.tours[i].cost for i=1:length(Chrm.tours)])
+    for tour in Chrm.tours
+        Chrm.genes = vcat(Chrm.genes, tour.Sequence)
+    end
+    return Chrm
+end
+
+function N7rs(Chrm::Chromosome, TT::Matrix{Float64}, Close_nodes::Matrix{Int}, demands::Vector{Int}, W::Int, n_nodes::Int)   #Swap(3,2)
+    r1 = argmax([Chrm.tours[i].cost for i=1:length(Chrm.tours)])
+    routes = [i for i=1:length(Chrm.tours)]
+    r2 = setdiff(routes, r1)[rand(1:length(Chrm.tours)-1)]
+    tour1 = Chrm.tours[r1].Sequence
+    tour2 = Chrm.tours[r2].Sequence
+    cost1 = Chrm.tours[r1].cost
+    cost2 = Chrm.tours[r2].cost
+    if length(tour1) < 3 || length(tour2) < 2
+        return Chrm
+    end
+    k1 = rand(1:length(tour1)-2)
+    city11 = tour1[k1]
+    city12 = tour1[k1+1]
+    city13 = tour1[k1+2]
+
+    nt2 = length(tour2)
+    Candidates = Int[] 
+    if nt2 <= 2  
+        if city11 in Close_nodes[n_nodes+1,:] || city13 in Close_nodes[n_nodes+1,:]
+            push!(Candidates, 1)
+        end
+    elseif nt2 == 4  
+        if city13 in Close_nodes[n_nodes+1,:] || tour2[4] in Close_nodes[city11,:] 
+            push!(Candidates, 1)
+        end
+        if city13 in Close_nodes[tour2[nt2-3],:] || city11 in Close_nodes[n_nodes+1,:] 
+            push!(Candidates, 2)
+        end
+    else
+        if city13 in Close_nodes[n_nodes+1,:] || tour2[4] in Close_nodes[city11,:] 
+            push!(Candidates, 1)
+        end
+        for i=2:nt2-3
+            if tour2[i-1] in Close_nodes[city13,:] || tour2[i+3] in Close_nodes[city11,:]
+                push!(Candidates, i)
+            end
+        end
+        if city13 in Close_nodes[tour2[nt2-3],:] || city11 in Close_nodes[n_nodes+1,:] 
+            push!(Candidates, nt2-2)
+        end
+    end
+    if length(Candidates) == 0
+        return Chrm
+    end
+    Candidates = collect(Set(Candidates))
+    k2 = Candidates[rand(1:length(Candidates))]
+    city21 = tour2[k2]
+    city22 = tour2[k2+1]
+    
+    new_cost1, new_cost2 = Calculate_new_cost_swap_three_with_two_reverse_straight(tour1, cost1, city11, city12, city13, k1, tour2, cost2, city21, city22,  k2, TT, n_nodes)
+    if new_cost1 >= cost1 || new_cost2 >= cost1
+        return Chrm
+    end
+    tour1[k1] = city21
+    tour1[k1+1] = city22
+    deleteat!(tour1, k1+2)
+    tour2[k2] = city13
+    tour2[k2+1] = city12
+    insert!(tour2, k2+2, city11)
+
+    Chrm.tours[r1].cost = new_cost1
+    Chrm.tours[r2].cost = new_cost2
+    Chrm.genes = Int[]
+    Chrm.fitness = maximum([Chrm.tours[i].cost for i=1:length(Chrm.tours)])
+    for tour in Chrm.tours
+        Chrm.genes = vcat(Chrm.genes, tour.Sequence)
+    end
+    return Chrm
+end
+
+function N7sr(Chrm::Chromosome, TT::Matrix{Float64}, Close_nodes::Matrix{Int}, demands::Vector{Int}, W::Int, n_nodes::Int)   #Swap(3,2)
+    r1 = argmax([Chrm.tours[i].cost for i=1:length(Chrm.tours)])
+    routes = [i for i=1:length(Chrm.tours)]
+    r2 = setdiff(routes, r1)[rand(1:length(Chrm.tours)-1)]
+    tour1 = Chrm.tours[r1].Sequence
+    tour2 = Chrm.tours[r2].Sequence
+    cost1 = Chrm.tours[r1].cost
+    cost2 = Chrm.tours[r2].cost
+    if length(tour1) < 3 || length(tour2) < 2
+        return Chrm
+    end
+    k1 = rand(1:length(tour1)-2)
+    city11 = tour1[k1]
+    city12 = tour1[k1+1]
+    city13 = tour1[k1+2]
+
+    nt2 = length(tour2)
+    Candidates = Int[] 
+    if nt2 <= 2  
+        if city11 in Close_nodes[n_nodes+1,:] || city13 in Close_nodes[n_nodes+1,:]
+            push!(Candidates, 1)
+        end
+    elseif nt2 == 4  
+        if city11 in Close_nodes[n_nodes+1,:] || tour2[4] in Close_nodes[city13,:] 
+            push!(Candidates, 1)
+        end
+        if city11 in Close_nodes[tour2[nt2-3],:] || city13 in Close_nodes[n_nodes+1,:] 
+            push!(Candidates, 2)
+        end
+    else
+        if city11 in Close_nodes[n_nodes+1,:] || tour2[4] in Close_nodes[city13,:] 
+            push!(Candidates, 1)
+        end
+        for i=2:nt2-3
+            if tour2[i-1] in Close_nodes[city11,:] || tour2[i+3] in Close_nodes[city13,:]
+                push!(Candidates, i)
+            end
+        end
+        if city11 in Close_nodes[tour2[nt2-3],:] || city13 in Close_nodes[n_nodes+1,:] 
+            push!(Candidates, nt2-2)
+        end
+    end
+    if length(Candidates) == 0
+        return Chrm
+    end
+    Candidates = collect(Set(Candidates))
+    k2 = Candidates[rand(1:length(Candidates))]
+    city21 = tour2[k2]
+    city22 = tour2[k2+1]
+    
+    new_cost1, new_cost2 = Calculate_new_cost_swap_three_with_two_straight_reverse(tour1, cost1, city11, city12, city13, k1, tour2, cost2, city21, city22,  k2, TT, n_nodes)
+    if new_cost1 >= cost1 || new_cost2 >= cost1
+        return Chrm
+    end
+    tour1[k1] = city22
+    tour1[k1+1] = city21
+    deleteat!(tour1, k1+2)
+    tour2[k2] = city11
+    tour2[k2+1] = city12
+    insert!(tour2, k2+2, city13)
+
+    Chrm.tours[r1].cost = new_cost1
+    Chrm.tours[r2].cost = new_cost2
+    Chrm.genes = Int[]
+    Chrm.fitness = maximum([Chrm.tours[i].cost for i=1:length(Chrm.tours)])
+    for tour in Chrm.tours
+        Chrm.genes = vcat(Chrm.genes, tour.Sequence)
+    end
+    return Chrm
+end
+
+function N7rr(Chrm::Chromosome, TT::Matrix{Float64}, Close_nodes::Matrix{Int}, demands::Vector{Int}, W::Int, n_nodes::Int)   #Swap(3,2)
+    r1 = argmax([Chrm.tours[i].cost for i=1:length(Chrm.tours)])
+    routes = [i for i=1:length(Chrm.tours)]
+    r2 = setdiff(routes, r1)[rand(1:length(Chrm.tours)-1)]
+    tour1 = Chrm.tours[r1].Sequence
+    tour2 = Chrm.tours[r2].Sequence
+    cost1 = Chrm.tours[r1].cost
+    cost2 = Chrm.tours[r2].cost
+    if length(tour1) < 3 || length(tour2) < 2
+        return Chrm
+    end
+    k1 = rand(1:length(tour1)-2)
+    city11 = tour1[k1]
+    city12 = tour1[k1+1]
+    city13 = tour1[k1+2]
+
+    nt2 = length(tour2)
+    Candidates = Int[] 
+    if nt2 <= 2  
+        if city11 in Close_nodes[n_nodes+1,:] || city13 in Close_nodes[n_nodes+1,:]
+            push!(Candidates, 1)
+        end
+    elseif nt2 == 4  
+        if city13 in Close_nodes[n_nodes+1,:] || tour2[4] in Close_nodes[city11,:] 
+            push!(Candidates, 1)
+        end
+        if city13 in Close_nodes[tour2[nt2-3],:] || city11 in Close_nodes[n_nodes+1,:] 
+            push!(Candidates, 2)
+        end
+    else
+        if city13 in Close_nodes[n_nodes+1,:] || tour2[4] in Close_nodes[city11,:] 
+            push!(Candidates, 1)
+        end
+        for i=2:nt2-3
+            if tour2[i-1] in Close_nodes[city13,:] || tour2[i+3] in Close_nodes[city11,:]
+                push!(Candidates, i)
+            end
+        end
+        if city13 in Close_nodes[tour2[nt2-3],:] || city11 in Close_nodes[n_nodes+1,:] 
+            push!(Candidates, nt2-2)
+        end
+    end
+    if length(Candidates) == 0
+        return Chrm
+    end
+    Candidates = collect(Set(Candidates))
+    k2 = Candidates[rand(1:length(Candidates))]
+    city21 = tour2[k2]
+    city22 = tour2[k2+1]
+    
+    new_cost1, new_cost2 = Calculate_new_cost_swap_three_with_two_reverse_reverse(tour1, cost1, city11, city12, city13, k1, tour2, cost2, city21, city22,  k2, TT, n_nodes)
+    if new_cost1 >= cost1 || new_cost2 >= cost1
+        return Chrm
+    end
+    tour1[k1] = city22
+    tour1[k1+1] = city21
+    deleteat!(tour1, k1+2)
+    tour2[k2] = city13
+    tour2[k2+1] = city12
+    insert!(tour2, k2+2, city11)
+
+    Chrm.tours[r1].cost = new_cost1
+    Chrm.tours[r2].cost = new_cost2
+    Chrm.genes = Int[]
+    Chrm.fitness = maximum([Chrm.tours[i].cost for i=1:length(Chrm.tours)])
+    for tour in Chrm.tours
+        Chrm.genes = vcat(Chrm.genes, tour.Sequence)
+    end
+    return Chrm
+end
+
 function Improve_chromosome(chrm::Chromosome, TT::Matrix{Float64}, Close_nodes::Matrix{Int}, demands::Vector{Int}, W::Int, n_nodes::Int, roullet::Vector{Int})
-#     Search_methods = [N1, N2, N3, N4, Ni1, Ni2, Ni3, Ni4, Ni5, Ni6, Ni7, N3r, N4sr, N4rs, N4rr, N5, N5r, N6, N6sr, N6rs, N6rr]
-    Search_methods = [N1, Ni1, Ni2, Ni3, Ni4, Ni5]    #Ni4 not great
+#     Search_methods = [N1, N2, N3, N4, Ni1, Ni2, Ni3, Ni4, Ni5, Ni6, Ni7, N3r, N4sr, N4rs, N4rr, N5, N5r, N6, N6sr, N6rs, N6rr, N7, N7rs, N7sr, N7rr]
+#     Search_methods = [N1, Ni1, Ni2, Ni3, Ni4, Ni5]    #Ni4 not great
     Search_methods = [N1, Ni1, Ni5]
     for i=1:100
         r = sample(1:length(Search_methods), weights(roullet))

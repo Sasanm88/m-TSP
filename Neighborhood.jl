@@ -765,7 +765,7 @@ function N6(Chrm::Chromosome, TT::Matrix{Float64}, Close_nodes::Matrix{Int}, dem
     return Chrm
 end
 
-function N6rs(Chrm::Chromosome, TT::Matrix{Float64}, Close_nodes::Matrix{Int}, demands::Vector{Int}, W::Int, n_nodes::Int)   #Swap(2,2)
+function N6rs(Chrm::Chromosome, TT::Matrix{Float64}, Close_nodes::Matrix{Int}, demands::Vector{Int}, W::Int, n_nodes::Int)   #Swap(3,3)
     r1 = argmax([Chrm.tours[i].cost for i=1:length(Chrm.tours)])
     routes = [i for i=1:length(Chrm.tours)]
     r2 = setdiff(routes, r1)[rand(1:length(Chrm.tours)-1)]
@@ -839,7 +839,7 @@ function N6rs(Chrm::Chromosome, TT::Matrix{Float64}, Close_nodes::Matrix{Int}, d
     return Chrm
 end
 
-function N6sr(Chrm::Chromosome, TT::Matrix{Float64}, Close_nodes::Matrix{Int}, demands::Vector{Int}, W::Int, n_nodes::Int)   #Swap(2,2)
+function N6sr(Chrm::Chromosome, TT::Matrix{Float64}, Close_nodes::Matrix{Int}, demands::Vector{Int}, W::Int, n_nodes::Int)   #Swap(3,3)
     r1 = argmax([Chrm.tours[i].cost for i=1:length(Chrm.tours)])
     routes = [i for i=1:length(Chrm.tours)]
     r2 = setdiff(routes, r1)[rand(1:length(Chrm.tours)-1)]
@@ -868,7 +868,7 @@ function N6sr(Chrm::Chromosome, TT::Matrix{Float64}, Close_nodes::Matrix{Int}, d
             push!(Candidates, 1)
         end
         if city21 in Close_nodes[tour1[nt1-3],:] || city23 in Close_nodes[n_nodes+1,:] 
-            push!(Candidates, nt1-1)
+            push!(Candidates, nt1-2)
         end
     else
         if city21 in Close_nodes[n_nodes+1,:] || tour1[4] in Close_nodes[city23,:] 
@@ -1003,28 +1003,28 @@ function N7(Chrm::Chromosome, TT::Matrix{Float64}, Close_nodes::Matrix{Int}, dem
 
     nt2 = length(tour2)
     Candidates = Int[] 
-    if nt2 <= 2  
+    if nt2 == 2  
         if city11 in Close_nodes[n_nodes+1,:] || city13 in Close_nodes[n_nodes+1,:]
             push!(Candidates, 1)
         end
-    elseif nt2 == 4  
-        if city11 in Close_nodes[n_nodes+1,:] || tour2[4] in Close_nodes[city13,:] 
+    elseif nt2 == 3  
+        if city11 in Close_nodes[n_nodes+1,:] || tour2[3] in Close_nodes[city13,:] 
             push!(Candidates, 1)
         end
-        if city11 in Close_nodes[tour2[nt2-3],:] || city13 in Close_nodes[n_nodes+1,:] 
+        if city11 in Close_nodes[tour2[1],:] || city13 in Close_nodes[n_nodes+1,:] 
             push!(Candidates, 2)
         end
     else
-        if city11 in Close_nodes[n_nodes+1,:] || tour2[4] in Close_nodes[city13,:] 
+        if city11 in Close_nodes[n_nodes+1,:] || tour2[3] in Close_nodes[city13,:] 
             push!(Candidates, 1)
         end
-        for i=2:nt2-3
-            if tour2[i-1] in Close_nodes[city11,:] || tour2[i+3] in Close_nodes[city13,:]
+        for i=2:nt2-2
+            if tour2[i-1] in Close_nodes[city11,:] || tour2[i+2] in Close_nodes[city13,:]
                 push!(Candidates, i)
             end
         end
-        if city11 in Close_nodes[tour2[nt2-3],:] || city13 in Close_nodes[n_nodes+1,:] 
-            push!(Candidates, nt2-2)
+        if city11 in Close_nodes[tour2[nt2-2],:] || city13 in Close_nodes[n_nodes+1,:] 
+            push!(Candidates, nt2-1)
         end
     end
     if length(Candidates) == 0
@@ -1074,28 +1074,28 @@ function N7rs(Chrm::Chromosome, TT::Matrix{Float64}, Close_nodes::Matrix{Int}, d
 
     nt2 = length(tour2)
     Candidates = Int[] 
-    if nt2 <= 2  
-        if city11 in Close_nodes[n_nodes+1,:] || city13 in Close_nodes[n_nodes+1,:]
+    if nt2 == 2  
+        if city13 in Close_nodes[n_nodes+1,:] || city11 in Close_nodes[n_nodes+1,:]
             push!(Candidates, 1)
         end
-    elseif nt2 == 4  
-        if city13 in Close_nodes[n_nodes+1,:] || tour2[4] in Close_nodes[city11,:] 
+    elseif nt2 == 3  
+        if city13 in Close_nodes[n_nodes+1,:] || tour2[3] in Close_nodes[city11,:] 
             push!(Candidates, 1)
         end
-        if city13 in Close_nodes[tour2[nt2-3],:] || city11 in Close_nodes[n_nodes+1,:] 
+        if city13 in Close_nodes[tour2[1],:] || city11 in Close_nodes[n_nodes+1,:] 
             push!(Candidates, 2)
         end
     else
-        if city13 in Close_nodes[n_nodes+1,:] || tour2[4] in Close_nodes[city11,:] 
+        if city13 in Close_nodes[n_nodes+1,:] || tour2[3] in Close_nodes[city11,:] 
             push!(Candidates, 1)
         end
-        for i=2:nt2-3
-            if tour2[i-1] in Close_nodes[city13,:] || tour2[i+3] in Close_nodes[city11,:]
+        for i=2:nt2-2
+            if tour2[i-1] in Close_nodes[city13,:] || tour2[i+2] in Close_nodes[city11,:]
                 push!(Candidates, i)
             end
         end
-        if city13 in Close_nodes[tour2[nt2-3],:] || city11 in Close_nodes[n_nodes+1,:] 
-            push!(Candidates, nt2-2)
+        if city13 in Close_nodes[tour2[nt2-2],:] || city11 in Close_nodes[n_nodes+1,:] 
+            push!(Candidates, nt2-1)
         end
     end
     if length(Candidates) == 0
@@ -1145,28 +1145,28 @@ function N7sr(Chrm::Chromosome, TT::Matrix{Float64}, Close_nodes::Matrix{Int}, d
 
     nt2 = length(tour2)
     Candidates = Int[] 
-    if nt2 <= 2  
+    if nt2 == 2  
         if city11 in Close_nodes[n_nodes+1,:] || city13 in Close_nodes[n_nodes+1,:]
             push!(Candidates, 1)
         end
-    elseif nt2 == 4  
-        if city11 in Close_nodes[n_nodes+1,:] || tour2[4] in Close_nodes[city13,:] 
+    elseif nt2 == 3  
+        if city11 in Close_nodes[n_nodes+1,:] || tour2[3] in Close_nodes[city13,:] 
             push!(Candidates, 1)
         end
-        if city11 in Close_nodes[tour2[nt2-3],:] || city13 in Close_nodes[n_nodes+1,:] 
+        if city11 in Close_nodes[tour2[1],:] || city13 in Close_nodes[n_nodes+1,:] 
             push!(Candidates, 2)
         end
     else
-        if city11 in Close_nodes[n_nodes+1,:] || tour2[4] in Close_nodes[city13,:] 
+        if city11 in Close_nodes[n_nodes+1,:] || tour2[3] in Close_nodes[city13,:] 
             push!(Candidates, 1)
         end
-        for i=2:nt2-3
-            if tour2[i-1] in Close_nodes[city11,:] || tour2[i+3] in Close_nodes[city13,:]
+        for i=2:nt2-2
+            if tour2[i-1] in Close_nodes[city11,:] || tour2[i+2] in Close_nodes[city13,:]
                 push!(Candidates, i)
             end
         end
-        if city11 in Close_nodes[tour2[nt2-3],:] || city13 in Close_nodes[n_nodes+1,:] 
-            push!(Candidates, nt2-2)
+        if city11 in Close_nodes[tour2[nt2-2],:] || city13 in Close_nodes[n_nodes+1,:] 
+            push!(Candidates, nt2-1)
         end
     end
     if length(Candidates) == 0
@@ -1216,28 +1216,28 @@ function N7rr(Chrm::Chromosome, TT::Matrix{Float64}, Close_nodes::Matrix{Int}, d
 
     nt2 = length(tour2)
     Candidates = Int[] 
-    if nt2 <= 2  
-        if city11 in Close_nodes[n_nodes+1,:] || city13 in Close_nodes[n_nodes+1,:]
+    if nt2 == 2  
+        if city13 in Close_nodes[n_nodes+1,:] || city11 in Close_nodes[n_nodes+1,:]
             push!(Candidates, 1)
         end
-    elseif nt2 == 4  
-        if city13 in Close_nodes[n_nodes+1,:] || tour2[4] in Close_nodes[city11,:] 
+    elseif nt2 == 3  
+        if city13 in Close_nodes[n_nodes+1,:] || tour2[3] in Close_nodes[city11,:] 
             push!(Candidates, 1)
         end
-        if city13 in Close_nodes[tour2[nt2-3],:] || city11 in Close_nodes[n_nodes+1,:] 
+        if city13 in Close_nodes[tour2[1],:] || city11 in Close_nodes[n_nodes+1,:] 
             push!(Candidates, 2)
         end
     else
-        if city13 in Close_nodes[n_nodes+1,:] || tour2[4] in Close_nodes[city11,:] 
+        if city13 in Close_nodes[n_nodes+1,:] || tour2[3] in Close_nodes[city11,:] 
             push!(Candidates, 1)
         end
-        for i=2:nt2-3
-            if tour2[i-1] in Close_nodes[city13,:] || tour2[i+3] in Close_nodes[city11,:]
+        for i=2:nt2-2
+            if tour2[i-1] in Close_nodes[city13,:] || tour2[i+2] in Close_nodes[city11,:]
                 push!(Candidates, i)
             end
         end
-        if city13 in Close_nodes[tour2[nt2-3],:] || city11 in Close_nodes[n_nodes+1,:] 
-            push!(Candidates, nt2-2)
+        if city13 in Close_nodes[tour2[nt2-2],:] || city11 in Close_nodes[n_nodes+1,:] 
+            push!(Candidates, nt2-1)
         end
     end
     if length(Candidates) == 0
@@ -1270,9 +1270,9 @@ function N7rr(Chrm::Chromosome, TT::Matrix{Float64}, Close_nodes::Matrix{Int}, d
 end
 
 function Improve_chromosome(chrm::Chromosome, TT::Matrix{Float64}, Close_nodes::Matrix{Int}, demands::Vector{Int}, W::Int, n_nodes::Int, roullet::Vector{Int})
-#     Search_methods = [N1, N2, N3, N4, Ni1, Ni2, Ni3, Ni4, Ni5, Ni6, Ni7, N3r, N4sr, N4rs, N4rr, N5, N5r, N6, N6sr, N6rs, N6rr, N7, N7rs, N7sr, N7rr]
-#     Search_methods = [N1, Ni1, Ni2, Ni3, Ni4, Ni5]    #Ni4 not great
-    Search_methods = [N1, Ni1, Ni5]
+    Search_methods = [N1, N2, N3, N4, Ni1, Ni2, Ni3, Ni4, Ni5, Ni6, Ni7, N3r, N4sr, N4rs, N4rr, N5, N5r, N6, N6sr, N6rs, N6rr, N7, N7rs, N7sr, N7rr]
+    Search_methods = [N1, Ni1, Ni2, Ni3, Ni4, Ni5]    #Ni4 not great
+#     Search_methods = [N1, N2, N3, Ni1, Ni2, Ni5, Ni7]
     for i=1:100
         r = sample(1:length(Search_methods), weights(roullet))
 #         r= rand(1:length(Search_methods))
@@ -1281,8 +1281,9 @@ function Improve_chromosome(chrm::Chromosome, TT::Matrix{Float64}, Close_nodes::
         chrm = search(chrm, TT, Close_nodes, demands, W, n_nodes)
         if chrm.fitness < f1
             roullet[r] +=1
+            return chrm, r
         end
     end
-    return chrm
+    return chrm, 0
 end
         

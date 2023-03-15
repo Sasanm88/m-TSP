@@ -321,7 +321,6 @@ function new_crossover(parent1::Chromosome, parent2::Chromosome, T::Matrix{Float
         
         if pr == 1
             r = argmin([tour.cost for tour in P1.tours])
-#             println("tour ", r, " chosen from parent 1")
             if P1.tours[r].cost > max_tour_length
                 max_tour_length = P1.tours[r].cost
                 pushfirst!(c, P1.tours[r])

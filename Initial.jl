@@ -5,11 +5,11 @@ function find_tsp_tour1(Ct::Matrix{Float64})
     dist_mtx = round.(Int, Ct .* scale_factor)
 
     # tsp_tour, tsp_tour_len = Concorde.solve_tsp(dist_mtx)
-    tsp_tour, _ = LKH.solve_tsp(dist_mtx)
+    tsp_tour, tour_length = LKH.solve_tsp(dist_mtx)
 
     @assert tsp_tour[1] == 1
 
-    return tsp_tour[2:length(tsp_tour)].-1
+    return tsp_tour[2:length(tsp_tour)].-1, tour_length/scale_factor
 end
 
 function Change_initial(c::Vector{Int64}, n_nodes::Int64)
@@ -67,6 +67,8 @@ function Diversify(Population::Vector{Chromosome}, TT::Matrix{Float64}, demands:
         end
         obj, trips = SPLIT(TT, demands, K, W, S)
         Population[i] = Chromosome(S, obj, 0.0, trips)
+#         chrm = chunk_mutation_rand(Population[1], T, 5)
+#         Population[i] = chrm
     end
     sort!(Population, by=x -> x.fitness)
 end

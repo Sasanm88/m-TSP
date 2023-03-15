@@ -383,7 +383,7 @@ function Calculate_new_cost_swap_three_with_two(tour1::Vector{Int}, cost1::Float
         end
     end
 
-    if nt2 == 3
+    if nt2 == 2
         new_cost2 = T[1, city11+1] + T[city11+1, city12+1] + T[city12+1, city13+1] + T[city13+1, n_nodes+2] 
     else
         if position2 == 1
@@ -414,7 +414,7 @@ function Calculate_new_cost_swap_three_with_two_reverse_straight(tour1::Vector{I
         end
     end
 
-    if nt2 == 3
+    if nt2 == 2
         new_cost2 = T[1, city13+1] + T[city13+1, city12+1] + T[city12+1, city11+1] + T[city11+1, n_nodes+2] 
     else
         if position2 == 1
@@ -445,7 +445,7 @@ function Calculate_new_cost_swap_three_with_two_straight_reverse(tour1::Vector{I
         end
     end
 
-    if nt2 == 3
+    if nt2 == 2
         new_cost2 = T[1, city11+1] + T[city11+1, city12+1] + T[city12+1, city13+1] + T[city13+1, n_nodes+2] 
     else
         if position2 == 1
@@ -476,7 +476,7 @@ function Calculate_new_cost_swap_three_with_two_reverse_reverse(tour1::Vector{In
         end
     end
 
-    if nt2 == 3
+    if nt2 == 2
         new_cost2 = T[1, city13+1] + T[city13+1, city12+1] + T[city12+1, city11+1] + T[city11+1, n_nodes+2] 
     else
         if position2 == 1

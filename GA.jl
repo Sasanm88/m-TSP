@@ -51,11 +51,13 @@ end
 
 function Reproduce(TT::Matrix{Float64}, parent1::Chromosome, parent2::Chromosome, n_nodes::Int64)
     #     r = sample(1:length(crsovr_chances), Weights(crsovr_chances),1)
-    r = rand(1:2)
+    rs = [5,7]
+    r = rs[rand(1:length(rs))]
+    
 #     r = 7
     if r == 1
         return Crossover_OX1(parent1.genes, parent2.genes, n_nodes), r  #4730
-    elseif r == 7
+    elseif r == 2
         return Crossover_OX2(parent1.genes, parent2.genes, n_nodes), r  #4618
     elseif r == 3
         return Crossover_POS(parent1.genes, parent2.genes, n_nodes), r  #4712
@@ -65,8 +67,14 @@ function Reproduce(TT::Matrix{Float64}, parent1::Chromosome, parent2::Chromosome
         return Crossover_HX(TT, parent1.genes, parent2.genes, n_nodes), r #4244
     elseif r == 6
         return Crossover_PMX(parent1.genes, parent2.genes, n_nodes), r  #4695
-    else
+    elseif r == 7
         return new_crossover(parent1, parent2, TT, n_nodes), r
+    elseif r == 8
+        return tour_crossover(parent1, parent2, TT, n_nodes), r
+    elseif r == 9
+        return tour_crossover2(parent1, parent2, TT, n_nodes), r
+    elseif r == 10
+        return tour_crossover3(parent1, parent2, TT, n_nodes), r
     end
 end
 
@@ -168,7 +176,7 @@ function Generate_new_generation(TT::Matrix{Float64}, Close_nodes::Matrix{Int}, 
     mu, sigma = popsize
     n_nodes = length(Population[1].genes)
 
-    if improve_count % 100 == 0  
+    if improve_count % 200 == 19  
         Diversify(Population, TT, demands, K, W, mu, tsp_tour)
     end
     
@@ -187,15 +195,15 @@ function Generate_new_generation(TT::Matrix{Float64}, Close_nodes::Matrix{Int}, 
 #         counter2[crss] += 1
 #     end
     
-#     if rand() < Mutation_Chance
-#         if rand() < 1.0
-#             chunk_length = Int(ceil(improve_count+1/100))
-#             offspring = chunk_mutation_rand(offspring, T, 5)
-#         else
-#             pm = 0.5*(1 - improve_count/3000)
-#             offspring = new_mutation(offspring, T, pm)
-#         end
-#     end
+    if rand() < Mutation_Chance
+        if rand() < 1.0
+#             prob_mutation(offspring, T, n_nodes, 0.5)
+            offspring = chunk_mutation(offspring, T, 2, n_nodes)
+        else
+            pm = 0.5*(1 - improve_count/3000)
+            offspring = new_mutation(offspring, T, pm)
+        end
+    end
     offspring, imprv = Improve_chromosome(offspring, TT, Close_nodes, demands, W, n_nodes, roullet)
     
 #     if round(offspring.fitness, digits=4) < round(old_best, digits=4)
@@ -208,7 +216,10 @@ function Generate_new_generation(TT::Matrix{Float64}, Close_nodes::Matrix{Int}, 
     sort!(Population, by=x -> x.fitness)
 
     Perform_Survival_Plan(Population, mu, sigma)
-
+    if improve_count % 200 == 0
+        Improve_Population(Population, TT, Close_nodes, demands, W, n_nodes)
+    end
+        
     new_best = Population[1].fitness
     if (old_best - new_best) / new_best > 0.0005
         old_best = new_best

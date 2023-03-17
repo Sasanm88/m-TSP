@@ -1269,10 +1269,89 @@ function N7rr(Chrm::Chromosome, TT::Matrix{Float64}, Close_nodes::Matrix{Int}, d
     return Chrm
 end
 
+function N8(Chrm::Chromosome, TT::Matrix{Float64}, n_nodes::Int)   #divides the tours into two chuncks and attaches them
+    r1 = argmax([Chrm.tours[i].cost for i=1:length(Chrm.tours)])
+    routes = [i for i=1:length(Chrm.tours)]
+    r2 = setdiff(routes, r1)[rand(1:length(Chrm.tours)-1)]
+    
+    tour1 = Chrm.tours[r1].Sequence
+    tour2 = Chrm.tours[r2].Sequence
+    cost1 = Chrm.tours[r1].cost
+    cost2 = Chrm.tours[r2].cost
+    if length(tour1) < 3 || length(tour2) < 3
+        return Chrm
+    end
+    k1 = rand(2:length(tour1)-1)
+    k2 = rand(2:length(tour2)-1)
+    chunk11 = tour1[1:k1]
+    chunk12 = tour1[k1+1:length(tour1)]
+    chunk21 = tour2[1:k2]
+    chunk22 = tour2[k2+1:length(tour2)]
+#     chuck = 1
+#     direction = true
+#     distance = Inf
+#     if T[chunk11[k1]+1, chunk21[1]+1] < distance 
+#         distance = T[chunk11[k1]+1, chunk21[k1]+1]
+#     end
+#     if T[chunk11[k1]+1, chunk21[length(chunk21)]+1] < distance 
+#         distance = T[chunk11[k1]+1, chunk21[length(chunk21)]+1]
+#         direction = false
+#     end
+#     if T[chunk11[k1]+1, chunk22[1]+1] < distance 
+#         distance = T[chunk11[k1]+1, chunk21[length(chunk21)]+1]
+#         direction = false
+#     end
+    t1 = Int[]
+    t2 = Int[]
+    if rand() < 0.5
+        if rand() < 0.5
+            t1 = vcat(chunk11, chunk21)
+        else
+            t1 = vcat(chunk11, reverse(chunk21))
+        end
+        if rand() < 0.5
+            t2 = vcat(chunk12, chunk22)
+        else
+            t2 = vcat(chunk12, reverse(chunk22))
+        end
+    else
+        if rand() < 0.5
+            t1 = vcat(chunk11, chunk22)
+        else
+            t1 = vcat(chunk11, reverse(chunk22))
+        end
+        if rand() < 0.5
+            t2 = vcat(chunk12, chunk21)
+        else
+            t2 = vcat(chunk12, reverse(chunk21))
+        end
+    end
+    new_cost1 = find_tour_length(t1, TT)
+    if new_cost1 > cost1
+        return Chrm
+    end
+    new_cost2 = find_tour_length(t2, TT)
+    if new_cost2 > cost1
+        return Chrm
+    end
+#     println("nice")
+    Chrm.tours[r1].cost = new_cost1
+    Chrm.tours[r2].cost = new_cost2
+    Chrm.tours[r1].Sequence = t1
+    Chrm.tours[r2].Sequence = t2
+    Chrm.genes = Int[]
+    Chrm.fitness = maximum([Chrm.tours[i].cost for i=1:length(Chrm.tours)])
+    for tour in Chrm.tours
+        Chrm.genes = vcat(Chrm.genes, tour.Sequence)
+    end
+    return Chrm
+end
+
 function Improve_chromosome(chrm::Chromosome, TT::Matrix{Float64}, Close_nodes::Matrix{Int}, demands::Vector{Int}, W::Int, n_nodes::Int, roullet::Vector{Int})
-    Search_methods = [N1, N2, N3, N4, Ni1, Ni2, Ni3, Ni4, Ni5, Ni6, Ni7, N3r, N4sr, N4rs, N4rr, N5, N5r, N6, N6sr, N6rs, N6rr, N7, N7rs, N7sr, N7rr]
+#     Search_methods = [N1, N2, N3, N4, Ni1, Ni2, Ni3, Ni4, Ni5, Ni6, Ni7, N3r, N4sr, N4rs, N4rr, N5, N5r, N6, N6sr, N6rs, N6rr, N7, N7rs, N7sr, N7rr]
     Search_methods = [N1, Ni1, Ni2, Ni3, Ni4, Ni5]    #Ni4 not great
-#     Search_methods = [N1, N2, N3, Ni1, Ni2, Ni5, Ni7]
+#     Search_methods = [N1, N2, N3, Ni1, Ni2, Ni5, Ni7, Ni3, Ni4]
+
     for i=1:100
         r = sample(1:length(Search_methods), weights(roullet))
 #         r= rand(1:length(Search_methods))
@@ -1284,6 +1363,23 @@ function Improve_chromosome(chrm::Chromosome, TT::Matrix{Float64}, Close_nodes::
             return chrm, r
         end
     end
+
     return chrm, 0
+end
+
+function Improve_Population(P::Vector{Chromosome}, TT::Matrix{Float64}, Close_nodes::Matrix{Int}, demands::Vector{Int}, W::Int, n_nodes::Int)
+#     Search_methods = [N4, N2, N3, Ni6, Ni7, N3r, N4sr, N4rs, N4rr, N5, N5r, N6, N6sr, N6rs, N6rr, N7, N7rs, N7sr, N7rr]
+    Search_methods = [N1, N2, N3, N4, Ni1, Ni2, Ni3, Ni4, Ni5, Ni6, Ni7, N3r, N4sr, N4rs, N4rr, N5, N5r, N6, N6sr, N6rs, N6rr, N7, N7rs, N7sr, N7rr]
+#     seq = sort(sample(1:length(P), 10, replace = false))[1:5]
+#     seq = [1]
+#     for j in seq
+#         chrm = P[j]
+    for chrm in P
+        for i=1:1000
+            r= rand(1:length(Search_methods))
+            search = Search_methods[r]
+            chrm = search(chrm, TT, Close_nodes, demands, W, n_nodes)
+        end
+    end
 end
         

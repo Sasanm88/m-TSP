@@ -49,9 +49,9 @@ function Select_parents(Population::Vector{Chromosome}, k_tournament::Int64, pop
     return Parent_Selection_TS(Population, k_tournament, popsize), Parent_Selection_TS(Population, k_tournament, popsize)
 end
 
-function Reproduce(TT::Matrix{Float64}, parent1::Chromosome, parent2::Chromosome, n_nodes::Int64)
+function Reproduce(TT::Matrix{Float64}, parent1::Chromosome, parent2::Chromosome, n_nodes::Int64, crossover_functions::Vector{Int})
     #     r = sample(1:length(crsovr_chances), Weights(crsovr_chances),1)
-    rs = [5,7]
+    rs = crossover_functions
     r = rs[rand(1:length(rs))]
     
 #     r = 7
@@ -170,7 +170,7 @@ end
 function Generate_new_generation(TT::Matrix{Float64}, Close_nodes::Matrix{Int}, demands::Vector{Int}, K::Int, W::Int,
         Population::Vector{Chromosome}, popsize::Tuple{Int64,Int64}, k_tournament::Int64, 
         ClosenessT::Matrix{Int64}, Gen_num::Int64, old_best::Float64, improve_count::Int64, Mutation_Chance::Float64,
-        tsp_tour::Vector{Int}, roullet::Vector{Int}, num_nei::Int, counter1::Vector{Int}, counter2::Vector{Int})
+        tsp_tour::Vector{Int}, roullet::Vector{Int}, num_nei::Int, crossover_functions::Vector{Int})
     t1 = time()
 
     mu, sigma = popsize
@@ -184,7 +184,7 @@ function Generate_new_generation(TT::Matrix{Float64}, Close_nodes::Matrix{Int}, 
     psize = length(Population)
     parent1, parent2 = Select_parents(Population, k_tournament, psize)
 
-    child, crss = Reproduce(TT, parent1, parent2, n_nodes)
+    child, crss = Reproduce(TT, parent1, parent2, n_nodes, crossover_functions)
 #     Mutate(child, Mutation_Chance)
     obj, trips = SPLIT(TT, demands, K, W, child)
     offspring = Chromosome(child, obj, 0.0, trips)
@@ -238,7 +238,7 @@ function Generate_new_generation(TT::Matrix{Float64}, Close_nodes::Matrix{Int}, 
 end
 
 function Perform_Genetic_Algorithm(TT::Matrix{Float64}, demands::Vector{Int}, K::Int, W::Int,h::Float64, popsize::Tuple{Int64,Int64},
-    k_tournament::Int64, num_iter::Int64, Mutation_Chance::Float64, num_nei::Int, counter1::Vector{Int}, counter2::Vector{Int})
+    k_tournament::Int64, num_iter::Int64, Mutation_Chance::Float64, num_nei::Int, crossover_functions::Vector{Int})
     n_nodes = size(TT)[1] - 2
     t1 = time()
     ClosenessT= Find_Closeness(TT, h) 
@@ -253,7 +253,7 @@ function Perform_Genetic_Algorithm(TT::Matrix{Float64}, demands::Vector{Int}, K:
 
     @inbounds while improve_count < num_iter
             Gen_num, old_best, Population, improve_count = Generate_new_generation(TT, ClosenessT, demands, K, W,
-        Population, popsize, k_tournament, ClosenessT, Gen_num, old_best, improve_count, Mutation_Chance, tsp_tour, roullet, num_nei, counter1, counter2)
+        Population, popsize, k_tournament, ClosenessT, Gen_num, old_best, improve_count, Mutation_Chance, tsp_tour, roullet, num_nei, crossover_functions)
         count += 1
     end
     t2 = time()

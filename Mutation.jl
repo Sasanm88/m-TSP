@@ -354,3 +354,89 @@ function prob_mutation(chrm::Chromosome, T::Matrix{Float64}, n_nodes::Int, p0::F
     end
     return chrm
 end
+
+
+function put_one_seq_in_one_tour(c::Tour, seq::Vector{Int}, T::Matrix{Float64}, n_nodes::Int)
+    least_increase = Inf
+    best_position = 0
+    tour = c.Sequence
+    nt = length(tour)
+    if nt==0
+        increase = T[1, city+1] + T[city+1, n_nodes+2]
+        best_position = 1
+    else
+        increase = T[1, city+1] + T[city+1, tour[1]+1] - T[1, tour[1]+1]
+        if increase < least_increase
+            least_increase = increase
+            best_position = 1
+        end
+        for j = 2:nt
+            increase = T[tour[j-1]+1, city+1] + T[city+1, tour[j]+1] - T[tour[j-1]+1, tour[j]+1]
+            if increase < least_increase
+                least_increase = increase
+                best_position = j
+            end
+        end
+        increase = T[tour[nt]+1, city+1] + T[city+1, n_nodes+2] - T[tour[nt]+1, n_nodes+2]
+        if increase < least_increase
+            least_increase = increase
+            best_position = nt+1
+        end
+    end
+    insert!(tour, best_position, city)
+    c.cost += least_increase
+end 
+
+function prob_chunk_mutation(chrm::Chromosome, T::Matrix{Float64}, n_nodes::Int, p0::Float64)
+    tour1 = chrm.tours[1]
+    tour2 = chrm.tours[2]
+    t1 = copy(tour1.Sequence)
+    t2 = copy(tour2.Sequence)
+    D = zeros(length(t1),length(t2))
+    for i=1:length(t1)
+        for j=1:length(t2)
+            D[i,j] = T[t1[i]+1, t2[j]+1]
+        end
+    end
+    p1 = zeros(length(t1))
+    p2 = zeros(length(t2))
+    
+    for (i, node) in enumerate(sortperm(minimum(D, dims=2)[:,1]))
+        p1[node] = p0/i
+    end
+    for (i, node) in enumerate(sortperm(minimum(D, dims=1)[1,:]))
+        p2[node] = p0/i
+    end
+    delete1 = Int[]
+    delete2 = Int[]
+    for i=1:length(p1)
+        if rand() < p1[i]
+            push!(delete1, i)
+        end
+    end
+    for i=1:length(p2)
+        if rand() < p2[i]
+            push!(delete2, i)
+        end
+    end
+    if length(delete1) > 0
+        Remove_cities_from_one_tour(tour1, delete1, T, n_nodes)
+        deleteat!(tour1.Sequence, delete1)
+    end
+    if length(delete2) > 0
+        Remove_cities_from_one_tour(tour2, delete2, T, n_nodes)
+        deleteat!(tour2.Sequence, delete2)
+    end
+    for i in delete1
+        put_one_city_in_one_tour(tour2, t1[i], T::Matrix{Float64}, n_nodes::Int)
+    end
+    for i in delete2
+        put_one_city_in_one_tour(tour1, t2[i], T::Matrix{Float64}, n_nodes::Int)
+    end
+    chrm.genes = Int[]
+    chrm.fitness = maximum([chrm.tours[i].cost for i=1:length(chrm.tours)])
+    for tour in chrm.tours
+        chrm.genes = vcat(chrm.genes, tour.Sequence)
+    end
+    return chrm
+end

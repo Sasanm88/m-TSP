@@ -63,3 +63,41 @@ function Read_TSPLIB_instance(sample_name::Symbol, tspeed::Int)
     T = Calculate_distance_matrices_TSPLIB(tspeed, tsp.nodes)
     return T
 end
+
+function read_data(dir_name::String, sample_name::String)
+    filename = joinpath(@__DIR__, "data/$(dir_name)/$(sample_name).txt")
+    f = open(filename, "r")
+    lines = readlines(f)
+    m = parse(Int,split(lines[1]," ")[3])
+    n_nodes = length(lines)-2
+    if length(split(lines[2],"\t")) == 3
+        depot = parse.(Int, split(lines[2],"\t"))[2:3]
+    else
+        depot = parse.(Int, split(lines[2]," "))[2:3]
+    end
+    customers = zeros(2, n_nodes)
+    for i=1:n_nodes
+        if length(split(lines[2+i],"\t")) == 3
+            customers[:,i] = parse.(Int, split(lines[2+i],"\t"))[2:3]
+        else
+            customers[:,i] = parse.(Int, split(lines[2+i]," "))[2:3]
+        end
+    end
+    T = Matrix{Float64}(undef, n_nodes + 2, n_nodes + 2)
+    T[1, 1] = 0.0
+    T[n_nodes+2, n_nodes+2] = 0.0
+    T[1, n_nodes+2] = 0.0
+    T[n_nodes+2, 1] = 0.0
+    @inbounds for i in 1:n_nodes
+        T[1, i+1] = euclidean(depot, customers[:, i])
+        T[i+1, 1] = T[1, i+1]
+        T[n_nodes+2, i+1] = T[1, i+1]
+        T[i+1, n_nodes+2] = T[1, i+1]
+        @inbounds for j in 1:n_nodes
+            T[i+1, j+1] = euclidean(customers[:, i], customers[:, j])
+            T[j+1, i+1] = T[i+1, j+1]
+        end
+    end
+
+    return m, T, depot, customers
+end

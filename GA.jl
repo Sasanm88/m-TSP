@@ -185,9 +185,11 @@ function Generate_new_generation(TT::Matrix{Float64}, Close_nodes::Matrix{Int}, 
     parent1, parent2 = Select_parents(Population, k_tournament, psize)
 
     child, crss = Reproduce(TT, parent1, parent2, n_nodes, crossover_functions)
-#     Mutate(child, Mutation_Chance)
     obj, trips = SPLIT(TT, demands, K, W, child)
     offspring = Chromosome(child, obj, 0.0, trips)
+
+#     Mutate(child, Mutation_Chance)
+    
     
 #     if round(obj,digits=4) < round(old_best, digits=4)
 # #         println("Improvement in generation ", Gen_num, " by crossover: " , crss,"  ", round(old_best, digits=4) ," to ", round(obj,digits=4))
@@ -198,7 +200,8 @@ function Generate_new_generation(TT::Matrix{Float64}, Close_nodes::Matrix{Int}, 
     if rand() < Mutation_Chance
         if rand() < 1.0
 #             prob_mutation(offspring, T, n_nodes, 0.5)
-            offspring = chunk_mutation(offspring, T, 2, n_nodes)
+            chunk_length = rand(2:max(5, minimum([length(tour.Sequence) for tour in offspring.tours])))
+            offspring = chunk_mutation(offspring, T, chunk_length, n_nodes)
         else
             pm = 0.5*(1 - improve_count/3000)
             offspring = new_mutation(offspring, T, pm)

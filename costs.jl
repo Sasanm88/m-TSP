@@ -516,6 +516,27 @@ function Calculate_new_cost_exchange_one(tour1::Vector{Int}, cost::Float64, city
     return cost
 end
 
+function Calculate_new_cost_cross_straight_straight(tour1::Vector{Int}, cost1::Float64, tour2::Vector{Int}, cost2::Float64, k11::Int, k12::Int, k21::Int, k22::Int, T::Matrix{Float64}, n_nodes::Int)
+    nt1 = length(tour1)
+    nt2 = length(tour2)
+    alpha2 = tour2[k21:k22]
+    c1 = sum(T[tour1[i]+1, tour1[i+1]+1] for i=k11:k12-1)
+    c2 = sum(T[tour2[i]+1, tour2[i+1]+1] for i=k21:k22-1)
+    t1 = copy(tour1)
+    t2 = copy(tour2)
+    pushfirst!(t1, 0)
+    push!(t1, n_nodes+1)
+    pushfirst!(t2, 0)
+    push!(t2, n_nodes+1)
+    k11 += 1
+    k12 += 1
+    k21 += 1
+    k22 += 1
+        cost1 = cost1 - T[t1[k11-1]+1, t1[k11]+1] - c1 - T[t1[k12]+1, t1[k12+1]+1] + T[t1[k11-1]+1, t2[k21]+1] + c2 + T[t2[k22]+1, t1[k12+1]+1]
+        cost2 = cost2 - T[t2[k12-1]+1, t2[k12]+1] - c2 - T[t2[k22]+1, t2[k22+1]+1] + T[t2[k12-1]+1, t1[k11]+1] + c1 + T[t1[k12]+1, tour2[k22+1]+1]
+    return cost1, cost2
+end
+
 function Calculate_new_cost_exchange_two(tour::Vector{Int}, cost::Float64, city1::Int, position1::Int, city2::Int,
     position2::Int, T::Matrix{Float64}, n_nodes::Int)
     nt = length(tour)

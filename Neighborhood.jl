@@ -1269,6 +1269,78 @@ function N7rr(Chrm::Chromosome, TT::Matrix{Float64}, Close_nodes::Matrix{Int}, d
     return Chrm
 end
 
+function N_cross(Chrm::Chromosome, T::Matrix{Float64}, Close_nodes::Matrix{Int}, demands::Vector{Int}, W::Int, n_nodes::Int)   #Cross Exchange
+    r1 = argmax([Chrm.tours[i].cost for i=1:length(Chrm.tours)])
+    routes = [i for i=1:length(Chrm.tours)]
+    r2 = setdiff(routes, r1)[rand(1:length(Chrm.tours)-1)]
+    t1 = Chrm.tours[r1].Sequence
+    t2 = Chrm.tours[r2].Sequence
+    cost1 = Chrm.tours[r1].cost
+    cost2 = Chrm.tours[r2].cost
+    if length(t1) < 6 || length(t2) < 6
+        return Chrm
+    end
+    tau = min(8, Int(round(min(length(t1), length(t2))/2)))
+    k11 = rand(1:length(t1)-tau)
+    l1 = rand(1:tau)
+    k12 = k11 + l1
+
+    Candidates = Int[] 
+    for i=1:length(t2)-tau
+        if k11 == 1  
+            if t2[i] in Close_nodes[n_nodes+1,:] 
+                push!(Candidates, 1)
+            end
+        else
+            if t2[i] in Close_nodes[t1[k11-1],:]
+                push!(Candidates, i) 
+            end
+        end
+    end
+
+    if length(Candidates) == 0
+        return Chrm
+    end
+    Candidates = collect(Set(Candidates))
+    k21 = Candidates[rand(1:length(Candidates))]
+    l2 = rand(1:tau)
+    k22 = k21 + l2
+    
+    new_cost1, new_cost2, straight1, straight2 = Calculate_new_cost_cross(t1, cost1, t2, cost2, k11, k12, k21, k22, T, n_nodes)
+    if new_cost1 >= cost1 || new_cost2 >= cost1
+        return Chrm
+    end
+
+    if straight2
+        alpha1 = copy(t1[k11:k12])
+    else
+        alpha1 = reverse(copy(t1[k11:k12]))
+    end
+    if straight1
+        alpha2 = copy(t2[k21:k22])
+    else
+        alpha2 = reverse(copy(t2[k21:k22]))
+    end
+    deleteat!(t1, [i for i=k11:k12])
+    for i=1:k22-k21+1
+        insert!(t1, i+k11-1, alpha2[i])
+    end
+
+    deleteat!(t2, [i for i=k21:k22])
+    for i=1:k12-k11+1
+        insert!(t2, i+k21-1, alpha1[i])
+    end
+
+    Chrm.tours[r1].cost = new_cost1
+    Chrm.tours[r2].cost = new_cost2
+    Chrm.genes = Int[]
+    Chrm.fitness = maximum([Chrm.tours[i].cost for i=1:length(Chrm.tours)])
+    for tour in Chrm.tours
+        Chrm.genes = vcat(Chrm.genes, tour.Sequence)
+    end
+    return Chrm
+end
+
 function N8(Chrm::Chromosome, TT::Matrix{Float64}, n_nodes::Int)   #divides the tours into two chuncks and attaches them
     r1 = argmax([Chrm.tours[i].cost for i=1:length(Chrm.tours)])
     routes = [i for i=1:length(Chrm.tours)]
@@ -1369,17 +1441,20 @@ end
 
 function Improve_Population(P::Vector{Chromosome}, TT::Matrix{Float64}, Close_nodes::Matrix{Int}, demands::Vector{Int}, W::Int, n_nodes::Int)
 #     Search_methods = [N4, N2, N3, Ni6, Ni7, N3r, N4sr, N4rs, N4rr, N5, N5r, N6, N6sr, N6rs, N6rr, N7, N7rs, N7sr, N7rr]
-    Search_methods = [N1, N2, N3, N4, Ni1, Ni2, Ni3, Ni4, Ni5, Ni6, Ni7, N3r, N4sr, N4rs, N4rr, N5, N5r, N6, N6sr, N6rs, N6rr, N7, N7rs, N7sr, N7rr]
+    Search_methods = [N1, N2, N3, N4, Ni1, Ni2, Ni3, Ni4, Ni5, Ni6, Ni7, N3r, N4sr, N4rs, N4rr, N5, N5r, N6, N6sr, N6rs, N6rr, N7, N7rs, N7sr, N7rr, N_cross]
 #     seq = sort(sample(1:length(P), 10, replace = false))[1:5]
 #     seq = [1]
 #     for j in seq
 #         chrm = P[j]
-    for chrm in P
-        for i=1:1000
-            r= rand(1:length(Search_methods))
-            search = Search_methods[r]
-            chrm = search(chrm, TT, Close_nodes, demands, W, n_nodes)
-        end
-    end
+#     for chrm in P[1:10]
+#         for i=1:5000
+#             r= rand(1:length(Search_methods))
+#             search = Search_methods[r]
+#             chrm = search(chrm, TT, Close_nodes, demands, W, n_nodes)
+#         end
+
+#     end
+    chrm = P[1]
+    P[1] = N_cross_extensive(chrm, T, n_nodes, 5)
 end
         

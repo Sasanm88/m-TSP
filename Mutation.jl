@@ -440,3 +440,55 @@ function prob_chunk_mutation(chrm::Chromosome, T::Matrix{Float64}, n_nodes::Int,
     end
     return chrm
 end
+
+function mutation_cross(Chrm::Chromosome, T::Matrix{Float64}, n_nodes::Int)   #Cross Exchange
+    r1 = argmax([Chrm.tours[i].cost for i=1:length(Chrm.tours)])
+    routes = [i for i=1:length(Chrm.tours)]
+    r2 = setdiff(routes, r1)[rand(1:length(Chrm.tours)-1)]
+    t1 = Chrm.tours[r1].Sequence
+    t2 = Chrm.tours[r2].Sequence
+    cost1 = Chrm.tours[r1].cost
+    cost2 = Chrm.tours[r2].cost
+    if length(t1) < 6 || length(t2) < 6
+        return Chrm
+    end
+    tau = min(8, Int(round(min(length(t1), length(t2))/2)))
+    k11 = rand(1:length(t1)-tau)
+    l1 = rand(1:tau)
+    k12 = k11 + l1
+
+    k21 = rand(1:length(t2)-tau)
+    l2 = rand(1:tau)
+    k22 = k21 + l2
+    
+    new_cost1, new_cost2, straight1, straight2 = Calculate_new_cost_cross(t1, cost1, t2, cost2, k11, k12, k21, k22, T, n_nodes)
+
+    if straight2
+        alpha1 = copy(t1[k11:k12])
+    else
+        alpha1 = reverse(copy(t1[k11:k12]))
+    end
+    if straight1
+        alpha2 = copy(t2[k21:k22])
+    else
+        alpha2 = reverse(copy(t2[k21:k22]))
+    end
+    deleteat!(t1, [i for i=k11:k12])
+    for i=1:k22-k21+1
+        insert!(t1, i+k11-1, alpha2[i])
+    end
+
+    deleteat!(t2, [i for i=k21:k22])
+    for i=1:k12-k11+1
+        insert!(t2, i+k21-1, alpha1[i])
+    end
+
+    Chrm.tours[r1].cost = new_cost1
+    Chrm.tours[r2].cost = new_cost2
+    Chrm.genes = Int[]
+    Chrm.fitness = maximum([Chrm.tours[i].cost for i=1:length(Chrm.tours)])
+    for tour in Chrm.tours
+        Chrm.genes = vcat(Chrm.genes, tour.Sequence)
+    end
+    return Chrm
+end

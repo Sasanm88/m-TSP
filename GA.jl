@@ -199,29 +199,22 @@ function Generate_new_generation(TT::Matrix{Float64}, Close_nodes::Matrix{Int}, 
     
     if rand() < Mutation_Chance
         if rand() < 1.0
-#             prob_mutation(offspring, T, n_nodes, 0.5)
-            chunk_length = rand(2:max(5, minimum([length(tour.Sequence) for tour in offspring.tours])))
-            offspring = chunk_mutation(offspring, T, chunk_length, n_nodes)
+#             offspring = mutation_cross(offspring, T, n_nodes)
         else
             pm = 0.5*(1 - improve_count/3000)
             offspring = new_mutation(offspring, T, pm)
         end
     end
-    offspring, imprv = Improve_chromosome(offspring, TT, Close_nodes, demands, W, n_nodes, roullet)
-    
-#     if round(offspring.fitness, digits=4) < round(old_best, digits=4)
-# #         println("Improvement in generation ", Gen_num, " by neighborhoods: ", imprv ,"  ", round(old_best, digits=4) ," to ", round(offspring.fitness, digits=4))
-#         old_best = offspring.fitness
-#         counter1[imprv] += 1
-#     end
+#     offspring, imprv = Improve_chromosome(offspring, TT, Close_nodes, demands, W, n_nodes, roullet)
+   
     
     push!(Population, offspring)
     sort!(Population, by=x -> x.fitness)
 
     Perform_Survival_Plan(Population, mu, sigma)
-    if improve_count % 200 == 0
-        Improve_Population(Population, TT, Close_nodes, demands, W, n_nodes)
-    end
+#     if improve_count % 100 == 0
+#         Improve_Population(Population, TT, Close_nodes, demands, W, n_nodes)
+#     end
         
     new_best = Population[1].fitness
     if (old_best - new_best) / new_best > 0.0005
@@ -233,9 +226,9 @@ function Generate_new_generation(TT::Matrix{Float64}, Close_nodes::Matrix{Int}, 
     t2 = time()
     
 
-#     if Gen_num % 100 == 0
-#         println("Generation ", Gen_num, " the best objective is: ", old_best)
-#     end
+    if Gen_num % 100 == 0
+        println("Generation ", Gen_num, " the best objective is: ", old_best)
+    end
     Gen_num += 1
     return Gen_num, old_best, Population, improve_count
 end

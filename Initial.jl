@@ -5,11 +5,11 @@ function find_tsp_tour1(Ct::Matrix{Float64})
     dist_mtx = round.(Int, Ct .* scale_factor)
 
     # tsp_tour, tsp_tour_len = Concorde.solve_tsp(dist_mtx)
-    tsp_tour, _ = LKH.solve_tsp(dist_mtx)
+    tsp_tour, tour_length = LKH.solve_tsp(dist_mtx)
 
     @assert tsp_tour[1] == 1
 
-    return tsp_tour[2:length(tsp_tour)].-1
+    return tsp_tour[2:length(tsp_tour)].-1, tour_length/scale_factor
 end
 
 function Change_initial(c::Vector{Int64}, n_nodes::Int64)
@@ -57,16 +57,18 @@ end
 
 function Diversify(Population::Vector{Chromosome}, TT::Matrix{Float64}, demands::Vector{Int}, K::Int, W::Int, mu::Int, tsp_tour::Vector{Int})
     n_nodes = length(demands)
-    n_best = Int(round(0.3 * mu)) 
+    n_best = Int(round(0.15 * mu)) 
     for i=n_best+1:length(Population)
         S = Int[]
-        if rand() < 0.0
-            S = Change_initial(tsp_tour, n_nodes)
+        if rand() < 0.5
+            chrm = deepcopy(Population[1])
+            ch = N8(chrm, TT, n_nodes)
+            Population[i] = ch
         else
             S = Creat_Random_Cromosome(n_nodes)
+            obj, trips = SPLIT(TT, demands, K, W, S)
+            Population[i] = Chromosome(S, obj, 0.0, trips)
         end
-        obj, trips = SPLIT(TT, demands, K, W, S)
-        Population[i] = Chromosome(S, obj, 0.0, trips)
     end
     sort!(Population, by=x -> x.fitness)
 end

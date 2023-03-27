@@ -383,7 +383,7 @@ function Calculate_new_cost_swap_three_with_two(tour1::Vector{Int}, cost1::Float
         end
     end
 
-    if nt2 == 3
+    if nt2 == 2
         new_cost2 = T[1, city11+1] + T[city11+1, city12+1] + T[city12+1, city13+1] + T[city13+1, n_nodes+2] 
     else
         if position2 == 1
@@ -414,7 +414,7 @@ function Calculate_new_cost_swap_three_with_two_reverse_straight(tour1::Vector{I
         end
     end
 
-    if nt2 == 3
+    if nt2 == 2
         new_cost2 = T[1, city13+1] + T[city13+1, city12+1] + T[city12+1, city11+1] + T[city11+1, n_nodes+2] 
     else
         if position2 == 1
@@ -445,7 +445,7 @@ function Calculate_new_cost_swap_three_with_two_straight_reverse(tour1::Vector{I
         end
     end
 
-    if nt2 == 3
+    if nt2 == 2
         new_cost2 = T[1, city11+1] + T[city11+1, city12+1] + T[city12+1, city13+1] + T[city13+1, n_nodes+2] 
     else
         if position2 == 1
@@ -476,7 +476,7 @@ function Calculate_new_cost_swap_three_with_two_reverse_reverse(tour1::Vector{In
         end
     end
 
-    if nt2 == 3
+    if nt2 == 2
         new_cost2 = T[1, city13+1] + T[city13+1, city12+1] + T[city12+1, city11+1] + T[city11+1, n_nodes+2] 
     else
         if position2 == 1
@@ -514,6 +514,83 @@ function Calculate_new_cost_exchange_one(tour1::Vector{Int}, cost::Float64, city
         cost = cost + T[tour[position2-1]+1, city+1] + T[city+1, tour[position2]+1] - T[tour[position2-1]+1, tour[position2]+1]
     end
     return cost
+end
+
+function Calculate_new_cost_cross(tour1::Vector{Int}, cost1::Float64, tour2::Vector{Int}, cost2::Float64, k11::Int, k12::Int, k21::Int, k22::Int, T::Matrix{Float64}, n_nodes::Int)
+    c1 = sum(T[tour1[i]+1, tour1[i+1]+1] for i=k11:k12-1)
+    c2 = sum(T[tour2[i]+1, tour2[i+1]+1] for i=k21:k22-1)
+    t1 = copy(tour1)
+    t2 = copy(tour2)
+    pushfirst!(t1, 0)
+    push!(t1, n_nodes+1)
+    pushfirst!(t2, 0)
+    push!(t2, n_nodes+1)
+    k11 += 1
+    k12 += 1
+    k21 += 1
+    k22 += 1
+    cost11 = cost1 - T[t1[k11-1]+1, t1[k11]+1] - c1 - T[t1[k12]+1, t1[k12+1]+1] + T[t1[k11-1]+1, t2[k21]+1] + c2 + T[t2[k22]+1, t1[k12+1]+1]
+    cost12 = cost1 - T[t1[k11-1]+1, t1[k11]+1] - c1 - T[t1[k12]+1, t1[k12+1]+1] + T[t1[k11-1]+1, t2[k22]+1] + c2 + T[t2[k21]+1, t1[k12+1]+1]
+    cost21 = cost2 - T[t2[k21-1]+1, t2[k21]+1] - c2 - T[t2[k22]+1, t2[k22+1]+1] + T[t2[k21-1]+1, t1[k11]+1] + c1 + T[t1[k12]+1, t2[k22+1]+1]
+    cost22 = cost2 - T[t2[k21-1]+1, t2[k21]+1] - c2 - T[t2[k22]+1, t2[k22+1]+1] + T[t2[k21-1]+1, t1[k12]+1] + c1 + T[t1[k11]+1, t2[k22+1]+1]
+    if cost11 < cost12
+        if cost21 < cost22
+            return cost11, cost21, true, true
+        else
+            return cost11, cost22, true, false
+        end
+    else
+        if cost21 < cost22
+            return cost12, cost21, false, true
+        else
+            return cost12, cost22, false, false
+        end
+    end
+end
+
+function Calculate_new_cost_cross_upgraded(tour1::Vector{Int}, cost1::Float64, tour2::Vector{Int}, cost2::Float64, k11::Int, k12::Int, k21::Int, k22::Int, k13::Int, k23::Int, T::Matrix{Float64}, n_nodes::Int)
+    c1 = sum(T[tour1[i]+1, tour1[i+1]+1] for i=k11:k12-1)
+    c2 = sum(T[tour2[i]+1, tour2[i+1]+1] for i=k21:k22-1)
+    t1 = copy(tour1)
+    t2 = copy(tour2)
+    pushfirst!(t1, 0)
+    push!(t1, n_nodes+1)
+    pushfirst!(t2, 0)
+    push!(t2, n_nodes+1)
+    k11 += 1
+    k12 += 1
+    k21 += 1
+    k22 += 1
+    k13 += 1
+    k23 += 1
+    if k13 == k11
+        cost11 = cost1 - T[t1[k11-1]+1, t1[k11]+1] - c1 - T[t1[k12]+1, t1[k12+1]+1] + T[t1[k11-1]+1, t2[k21]+1] + c2 + T[t2[k22]+1, t1[k12+1]+1]
+        cost12 = cost1 - T[t1[k11-1]+1, t1[k11]+1] - c1 - T[t1[k12]+1, t1[k12+1]+1] + T[t1[k11-1]+1, t2[k22]+1] + c2 + T[t2[k21]+1, t1[k12+1]+1]
+    else
+        cost11 = cost1 - T[t1[k11-1]+1, t1[k11]+1] - c1 - T[t1[k12]+1, t1[k12+1]+1] + T[t1[k11-1]+1, t1[k12+1]+1] + T[t1[k13-1]+1, t2[k21]+1] + c2 + T[t2[k22]+1, t1[k13]+1] - T[t1[k13-1]+1, t1[k13]+1]
+        cost12 = cost1 - T[t1[k11-1]+1, t1[k11]+1] - c1 - T[t1[k12]+1, t1[k12+1]+1] + T[t1[k11-1]+1, t1[k12+1]+1] + T[t1[k13-1]+1, t2[k22]+1] + c2 + T[t2[k21]+1, t1[k13]+1] - T[t1[k13-1]+1, t1[k13]+1]
+    end
+
+    if k23 == k21
+        cost21 = cost2 - T[t2[k21-1]+1, t2[k21]+1] - c2 - T[t2[k22]+1, t2[k22+1]+1] + T[t2[k21-1]+1, t1[k11]+1] + c1 + T[t1[k12]+1, t2[k22+1]+1]
+        cost22 = cost2 - T[t2[k21-1]+1, t2[k21]+1] - c2 - T[t2[k22]+1, t2[k22+1]+1] + T[t2[k21-1]+1, t1[k12]+1] + c1 + T[t1[k11]+1, t2[k22+1]+1]
+    else
+        cost21 = cost2 - T[t2[k21-1]+1, t2[k21]+1] - c2 - T[t2[k22]+1, t2[k22+1]+1] + T[t2[k21-1]+1, t2[k22+1]+1] + T[t2[k23-1]+1, t1[k11]+1] + c1 + T[t1[k12]+1, t2[k23]+1] - T[t2[k23-1]+1, t2[k23]+1]
+        cost22 = cost2 - T[t2[k21-1]+1, t2[k21]+1] - c2 - T[t2[k22]+1, t2[k22+1]+1] + T[t2[k21-1]+1, t2[k22+1]+1] + T[t2[k23-1]+1, t1[k12]+1] + c1 + T[t1[k11]+1, t2[k23]+1] - T[t2[k23-1]+1, t2[k23]+1]
+    end
+    if cost11 < cost12
+        if cost21 < cost22
+            return cost11, cost21, true, true
+        else
+            return cost11, cost22, true, false
+        end
+    else
+        if cost21 < cost22
+            return cost12, cost21, false, true
+        else
+            return cost12, cost22, false, false
+        end
+    end
 end
 
 function Calculate_new_cost_exchange_two(tour::Vector{Int}, cost::Float64, city1::Int, position1::Int, city2::Int,

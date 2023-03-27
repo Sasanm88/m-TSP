@@ -49,24 +49,32 @@ function Select_parents(Population::Vector{Chromosome}, k_tournament::Int64, pop
     return Parent_Selection_TS(Population, k_tournament, popsize), Parent_Selection_TS(Population, k_tournament, popsize)
 end
 
-function Reproduce(TT::Matrix{Float64}, parent1::Chromosome, parent2::Chromosome, n_nodes::Int64)
+function Reproduce(TT::Matrix{Float64}, parent1::Chromosome, parent2::Chromosome, n_nodes::Int64, crossover_functions::Vector{Int})
     #     r = sample(1:length(crsovr_chances), Weights(crsovr_chances),1)
-    r = rand(1:2)
-#     r = 1
-    if r == 10
-        return Crossover_OX1(parent1.genes, parent2.genes, n_nodes)  #4730
-    elseif r == 20
-        return Crossover_OX2(parent1.genes, parent2.genes, n_nodes)  #4618
-    elseif r == 30
-        return Crossover_POS(parent1.genes, parent2.genes, n_nodes)  #4712
-    elseif r == 40
-        return Crossover_CX(parent1.genes, parent2.genes, n_nodes)  #4706
-    elseif r == 1
-        return Crossover_HX(TT, parent1.genes, parent2.genes, n_nodes) #4244
-    elseif r==6
-        return Crossover_PMX(parent1.genes, parent2.genes, n_nodes)  #4695
-    else
-        return new_crossover(parent1, parent2, TT, n_nodes)
+    rs = crossover_functions
+    r = rs[rand(1:length(rs))]
+    
+#     r = 7
+    if r == 1
+        return Crossover_OX1(parent1.genes, parent2.genes, n_nodes), r  #4730
+    elseif r == 2
+        return Crossover_OX2(parent1.genes, parent2.genes, n_nodes), r  #4618
+    elseif r == 3
+        return Crossover_POS(parent1.genes, parent2.genes, n_nodes), r  #4712
+    elseif r == 4
+        return Crossover_CX(parent1.genes, parent2.genes, n_nodes), r  #4706
+    elseif r == 5
+        return Crossover_HX(TT, parent1.genes, parent2.genes, n_nodes), r #4244
+    elseif r == 6
+        return Crossover_PMX(parent1.genes, parent2.genes, n_nodes), r  #4695
+    elseif r == 7
+        return new_crossover(parent1, parent2, TT, n_nodes), r
+    elseif r == 8
+        return tour_crossover(parent1, parent2, TT, n_nodes), r
+    elseif r == 9
+        return tour_crossover2(parent1, parent2, TT, n_nodes), r
+    elseif r == 10
+        return tour_crossover3(parent1, parent2, TT, n_nodes), r
     end
 end
 
@@ -162,13 +170,13 @@ end
 function Generate_new_generation(TT::Matrix{Float64}, Close_nodes::Matrix{Int}, demands::Vector{Int}, K::Int, W::Int,
         Population::Vector{Chromosome}, popsize::Tuple{Int64,Int64}, k_tournament::Int64, 
         ClosenessT::Matrix{Int64}, Gen_num::Int64, old_best::Float64, improve_count::Int64, Mutation_Chance::Float64,
-        tsp_tour::Vector{Int}, roullet::Vector{Int}, num_nei::Int)
+        tsp_tour::Vector{Int}, roullet::Vector{Int}, num_nei::Int, crossover_functions::Vector{Int})
     t1 = time()
 
     mu, sigma = popsize
     n_nodes = length(Population[1].genes)
 
-    if improve_count % 100 == 0  
+    if improve_count % 200 == 19  
         Diversify(Population, TT, demands, K, W, mu, tsp_tour)
     end
     
@@ -176,18 +184,38 @@ function Generate_new_generation(TT::Matrix{Float64}, Close_nodes::Matrix{Int}, 
     psize = length(Population)
     parent1, parent2 = Select_parents(Population, k_tournament, psize)
 
-    child = Reproduce(TT, parent1, parent2, n_nodes)
-    Mutate(child, Mutation_Chance)
+    child, crss = Reproduce(TT, parent1, parent2, n_nodes, crossover_functions)
     obj, trips = SPLIT(TT, demands, K, W, child)
     offspring = Chromosome(child, obj, 0.0, trips)
+
+#     Mutate(child, Mutation_Chance)
     
-    offspring = Improve_chromosome(offspring, TT, Close_nodes, demands, W, n_nodes, roullet)
+    
+#     if round(obj,digits=4) < round(old_best, digits=4)
+# #         println("Improvement in generation ", Gen_num, " by crossover: " , crss,"  ", round(old_best, digits=4) ," to ", round(obj,digits=4))
+#         old_best = obj
+#         counter2[crss] += 1
+#     end
+    
+    if rand() < Mutation_Chance
+        if rand() < 1.0
+#             offspring = mutation_cross(offspring, T, n_nodes)
+        else
+            pm = 0.5*(1 - improve_count/3000)
+            offspring = new_mutation(offspring, T, pm)
+        end
+    end
+#     offspring, imprv = Improve_chromosome(offspring, TT, Close_nodes, demands, W, n_nodes, roullet)
+   
     
     push!(Population, offspring)
     sort!(Population, by=x -> x.fitness)
 
     Perform_Survival_Plan(Population, mu, sigma)
-
+#     if improve_count % 100 == 0
+#         Improve_Population(Population, TT, Close_nodes, demands, W, n_nodes)
+#     end
+        
     new_best = Population[1].fitness
     if (old_best - new_best) / new_best > 0.0005
         old_best = new_best
@@ -198,15 +226,15 @@ function Generate_new_generation(TT::Matrix{Float64}, Close_nodes::Matrix{Int}, 
     t2 = time()
     
 
-    if Gen_num % 10000 == 0
-#         println("Generation ", Gen_num, " the best objective is: ", old_best)
+    if Gen_num % 100 == 0
+        println("Generation ", Gen_num, " the best objective is: ", old_best)
     end
     Gen_num += 1
     return Gen_num, old_best, Population, improve_count
 end
 
 function Perform_Genetic_Algorithm(TT::Matrix{Float64}, demands::Vector{Int}, K::Int, W::Int,h::Float64, popsize::Tuple{Int64,Int64},
-    k_tournament::Int64, num_iter::Int64, Mutation_Chance::Float64, num_nei::Int)
+    k_tournament::Int64, num_iter::Int64, Mutation_Chance::Float64, num_nei::Int, crossover_functions::Vector{Int})
     n_nodes = size(TT)[1] - 2
     t1 = time()
     ClosenessT= Find_Closeness(TT, h) 
@@ -214,14 +242,14 @@ function Perform_Genetic_Algorithm(TT::Matrix{Float64}, demands::Vector{Int}, K:
     improve_count = 0
     Gen_num = 0
     old_best = 0.0
-    roullet = ones(Int, 3) * 100
-    tsp_tour = find_tsp_tour1(TT[1:n_nodes+1, 1:n_nodes+1])
+    roullet = ones(Int, 6) * 100
+    tsp_tour, _ = find_tsp_tour1(TT[1:n_nodes+1, 1:n_nodes+1])
     Population, old_best = Generate_initial_population(TT, demands, K, W, mu, tsp_tour) 
     count = 0
 
     @inbounds while improve_count < num_iter
             Gen_num, old_best, Population, improve_count = Generate_new_generation(TT, ClosenessT, demands, K, W,
-        Population, popsize, k_tournament, ClosenessT, Gen_num, old_best, improve_count, Mutation_Chance, tsp_tour, roullet, num_nei)
+        Population, popsize, k_tournament, ClosenessT, Gen_num, old_best, improve_count, Mutation_Chance, tsp_tour, roullet, num_nei, crossover_functions)
         count += 1
     end
     t2 = time()
@@ -229,8 +257,8 @@ function Perform_Genetic_Algorithm(TT::Matrix{Float64}, demands::Vector{Int}, K:
 #     println("The best objective achieved in ", Gen_num, " generations is: ", Population[1].fitness, " and it took ", t2 - t1, " seconds.")
 #     println("And the best route is: ")
 #     best_route(Population)
-    println(roullet)
-    return Population
+#     println(roullet)
+    return Population, roullet
 end
 
 

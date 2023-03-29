@@ -205,7 +205,7 @@ function Generate_new_generation(TT::Matrix{Float64}, Close_nodes::Matrix{Int}, 
             offspring = new_mutation(offspring, T, pm)
         end
     end
-#     offspring, imprv = Improve_chromosome(offspring, TT, Close_nodes, demands, W, n_nodes, roullet)
+    offspring, imprv = Improve_chromosome(offspring, TT, Close_nodes, demands, W, n_nodes, roullet)
    
     
     push!(Population, offspring)
@@ -226,9 +226,9 @@ function Generate_new_generation(TT::Matrix{Float64}, Close_nodes::Matrix{Int}, 
     t2 = time()
     
 
-    if Gen_num % 100 == 0
-        println("Generation ", Gen_num, " the best objective is: ", old_best)
-    end
+#     if Gen_num % 100 == 0
+#         println("Generation ", Gen_num, " the best objective is: ", old_best)
+#     end
     Gen_num += 1
     return Gen_num, old_best, Population, improve_count
 end

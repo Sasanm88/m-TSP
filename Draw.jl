@@ -43,17 +43,20 @@ function Draw_Solution(chrm::Chromosome, depot::Vector{Float64}, Customers::Matr
     max_x = max_x + magnify*(max_x-min_x)
     min_y = min_y - magnify*(max_y-min_y)
     max_y = max_y + magnify*(max_y-min_y)
-    p = plot(x[1], y[1], marker =:circle, title = "mTSP path", label = "salesman1", xlim=(min_x, max_x), ylim=(min_y, max_y))
+    p = plot(x[1], y[1], marker =:circle, title = "mTSP path", label = "t1", xlim=(min_x, max_x), ylim=(min_y, max_y))
     for i=1:m
         annotate!.(x[i][1:length(x[i])-1], y[i][1:length(y[i])-1], text.(labels[i], :left,8))
     end
     for i=2:m
-        p = plot!(x[i], y[i], marker =:circle, label = "salesman"*string(i))
+        p = plot!(x[i], y[i], marker =:circle, label = "t"*string(i))
     end 
     for (j,tour) in enumerate(chrm.tours)
         println("Tour ", j, ":")
-        for i in tour.Sequence
+        for (k,i) in enumerate(tour.Sequence)
             print(i, " ")
+            if k%25==0
+                println()
+            end
         end
         println()
         print("cost=", tour.cost)

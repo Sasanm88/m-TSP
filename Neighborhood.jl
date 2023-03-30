@@ -1419,7 +1419,7 @@ function N8(Chrm::Chromosome, TT::Matrix{Float64}, n_nodes::Int)   #divides the 
     return Chrm
 end
 
-function Improve_chromosome(chrm::Chromosome, TT::Matrix{Float64}, Close_nodes::Matrix{Int}, demands::Vector{Int}, W::Int, n_nodes::Int, roullet::Vector{Int})
+function Improve_chromosome(chrm::Chromosome, TT::Matrix{Float64}, Close_nodes::Matrix{Int}, demands::Vector{Int}, W::Int, n_nodes::Int, roullet::Vector{Int}, old_best::Float64)
 #     Search_methods = [N1, N2, N3, N4, Ni1, Ni2, Ni3, Ni4, Ni5, Ni6, Ni7, N3r, N4sr, N4rs, N4rr, N5, N5r, N6, N6sr, N6rs, N6rr, N7, N7rs, N7sr, N7rr]
     Search_methods = [N1, Ni1, Ni2, Ni3, Ni4, Ni5]    #Ni4 not great
 #     Search_methods = [N1, N2, N3, Ni1, Ni2, Ni5, Ni7, Ni3, Ni4]
@@ -1430,6 +1430,10 @@ function Improve_chromosome(chrm::Chromosome, TT::Matrix{Float64}, Close_nodes::
         search = Search_methods[r]
         f1 = chrm.fitness
         chrm = search(chrm, TT, Close_nodes, demands, W, n_nodes)
+        if round(chrm.fitness, digits=4) < round(old_best, digits=4)
+            println("Improvement by local search: " , r ,"  ", round(old_best, digits=4) ," to ", round(chrm.fitness,digits=4))
+            old_best = chrm.fitness
+        end
         if chrm.fitness < f1
             roullet[r] +=1
             return chrm, r

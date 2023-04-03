@@ -1,12 +1,14 @@
 
 function N1(Chrm::Chromosome, TT::Matrix{Float64}, Close_nodes::Matrix{Int}, demands::Vector{Int}, W::Int, n_nodes::Int)   #Shift(0,1)
-    r1 = argmax([Chrm.tours[i].cost for i=1:length(Chrm.tours)])
-    routes = [i for i=1:length(Chrm.tours)]
-    r2 = setdiff(routes, r1)[rand(1:length(Chrm.tours)-1)]
+
+    r1, r2 = sample(1:length(Chrm.tours), 2, replace = false)
     tour1 = Chrm.tours[r1].Sequence
     tour2 = Chrm.tours[r2].Sequence
     cost1 = Chrm.tours[r1].cost
     cost2 = Chrm.tours[r2].cost
+    if length(tour1) == 1
+        return Chrm
+    end
     k1 = rand(1:length(tour1))
     city1 = tour1[k1]
     Candidates = Int[] 
@@ -37,18 +39,18 @@ function N1(Chrm::Chromosome, TT::Matrix{Float64}, Close_nodes::Matrix{Int}, dem
 #     k2 = rand(1:length(tour2)+1)
     
     new_cost2 = Calculate_new_cost_add_one(tour2, cost2, city1, k2, TT, n_nodes)
-
+    new_cost1 = Calculate_new_cost_remove_one(tour1, cost1, k1, TT, n_nodes)
     
-    if new_cost2 >= cost1
+    if new_cost2 + new_cost1 >= cost1 + cost2
         return Chrm
     end
     insert!(tour2, k2, city1)
-    new_cost1 = Calculate_new_cost_remove_one(tour1, cost1, k1, TT, n_nodes)
+    
     deleteat!(tour1, k1)
     Chrm.tours[r1].cost = new_cost1
     Chrm.tours[r2].cost = new_cost2
     Chrm.genes = Int[]
-    Chrm.fitness = maximum([Chrm.tours[i].cost for i=1:length(Chrm.tours)])
+    Chrm.fitness = Chrm.fitness + new_cost1 + new_cost2 - cost1 - cost2
     for tour in Chrm.tours
         Chrm.genes = vcat(Chrm.genes, tour.Sequence)
     end
@@ -57,9 +59,7 @@ end
 
 
 function N2(Chrm::Chromosome, TT::Matrix{Float64}, Close_nodes::Matrix{Int}, demands::Vector{Int}, W::Int, n_nodes::Int)   #Swap(1,1)
-    r1 = argmax([Chrm.tours[i].cost for i=1:length(Chrm.tours)])
-    routes = [i for i=1:length(Chrm.tours)]
-    r2 = setdiff(routes, r1)[rand(1:length(Chrm.tours)-1)]
+    r1, r2 = sample(1:length(Chrm.tours), 2, replace = false)
     tour1 = Chrm.tours[r1].Sequence
     tour2 = Chrm.tours[r2].Sequence
     cost1 = Chrm.tours[r1].cost
@@ -112,9 +112,7 @@ function N2(Chrm::Chromosome, TT::Matrix{Float64}, Close_nodes::Matrix{Int}, dem
 end
 
 function N3(Chrm::Chromosome, TT::Matrix{Float64}, Close_nodes::Matrix{Int}, demands::Vector{Int}, W::Int, n_nodes::Int)   #Shift(0,2)
-    r1 = argmax([Chrm.tours[i].cost for i=1:length(Chrm.tours)])
-    routes = [i for i=1:length(Chrm.tours)]
-    r2 = setdiff(routes, r1)[rand(1:length(Chrm.tours)-1)]
+    r1, r2 = sample(1:length(Chrm.tours), 2, replace = false)
     tour1 = Chrm.tours[r1].Sequence
     if length(tour1) < 2
         return Chrm

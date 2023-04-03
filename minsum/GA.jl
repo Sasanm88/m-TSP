@@ -185,7 +185,7 @@ function Generate_new_generation(TT::Matrix{Float64}, Close_nodes::Matrix{Int}, 
     parent1, parent2 = Select_parents(Population, k_tournament, psize)
 
     child, crss = Reproduce(TT, parent1, parent2, n_nodes, crossover_functions)
-    obj, trips = SPLIT(TT, demands, K, W, child)
+    obj, trips = SPLIT_minsum(TT, K, child)
     offspring = Chromosome(child, obj, 0.0, trips)
 
 #     Mutate(child, Mutation_Chance)
@@ -226,7 +226,7 @@ function Generate_new_generation(TT::Matrix{Float64}, Close_nodes::Matrix{Int}, 
     t2 = time()
     
 
-#     if Gen_num % 100 == 0
+#     if Gen_num % 50 == 0
 #         println("Generation ", Gen_num, " the best objective is: ", old_best)
 #     end
     Gen_num += 1

@@ -39,7 +39,7 @@ end
 function Generate_initial_population(TT::Matrix{Float64}, demands::Vector{Int}, K::Int, W::Int, mu::Int, tsp_tour::Vector{Int})
     Population = Chromosome[]
     n_nodes = length(demands)
-    obj, trips = SPLIT(TT, demands, K, W, tsp_tour)
+    obj, trips = SPLIT_minsum(TT, K, tsp_tour)
     push!(Population, Chromosome(tsp_tour, obj, 0.0, trips))
     S = Int[]
     for i=1:mu-1
@@ -48,7 +48,7 @@ function Generate_initial_population(TT::Matrix{Float64}, demands::Vector{Int}, 
         else
             S = Creat_Random_Cromosome(n_nodes)
         end
-        obj, trips = SPLIT(TT, demands, K, W, S)
+        obj, trips = SPLIT_minsum(TT, K, S)
         push!(Population, Chromosome(S, obj, 0.0, trips))
     end
     sort!(Population, by=x -> x.fitness)
@@ -62,11 +62,11 @@ function Diversify(Population::Vector{Chromosome}, TT::Matrix{Float64}, demands:
         S = Int[]
         if rand() < 0.5
             S = Change_initial(tsp_tour, n_nodes)
-            obj, trips = SPLIT(TT, demands, K, W, S)
+            obj, trips = SPLIT_minsum(TT, K, S)
             Population[i] = Chromosome(S, obj, 0.0, trips)
         else
             S = Creat_Random_Cromosome(n_nodes)
-            obj, trips = SPLIT(TT, demands, K, W, S)
+            obj, trips = SPLIT_minsum(TT, K, S)
             Population[i] = Chromosome(S, obj, 0.0, trips)
         end
     end

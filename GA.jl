@@ -170,14 +170,17 @@ end
 function Generate_new_generation(TT::Matrix{Float64}, Close_nodes::Matrix{Int}, demands::Vector{Int}, K::Int, W::Int,
         Population::Vector{Chromosome}, popsize::Tuple{Int64,Int64}, k_tournament::Int64, 
         ClosenessT::Matrix{Int64}, Gen_num::Int64, old_best::Float64, improve_count::Int64, Mutation_Chance::Float64,
-        tsp_tour::Vector{Int}, roullet::Vector{Int}, num_nei::Int, crossover_functions::Vector{Int})
+        tsp_tour::Vector{Int}, roullet::Vector{Int}, num_nei::Int, crossover_functions::Vector{Int}, Customers::Matrix{Float64}, depot::Vector{Float64})
     t1 = time()
 
     mu, sigma = popsize
     n_nodes = length(Population[1].genes)
 
-    if improve_count % 200 == 19  
-        Diversify(Population, TT, demands, K, W, mu, tsp_tour)
+    if improve_count % 500 == 499 
+        Diversify(Population, TT, demands, K, W, mu, tsp_tour, Customers, depot)
+    end
+    if improve_count % 2000 == 1999 
+        Diversify_(Population, TT, demands, K, W, mu, tsp_tour, Customers, depot)
     end
     
     Sort_based_on_power(Population, num_nei)
@@ -205,6 +208,7 @@ function Generate_new_generation(TT::Matrix{Float64}, Close_nodes::Matrix{Int}, 
             offspring = new_mutation(offspring, T, pm)
         end
     end
+    
     offspring, imprv = Improve_chromosome(offspring, TT, Close_nodes, demands, W, n_nodes, roullet, old_best)
    
     
@@ -212,9 +216,9 @@ function Generate_new_generation(TT::Matrix{Float64}, Close_nodes::Matrix{Int}, 
     sort!(Population, by=x -> x.fitness)
 
     Perform_Survival_Plan(Population, mu, sigma)
-#     if improve_count % 100 == 0
-#         Improve_Population(Population, TT, Close_nodes, demands, W, n_nodes)
-#     end
+    if improve_count % 500 == 0
+        Improve_Population(Population, TT, Close_nodes, demands, W, n_nodes)
+    end
         
     new_best = Population[1].fitness
     if (old_best - new_best) / new_best > 0.0005
@@ -226,15 +230,15 @@ function Generate_new_generation(TT::Matrix{Float64}, Close_nodes::Matrix{Int}, 
     t2 = time()
     
 
-#     if Gen_num % 100 == 0
-#         println("Generation ", Gen_num, " the best objective is: ", old_best)
-#     end
+    if Gen_num % 100 == 0
+        println("Generation ", Gen_num, " the best objective is: ", old_best)
+    end
     Gen_num += 1
     return Gen_num, old_best, Population, improve_count
 end
 
 function Perform_Genetic_Algorithm(TT::Matrix{Float64}, demands::Vector{Int}, K::Int, W::Int,h::Float64, popsize::Tuple{Int64,Int64},
-    k_tournament::Int64, num_iter::Int64, Mutation_Chance::Float64, num_nei::Int, crossover_functions::Vector{Int})
+    k_tournament::Int64, num_iter::Int64, time_limit::Float64, Mutation_Chance::Float64, num_nei::Int, crossover_functions::Vector{Int}, Customers::Matrix{Float64}, depot::Vector{Float64})
     n_nodes = size(TT)[1] - 2
     t1 = time()
     ClosenessT= Find_Closeness(TT, h) 
@@ -244,12 +248,15 @@ function Perform_Genetic_Algorithm(TT::Matrix{Float64}, demands::Vector{Int}, K:
     old_best = 0.0
     roullet = ones(Int, 6) * 100
     tsp_tour, _ = find_tsp_tour1(TT[1:n_nodes+1, 1:n_nodes+1])
-    Population, old_best = Generate_initial_population(TT, demands, K, W, mu, tsp_tour) 
+    Population, old_best = Generate_initial_population(TT, demands, K, W, mu, tsp_tour, Customers, depot) 
     count = 0
 
-    @inbounds while improve_count < num_iter
-            Gen_num, old_best, Population, improve_count = Generate_new_generation(TT, ClosenessT, demands, K, W,
-        Population, popsize, k_tournament, ClosenessT, Gen_num, old_best, improve_count, Mutation_Chance, tsp_tour, roullet, num_nei, crossover_functions)
+    while improve_count < num_iter
+        if time() - t1 >= time_limit
+            break
+        end
+        Gen_num, old_best, Population, improve_count = Generate_new_generation(TT, ClosenessT, demands, K, W,
+        Population, popsize, k_tournament, ClosenessT, Gen_num, old_best, improve_count, Mutation_Chance, tsp_tour, roullet, num_nei, crossover_functions, Customers, depot)
         count += 1
     end
     t2 = time()

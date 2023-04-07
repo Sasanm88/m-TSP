@@ -99,5 +99,5 @@ function read_data(dir_name::String, sample_name::String)
         end
     end
 
-    return m, T, depot, customers
+    return m, T, Float64.(depot), customers
 end

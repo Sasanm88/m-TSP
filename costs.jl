@@ -284,8 +284,8 @@ function Calculate_new_cost_swap_three_with_two_updated(tour1::Vector{Int}, cost
             new_cost22 += T[tour2[position2-1]+1, city13+1] + T[city13+1, city12+1]  + T[city12+1, city11+1] + T[city11+1, tour2[position2+2]+1] - T[tour2[position2-1]+1, city21+1] - T[city21+1, city22+1] - T[city22+1, tour2[position2+2]+1]
         end
     end
-    if new_cost11 < new_cost12
-        if new_cost21 < new_cost22
+    if new_cost11 > new_cost12
+        if new_cost21 > new_cost22
             return new_cost11, new_cost21, true, true
         else
             return new_cost11, new_cost22, true, false

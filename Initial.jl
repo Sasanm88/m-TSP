@@ -58,7 +58,7 @@ function initial_kmedian_solution(T::Matrix{Float64}, Customers::Matrix{Float64}
     else 
         Customers_ = Customers
     end
-    if rand() < 0.5
+    if rand() < 1
         result = kmeans(Customers_, K)
         assignments_ = copy(result.assignments)
     else
@@ -173,7 +173,7 @@ function Generate_initial_population(TT::Matrix{Float64}, demands::Vector{Int}, 
     S = Int[]
     for i=1:mu-1
 #         print(i, "  ")
-        if rand() < 0.5
+        if rand() < 1
 #             if rand() < 0.5
             S = Change_initial(tsp_tour, n_nodes)
             obj, trips = SPLIT(TT, demands, K, W, S)

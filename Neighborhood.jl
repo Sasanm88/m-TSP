@@ -36,13 +36,20 @@ function N1(Chrm::Chromosome, TT::Matrix{Float64}, Close_nodes::Matrix{Int}, dem
 #     k2 = rand(1:length(tour2)+1)
     
     new_cost2 = Calculate_new_cost_add_one(tour2, cost2, city1, k2, TT, n_nodes)
-
-    
+    new_cost1 = Calculate_new_cost_remove_one(tour1, cost1, k1, TT, n_nodes)
+    if new_cost2 - cost2 > 2 * (cost1 - new_cost1)
+        return Chrm
+    end
     if new_cost2 >= cost1
         return Chrm
     end
+
+#     println(cost1)
+#     println(new_cost1)
+#     println(cost2)
+#     println(new_cost2)
     insert!(tour2, k2, city1)
-    new_cost1 = Calculate_new_cost_remove_one(tour1, cost1, k1, TT, n_nodes)
+    
     deleteat!(tour1, k1)
     Chrm.tours[r1].cost = new_cost1
     Chrm.tours[r2].cost = new_cost2
@@ -671,7 +678,7 @@ function Improve_chromosome(chrm::Chromosome, TT::Matrix{Float64}, Close_nodes::
     Search_methods = [Ni1, Ni2, Ni3, Ni4, Ni5, N1]    #Ni4 not great
 #     Search_methods = [N1, N2, N3, Ni1, Ni2, Ni5, Ni7, Ni3, Ni4]
 #     Search_methods = [N1, N2, N3, N4, N_cross, Ni1, Ni2, Ni3, Ni4, Ni5]
-    for i=1:1000
+    for i=1:100
         r = sample(1:length(Search_methods), weights(roullet))
 #         r= rand(1:length(Search_methods))
         search = Search_methods[r]

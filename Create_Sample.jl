@@ -71,16 +71,16 @@ function read_data(dir_name::String, sample_name::String)
     m = parse(Int,split(lines[1]," ")[3])
     n_nodes = length(lines)-2
     if length(split(lines[2],"\t")) == 3
-        depot = parse.(Int, split(lines[2],"\t"))[2:3]
+        depot = parse.(Float64, split(lines[2],"\t"))[2:3]
     else
-        depot = parse.(Int, split(lines[2]," "))[2:3]
+        depot = parse.(Float64, split(lines[2]," "))[2:3]
     end
     customers = zeros(2, n_nodes)
     for i=1:n_nodes
         if length(split(lines[2+i],"\t")) == 3
-            customers[:,i] = parse.(Int, split(lines[2+i],"\t"))[2:3]
+            customers[:,i] = parse.(Float64, split(lines[2+i],"\t"))[2:3]
         else
-            customers[:,i] = parse.(Int, split(lines[2+i]," "))[2:3]
+            customers[:,i] = parse.(Float64, split(lines[2+i]," "))[2:3]
         end
     end
     T = Matrix{Float64}(undef, n_nodes + 2, n_nodes + 2)

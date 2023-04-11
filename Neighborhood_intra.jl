@@ -11,12 +11,14 @@ function Ni1(Chrm::Chromosome, TT::Matrix{Float64}, Close_nodes::Matrix{Int}, de
     tour1 = Chrm.tours[r1].Sequence
     cost1 = Chrm.tours[r1].cost
 
-    k1 = rand(1:length(tour1))
-    city1 = tour1[k1]
+    
     nt = length(tour1)
     if nt <= 1
         return Chrm
     end
+    
+    k1 = rand(1:length(tour1))
+    city1 = tour1[k1]
     Candidates = Int[] 
     if nt == 2
         Candidates = [1,2]

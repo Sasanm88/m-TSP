@@ -177,11 +177,11 @@ function Generate_new_generation(TT::Matrix{Float64}, Close_nodes::Matrix{Int}, 
     n_nodes = length(Population[1].genes)
 
     if improve_count % 500 == 499 
-        Diversify(Population, TT, demands, K, W, mu, tsp_tour, Customers, depot)
+        Diversify(Population, TT, demands, K, W, mu, tsp_tour, Customers, depot, improve_count)
     end
-#     if improve_count % 500 == 499 
-#         Diversify_(Population, TT, demands, K, W, mu, tsp_tour, Customers, depot)
-#     end
+    if improve_count % 10000 == 9999 
+        Diversify_(Population, TT, demands, K, W, mu, tsp_tour, Customers, depot)
+    end
     
     Sort_based_on_power(Population, num_nei)
     psize = length(Population)
@@ -199,14 +199,17 @@ function Generate_new_generation(TT::Matrix{Float64}, Close_nodes::Matrix{Int}, 
 # #         counter2[crss] += 1
 #     end
     
-#     if rand() < Mutation_Chance
+    if rand() < Mutation_Chance
+#         Solve_all_intersections(chrm, Customers, Float64.(depot), T)
+        Solve_all_intersections(offspring, Customers, depot, TT)
+        
 #         if rand() < 1.0
 # #             offspring = mutation_cross(offspring, T, n_nodes)
 #         else
 #             pm = 0.5*(1 - improve_count/3000)
 #             offspring = new_mutation(offspring, T, pm)
 #         end
-#     end
+    end
     
     offspring, imprv = Improve_chromosome(offspring, TT, Close_nodes, demands, W, n_nodes, roullet, old_best)
    
@@ -215,9 +218,9 @@ function Generate_new_generation(TT::Matrix{Float64}, Close_nodes::Matrix{Int}, 
     sort!(Population, by=x -> x.fitness)
 
     Perform_Survival_Plan(Population, mu, sigma)
-#     if improve_count % 500 == 0
-#         Improve_Population(Population, TT, Close_nodes, demands, W, n_nodes)
-#     end
+    if improve_count % 1000 == 0
+        Improve_Population(Population, TT, Close_nodes, demands, W, n_nodes)
+    end
         
     new_best = Population[1].fitness
     if (old_best - new_best) / new_best > 0.0005
@@ -229,7 +232,7 @@ function Generate_new_generation(TT::Matrix{Float64}, Close_nodes::Matrix{Int}, 
     t2 = time()
     
 
-#     if Gen_num % 100 == 0
+#     if Gen_num % 1000 == 0
 #         println("Generation ", Gen_num, " the best objective is: ", old_best)
 #     end
     Gen_num += 1

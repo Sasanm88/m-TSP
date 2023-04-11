@@ -10,7 +10,9 @@ function N1(Chrm::Chromosome, TT::Matrix{Float64}, Close_nodes::Matrix{Int}, dem
     city1 = tour1[k1]
     Candidates = Int[] 
     nt = length(tour2)
-    if nt == 1
+    if nt == 0
+        Candidates = [1]
+    elseif nt == 1
         Candidates = [1,2]
     elseif nt == 2
         Candidates = [1,2,3]
@@ -710,9 +712,9 @@ function Improve_Population(P::Vector{Chromosome}, TT::Matrix{Float64}, Close_no
             search = Search_methods[r]
             f = chrm.fitness
             chrm = search(chrm, TT, Close_nodes, demands, W, n_nodes)
-            if f > 118 && chrm.fitness< 118
-                println(string(search), "  ", f, "   ", chrm.fitness)
-            end
+#             if f > 118 && chrm.fitness< 118
+#                 println(string(search), "  ", f, "   ", chrm.fitness)
+#             end
         end
     end
 #     chrm = P[1]

@@ -184,34 +184,23 @@ function Generate_initial_population(TT::Matrix{Float64}, demands::Vector{Int}, 
         end
         
     end
-    sort!(Population, by=x -> x.fitness)
+#     sort!(Population, by=x -> x.fitness)
     return Population, Population[1].fitness
 end
 
-function Diversify(Population::Vector{Chromosome}, TT::Matrix{Float64}, demands::Vector{Int}, K::Int, W::Int, mu::Int, tsp_tour::Vector{Int}, Customers::Matrix{Float64}, depot::Vector{Float64})
+function Diversify(Population::Vector{Chromosome}, TT::Matrix{Float64}, demands::Vector{Int}, K::Int, W::Int, mu::Int, tsp_tour::Vector{Int}, Customers::Matrix{Float64}, depot::Vector{Float64}, num::Int)
     n_nodes = length(demands)
     n_best = Int(round(0.15 * mu)) 
 #     println(length(Population))
+    p = 1 - num/5000
     for i=n_best+1:length(Population)
-#         print(i, "  ")
-        S = Int[]
-        S = Change_initial(tsp_tour, n_nodes)
+        if rand() < p
+            S = Change_initial(tsp_tour, n_nodes)
+        else
+            S = Creat_Random_Cromosome(n_nodes)
+        end
         obj, trips = SPLIT(TT, demands, K, W, S)
         Population[i] = Chromosome(S, obj, 0.0, trips)
-#         if rand() < 0.5
-# #             S = Change_initial(tsp_tour, n_nodes)
-# #             obj, trips = SPLIT(TT, demands, K, W, S)
-# #             Population[i] = Chromosome(S, obj, 0.0, trips)
-# #         elseif rand() < 0.6
-# #             S = Creat_Random_Cromosome(n_nodes)
-# #             obj, trips = SPLIT(TT, demands, K, W, S)
-# #             Population[i] = Chromosome(S, obj, 0.0, trips)
-#             chrm = initial_random_solution(TT, K, n_nodes)
-#             Population[i] = chrm
-#         else
-#             chrm = initial_kmedian_solution(TT, Customers, depot, K)
-#             Population[i] = chrm
-#         end
     end
     sort!(Population, by=x -> x.fitness)
 end

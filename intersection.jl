@@ -179,7 +179,9 @@ function Solve_all_intersections(chrm::Chromosome, Customers::Matrix{Float64}, d
             two_opt_on_route(tour, T, n_nodes)
         end
     end
-
+    if rand() < 0.1
+        Improve_after_removing_intersections(chrm.tours, T, n_nodes, m, Customers, depot)
+    end
     chrm.genes = Int[]
     chrm.fitness = 0.0
     for tour in chrm.tours
@@ -213,4 +215,93 @@ function two_opt_on_route(tour::Tour, T::Matrix{Float64}, n_nodes::Int)   #2-opt
             end
         end    
     end
+end
+
+function Improve_after_removing_intersections(tours::Vector{Tour}, T::Matrix{Float64}, n_nodes::Int, m::Int, Customers::Matrix{Float64}, depot::Vector{Float64})
+    sort!(tours, by=x->x.cost, rev=true)
+    means = [mean(Customers[t1, :], dims=1)[1,:] for t1 in [tours[i].Sequence for i=1:m]]
+
+    distances = zeros(m, m)
+    for i = 1:m-1
+        for j = i+1:m
+            distances[i,j] = euclidean(means[i], means[j])
+            distances[j,i] = distances[i,j]
+        end
+    end
+
+    all_tours = [i for i=1:m]
+
+    improved = true
+    
+    while improved
+        current_tour = 1
+        improved = false
+        next_tours = sortperm(distances[current_tour,:])[2:min(m,3)]
+#         println(tours[current_tour].cost)
+        for next_tour in next_tours
+#             println(tours[next_tour].cost)
+            tour1 = tours[current_tour].Sequence
+            cost1 = tours[current_tour].cost
+            tour2 = tours[next_tour].Sequence
+            cost2 = tours[next_tour].cost
+            for i=1:length(tour1)
+                new_cost1 = Calculate_new_cost_remove_one(tour1, cost1, i, T, n_nodes)
+                new_cost2 = Inf
+                best_position = 0
+                for j = 1:length(tour2)+1
+                    temp = Calculate_new_cost_add_one(tour2, cost2, tour1[i], j, T, n_nodes)
+                    if temp < new_cost2 
+                        new_cost2 = temp
+                        best_position = j
+                    end
+                end
+#                 println(i,"  ", best_position)
+                
+                if new_cost2 < cost1 
+                    t2 = copy(tour2)
+                    insert!(t2, best_position, tour1[i])
+                    if i == 1 
+                        node1 = depot
+                        node2 = Customers[tour1[i+1],:]
+                    elseif i == length(tour1)
+                        node1 = Customers[tour1[i-1],:]
+                        node2 = depot
+                    else
+                        node1 = Customers[tour1[i-1],:]
+                        node2 = Customers[tour1[i+1],:]
+                    end
+                    node3 = Customers[tour1[i],:]
+                    intersected = false
+                    for j=1:length(t2)
+                        if j == 1 
+                            node4 = depot
+                            node5 = Customers[t2[j],:]
+                        elseif j == length(t2)+1
+                            node4 = Customers[t2[length(t2)],:]
+                            node5 = depot
+                        else
+                            node4 = Customers[t2[j-1],:]
+                            node5 = Customers[t2[j],:]
+                        end
+
+                        intersect1 = segments_intersect_orient(node1, node2, node3, node4)
+                        intersect2 = segments_intersect_orient(node1, node2, node3, node5)
+                        if intersect1 || intersect2
+                            intersected = true
+                            break
+                        end
+                    end
+                    if !intersected
+                        insert!(tour2, best_position, tour1[i])
+                        deleteat!(tour1, i)
+                        tours[current_tour].cost = new_cost1
+                        tours[next_tour].cost = new_cost2
+                        sort!(tours, by=x->x.cost, rev=true)
+                        improved = true
+                        break
+                    end
+                end
+            end
+        end
+    end                 
 end

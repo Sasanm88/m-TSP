@@ -1,14 +1,15 @@
 function Calculate_new_cost_add_one(tour::Vector{Int}, cost::Float64, city::Int, position::Int, T::Matrix{Float64}, n_nodes::Int)
     nt = length(tour)
     if nt == 0 
-        return T[1, city+1] + T[city+1, n_modes+2]
-    end
-    if position == 1
-        cost += T[1,city+1]+T[city+1, tour[1]+1]-T[1,tour[1]+1]
-    elseif position == nt+1
-        cost += T[city+1, n_nodes+2]+T[tour[nt]+1, city+1]-T[tour[nt]+1, n_nodes+2]
+        return T[1, city+1] + T[city+1, n_nodes+2]
     else
-        cost += T[tour[position-1]+1, city+1] + T[city+1, tour[position]+1]-T[tour[position-1]+1,tour[position]+1]
+        if position == 1
+            cost += T[1,city+1]+T[city+1, tour[1]+1]-T[1,tour[1]+1]
+        elseif position == nt+1
+            cost += T[city+1, n_nodes+2]+T[tour[nt]+1, city+1]-T[tour[nt]+1, n_nodes+2]
+        else
+            cost += T[tour[position-1]+1, city+1] + T[city+1, tour[position]+1]-T[tour[position-1]+1,tour[position]+1]
+        end
     end
     return cost
 end
@@ -20,16 +21,17 @@ function Calculate_new_cost_add_two(tour::Vector{Int}, cost::Float64, city1::Int
     if nt == 0 
         cost1 = T[1, city1+1] + T[city1+1, city2+1] + T[city2+1, n_nodes+2]
         cost2 = T[1, city2+1] + T[city2+1, city1+1] + T[city1+1, n_nodes+2]
-    end
-    if position == 1
-        cost1 += T[1, city1+1] + T[city1+1, city2+1] + T[city2+1, tour[1]+1] - T[1,tour[1]+1]
-        cost2 += T[1, city2+1] + T[city2+1, city1+1] + T[city1+1, tour[1]+1] - T[1,tour[1]+1]
-    elseif position == nt+1
-        cost1 += T[city2+1, n_nodes+2] + T[city1+1, city2+1] +T[tour[nt]+1, city1+1] - T[tour[nt]+1, n_nodes+2]
-        cost2 += T[city1+1, n_nodes+2] + T[city2+1, city1+1] +T[tour[nt]+1, city2+1] - T[tour[nt]+1, n_nodes+2]
     else
-        cost1 += T[tour[position-1]+1, city1+1] + T[city1+1, city2+1] + T[city2+1, tour[position]+1]-T[tour[position-1]+1,tour[position]+1]
-        cost2 += T[tour[position-1]+1, city2+1] + T[city2+1, city1+1] + T[city1+1, tour[position]+1]-T[tour[position-1]+1,tour[position]+1]
+        if position == 1
+            cost1 += T[1, city1+1] + T[city1+1, city2+1] + T[city2+1, tour[1]+1] - T[1,tour[1]+1]
+            cost2 += T[1, city2+1] + T[city2+1, city1+1] + T[city1+1, tour[1]+1] - T[1,tour[1]+1]
+        elseif position == nt+1
+            cost1 += T[city2+1, n_nodes+2] + T[city1+1, city2+1] +T[tour[nt]+1, city1+1] - T[tour[nt]+1, n_nodes+2]
+            cost2 += T[city1+1, n_nodes+2] + T[city2+1, city1+1] +T[tour[nt]+1, city2+1] - T[tour[nt]+1, n_nodes+2]
+        else
+            cost1 += T[tour[position-1]+1, city1+1] + T[city1+1, city2+1] + T[city2+1, tour[position]+1]-T[tour[position-1]+1,tour[position]+1]
+            cost2 += T[tour[position-1]+1, city2+1] + T[city2+1, city1+1] + T[city1+1, tour[position]+1]-T[tour[position-1]+1,tour[position]+1]
+        end
     end
     if cost1 < cost2
         return cost1, true
@@ -45,16 +47,17 @@ function Calculate_new_cost_add_three(tour::Vector{Int}, cost::Float64, city1::I
     if nt == 0 
         cost1 = T[1, city1+1] + T[city1+1, city2+1] + T[city2+1, city3+1] + T[city3+1, n_nodes+2]
         cost2 = T[1, city3+1] + T[city3+1, city2+1] + T[city2+1, city1+1] + T[city3+1, n_nodes+2]
-    end
-    if position == 1
-        cost1 += T[1, city1+1] + T[city1+1, city2+1] + T[city2+1, city3+1] + T[city3+1, tour[1]+1] - T[1,tour[1]+1]
-        cost2 += T[1, city3+1] + T[city3+1, city2+1] + T[city2+1, city1+1] + T[city1+1, tour[1]+1] - T[1,tour[1]+1]
-    elseif position == nt+1
-        cost1 += T[city3+1, n_nodes+2] + T[city1+1, city2+1] + T[city2+1, city3+1] + T[tour[nt]+1, city1+1] - T[tour[nt]+1, n_nodes+2]
-        cost2 += T[city1+1, n_nodes+2] + T[city3+1, city2+1] + T[city2+1, city1+1] + T[tour[nt]+1, city3+1] - T[tour[nt]+1, n_nodes+2]
     else
-        cost1 += T[tour[position-1]+1, city1+1] + T[city1+1, city2+1] + T[city2+1, city3+1] + T[city3+1, tour[position]+1]-T[tour[position-1]+1,tour[position]+1]
-        cost2 += T[tour[position-1]+1, city3+1] + T[city3+1, city2+1] + T[city2+1, city1+1] + T[city1+1, tour[position]+1]-T[tour[position-1]+1,tour[position]+1]
+        if position == 1
+            cost1 += T[1, city1+1] + T[city1+1, city2+1] + T[city2+1, city3+1] + T[city3+1, tour[1]+1] - T[1,tour[1]+1]
+            cost2 += T[1, city3+1] + T[city3+1, city2+1] + T[city2+1, city1+1] + T[city1+1, tour[1]+1] - T[1,tour[1]+1]
+        elseif position == nt+1
+            cost1 += T[city3+1, n_nodes+2] + T[city1+1, city2+1] + T[city2+1, city3+1] + T[tour[nt]+1, city1+1] - T[tour[nt]+1, n_nodes+2]
+            cost2 += T[city1+1, n_nodes+2] + T[city3+1, city2+1] + T[city2+1, city1+1] + T[tour[nt]+1, city3+1] - T[tour[nt]+1, n_nodes+2]
+        else
+            cost1 += T[tour[position-1]+1, city1+1] + T[city1+1, city2+1] + T[city2+1, city3+1] + T[city3+1, tour[position]+1]-T[tour[position-1]+1,tour[position]+1]
+            cost2 += T[tour[position-1]+1, city3+1] + T[city3+1, city2+1] + T[city2+1, city1+1] + T[city1+1, tour[position]+1]-T[tour[position-1]+1,tour[position]+1]
+        end
     end
     if cost1 < cost2
         return cost1, true
@@ -67,13 +70,14 @@ function Calculate_new_cost_remove_one(tour::Vector{Int}, cost::Float64, positio
     nt = length(tour)
     if nt == 1
         return 0.0
-    end
-    if position == 1
-        cost += T[1, tour[2]+1] - T[tour[1]+1, tour[2]+1] - T[1,tour[1]+1]
-    elseif position == nt
-        cost += T[tour[nt-1]+1, n_nodes+2] - T[tour[nt-1]+1, tour[nt]+1] - T[tour[nt]+1, n_nodes+2]
     else
-        cost += T[tour[position-1]+1, tour[position+1]+1] -T[tour[position-1]+1, tour[position]+1] - T[tour[position]+1, tour[position+1]+1]
+        if position == 1
+            cost += T[1, tour[2]+1] - T[tour[1]+1, tour[2]+1] - T[1,tour[1]+1]
+        elseif position == nt
+            cost += T[tour[nt-1]+1, n_nodes+2] - T[tour[nt-1]+1, tour[nt]+1] - T[tour[nt]+1, n_nodes+2]
+        else
+            cost += T[tour[position-1]+1, tour[position+1]+1] -T[tour[position-1]+1, tour[position]+1] - T[tour[position]+1, tour[position+1]+1]
+        end
     end
     return cost
 end
@@ -82,13 +86,14 @@ function Calculate_new_cost_remove_two(tour::Vector{Int}, cost::Float64, positio
     nt = length(tour)
     if nt == 2
         return 0.0
-    end
-    if position == 1
-        cost += T[1, tour[3]+1] - T[tour[1]+1, tour[2]+1] - T[tour[2]+1, tour[3]+1] - T[1,tour[1]+1]
-    elseif position == nt-1
-        cost += T[tour[nt-2]+1, n_nodes+2] - T[tour[nt-2]+1, tour[nt-1]+1] - T[tour[nt-1]+1, tour[nt]+1] - T[tour[nt]+1, n_nodes+2]
     else
-        cost += T[tour[position-1]+1, tour[position+2]+1] -T[tour[position-1]+1, tour[position]+1] - T[tour[position]+1, tour[position+1]+1] -T[tour[position+1]+1, tour[position+2]+1]
+        if position == 1
+            cost += T[1, tour[3]+1] - T[tour[1]+1, tour[2]+1] - T[tour[2]+1, tour[3]+1] - T[1,tour[1]+1]
+        elseif position == nt-1
+            cost += T[tour[nt-2]+1, n_nodes+2] - T[tour[nt-2]+1, tour[nt-1]+1] - T[tour[nt-1]+1, tour[nt]+1] - T[tour[nt]+1, n_nodes+2]
+        else
+            cost += T[tour[position-1]+1, tour[position+2]+1] -T[tour[position-1]+1, tour[position]+1] - T[tour[position]+1, tour[position+1]+1] -T[tour[position+1]+1, tour[position+2]+1]
+        end
     end
     return cost
 end
@@ -97,13 +102,14 @@ function Calculate_new_cost_remove_three(tour::Vector{Int}, cost::Float64, posit
     nt = length(tour)
     if nt == 3
         return 0.0
-    end
-    if position == 1
-        cost += T[1, tour[4]+1] - T[tour[1]+1, tour[2]+1] - T[tour[2]+1, tour[3]+1] - T[tour[3]+1, tour[4]+1] - T[1,tour[1]+1]
-    elseif position == nt-2
-        cost += T[tour[nt-3]+1, n_nodes+2] - T[tour[nt-3]+1, tour[nt-2]+1] - T[tour[nt-2]+1, tour[nt-1]+1] - T[tour[nt-1]+1, tour[nt]+1] - T[tour[nt]+1, n_nodes+2]
     else
-        cost += T[tour[position-1]+1, tour[position+3]+1] -T[tour[position-1]+1, tour[position]+1] - T[tour[position]+1, tour[position+1]+1] -T[tour[position+1]+1, tour[position+2]+1]-T[tour[position+2]+1, tour[position+3]+1]
+        if position == 1
+            cost += T[1, tour[4]+1] - T[tour[1]+1, tour[2]+1] - T[tour[2]+1, tour[3]+1] - T[tour[3]+1, tour[4]+1] - T[1,tour[1]+1]
+        elseif position == nt-2
+            cost += T[tour[nt-3]+1, n_nodes+2] - T[tour[nt-3]+1, tour[nt-2]+1] - T[tour[nt-2]+1, tour[nt-1]+1] - T[tour[nt-1]+1, tour[nt]+1] - T[tour[nt]+1, n_nodes+2]
+        else
+            cost += T[tour[position-1]+1, tour[position+3]+1] -T[tour[position-1]+1, tour[position]+1] - T[tour[position]+1, tour[position+1]+1] -T[tour[position+1]+1, tour[position+2]+1]-T[tour[position+2]+1, tour[position+3]+1]
+        end
     end
     return cost
 end

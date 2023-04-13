@@ -89,7 +89,11 @@ function initial_kmedian_solution(T::Matrix{Float64}, Customers::Matrix{Float64}
             end
         end
     end
+    
     chrm = Chromosome(genes, obj, 0.0, tours)
+#     if rand() < 0.5
+#         Solve_all_intersections(chrm, Customers, depot, T)
+#     end
     return chrm
 end
 
@@ -164,6 +168,57 @@ function Creat_Random_Cromosome(n_nodes::Int64)
     chromosome = shuffle!([i for i = 1:n_nodes])
     chromosome
 end
+function Creat_Random_Cromosome2(T::Matrix{Float64}, n_nodes::Int64, m::Int)
+    Nodes = shuffle([i for i=1:n_nodes]);
+    tours = Tour[]
+    for i=1:m
+        push!(tours, Tour(Int[], 0.0))
+    end
+
+    while length(Nodes) > 0
+        city = pop!(Nodes)
+        put_city_in_tour(tours, city, T, n_nodes)
+    end
+
+    S = Int[]
+    obj = 0.0
+    for tour in tours
+        S = vcat(S, tour.Sequence)
+    end
+    return S
+end
+
+function Creat_Random_Cromosome3(T::Matrix{Float64}, n_nodes::Int64)
+    Nodes = [i for i=1:n_nodes];
+    tours = Tour[]
+    a = copy(T[1, 2:n_nodes+1])
+    b = sortperm(a)
+
+    for i=1:m
+        push!(tours, Tour([b[i]], 0.0))
+    end
+
+    tour_indices = [i for i=1:m]
+    while length(Nodes) > 0
+        r = tour_indices[rand(1:length(tour_indices))]
+        tour = tours[r]
+        last_city = tour.Sequence[length(tour.Sequence)]
+        a = copy(T[last_city+1, Nodes.+1])
+        new_city = Nodes[argmin(a)]
+        push!(tour.Sequence, new_city)
+        deleteat!(tour_indices, findfirst(x->x==r, tour_indices))
+        deleteat!(Nodes, findfirst(x->x==new_city, Nodes))
+        if length(tour_indices) == 0
+            tour_indices = [i for i=1:m]
+        end
+    end
+
+    S = Int[]
+    for tour in tours
+        S = vcat(S, tour.Sequence)
+    end
+    return S
+end
 
 function Generate_initial_population(TT::Matrix{Float64}, demands::Vector{Int}, K::Int, W::Int, mu::Int, tsp_tour::Vector{Int}, Customers::Matrix{Float64}, depot::Vector{Float64})
     Population = Chromosome[]
@@ -191,16 +246,31 @@ end
 function Diversify(Population::Vector{Chromosome}, TT::Matrix{Float64}, demands::Vector{Int}, K::Int, W::Int, mu::Int, tsp_tour::Vector{Int}, Customers::Matrix{Float64}, depot::Vector{Float64}, num::Int)
     n_nodes = length(demands)
     n_best = Int(round(0.15 * mu)) 
-#     println(length(Population))
-    p = 1 - num/5000
+#     p = min(0.5, 1 - num/5000)
+#     for i=n_best+1:length(Population)
+#         if rand() < p
+#             S = Change_initial(tsp_tour, n_nodes)
+#         else
+#             if rand() < 0.5
+#                 S = Creat_Random_Cromosome2(TT, n_nodes)
+#             else
+#                 S = Creat_Random_Cromosome(n_nodes)
+#             end
+#         end
+#         obj, trips = SPLIT(TT, demands, K, W, S)
+#         Population[i] = Chromosome(S, obj, 0.0, trips)
+#     end
     for i=n_best+1:length(Population)
-        if rand() < p
-            S = Change_initial(tsp_tour, n_nodes)
-        else
-            S = Creat_Random_Cromosome(n_nodes)
-        end
+        S = Creat_Random_Cromosome2(TT, n_nodes, K)
         obj, trips = SPLIT(TT, demands, K, W, S)
-        Population[i] = Chromosome(S, obj, 0.0, trips)
+        chrm = Chromosome(S, obj, 0.0, trips)
+        if rand() < 0.4
+            Solve_all_intersections(chrm, Customers, depot, TT)
+        end
+        if rand() < 0.4
+            chrm = Enrich_the_chromosome(chrm, TT, Customers, n_nodes)
+        end
+        Population[i] = chrm
     end
     sort!(Population, by=x -> x.fitness)
 end
@@ -222,10 +292,93 @@ function Diversify_(Population::Vector{Chromosome}, TT::Matrix{Float64}, demands
 #             Population[i] = chrm
 #         else
         chrm = initial_kmedian_solution(TT, Customers, depot, K)
+#         chrm = initial_random_solution(TT, K, n_nodes)
         Population[i] = chrm
 #         end
     end
     sort!(Population, by=x -> x.fitness)
+end
+
+function find_tour_neighbors(tours::Vector{Tour}, Customers::Matrix{Float64}, m::Int)
+    means = [mean(Customers[t1, :], dims=1)[1,:] for t1 in [tours[i].Sequence for i=1:m]]
+    distances = zeros(m, m)
+    for i = 1:m-1
+        for j = i+1:m
+            distances[i,j] = euclidean(means[i], means[j])
+            distances[j,i] = distances[i,j]
+        end
+    end
+    return [sortperm(distances[i,:])[2:min(m,3)] for i=1:m]
+end
+
+
+function Enrich_the_chromosome(Chrm::Chromosome, T::Matrix{Float64}, Customers::Matrix{Float64}, n_nodes::Int)   #Shift(0,1)
+    m = length(Chrm.tours)
+    max_tour_index = argmax([Chrm.tours[i].cost for i=1:length(Chrm.tours)])
+    max_tour_length = Chrm.fitness
+    tour_neighbors = find_tour_neighbors(Chrm.tours, Customers, m)
+    improved = true
+    count = 0
+    while improved && count < 100
+        count += 1
+        improved = false
+        for r1 = 1:m
+            for r2 in tour_neighbors[r1]
+                if r2 != max_tour_index
+                    tour1 = Chrm.tours[r1].Sequence
+                    tour2 = Chrm.tours[r2].Sequence
+                    
+                    k1 = 0
+                    became_max = false
+                    while k1 < length(tour1) && !became_max
+                        cost1 = Chrm.tours[r1].cost
+                        cost2 = Chrm.tours[r2].cost
+                        k1 += 1
+                        city1 = tour1[k1]
+                        for k2 = 1:length(tour2)+1
+                            new_cost2 = Calculate_new_cost_add_one(tour2, cost2, city1, k2, T, n_nodes)
+                            new_cost1 = Calculate_new_cost_remove_one(tour1, cost1, k1, T, n_nodes)
+                            do_it = false
+                            if r1 == max_tour_index
+                                if new_cost2 < max_tour_length
+                                    do_it = true
+                                end
+                            else
+                                if (new_cost2 - cost2) < (cost1 - new_cost1) && new_cost2< max_tour_length
+                                    do_it = true
+                                end
+                            end
+                            if do_it
+                                
+                                Chrm.tours[r1].cost = new_cost1
+                                Chrm.tours[r2].cost = new_cost2
+                                insert!(tour2, k2, city1)  
+                                deleteat!(tour1, k1)
+                                if new_cost2 > max_tour_length
+                                    max_tour_length = new_cost2
+                                    max_tour_index = r2 
+                                    became_max = true
+                                    
+                                end
+                                k1 -= 1
+                                improved = true
+                                break
+                            end
+                        end
+                    end
+                end
+            end
+        end
+    end
+    for tour in Chrm.tours
+        two_opt_on_route(tour, T, n_nodes)
+    end
+    Chrm.genes = Int[]
+    Chrm.fitness = maximum([Chrm.tours[i].cost for i=1:length(Chrm.tours)])
+    for tour in Chrm.tours
+        Chrm.genes = vcat(Chrm.genes, tour.Sequence)
+    end
+    return Chrm
 end
 
 function Find_Closeness(TT::Matrix{Float64}, h::Float64)

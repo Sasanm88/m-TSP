@@ -158,19 +158,21 @@ function Solve_all_intersections(chrm::Chromosome, Customers::Matrix{Float64}, d
     #             println("tour ", i, " , tour ", j)
                 tour1 = chrm.tours[i].Sequence
                 tour2 = chrm.tours[j].Sequence
-                intersected = true
-                while intersected 
-                    k1, k2 , intersected = find_intersections(tour1, tour2, Customers, depot)
-                    if intersected 
-                        t1 , t2, c1, c2 = Solve_one_intersections(tour1, tour2, T, k1, k2)
-                        tour1 = copy(t1)
-                        tour2 = copy(t2)
-                        chrm.tours[i].cost = c1
-                        chrm.tours[j].cost = c2
-                        chrm.tours[i].Sequence = tour1
-                        chrm.tours[j].Sequence = tour2
-                        intersected_ = true
-    #                     println("tour ", i, " , tour ", j, " ,k1=", k1, " ,k2=", k2)
+                if length(tour1) > 0 && length(tour2)>0
+                    intersected = true
+                    while intersected 
+                        k1, k2 , intersected = find_intersections(tour1, tour2, Customers, depot)
+                        if intersected 
+                            t1 , t2, c1, c2 = Solve_one_intersections(tour1, tour2, T, k1, k2)
+                            tour1 = copy(t1)
+                            tour2 = copy(t2)
+                            chrm.tours[i].cost = c1
+                            chrm.tours[j].cost = c2
+                            chrm.tours[i].Sequence = tour1
+                            chrm.tours[j].Sequence = tour2
+                            intersected_ = true
+        #                     println("tour ", i, " , tour ", j, " ,k1=", k1, " ,k2=", k2)
+                        end
                     end
                 end
             end

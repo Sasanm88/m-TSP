@@ -176,12 +176,12 @@ function Generate_new_generation(TT::Matrix{Float64}, Close_nodes::Matrix{Int}, 
     mu, sigma = popsize
     n_nodes = length(Population[1].genes)
 
-    if improve_count % 500 == 499 
+    if improve_count % 1500 == 1499 
         Diversify(Population, TT, demands, K, W, mu, tsp_tour, Customers, depot, improve_count)
     end
-    if improve_count % 10000 == 9999 
-        Diversify_(Population, TT, demands, K, W, mu, tsp_tour, Customers, depot)
-    end
+#     if improve_count % 5000 == 4999 
+#         Diversify_(Population, TT, demands, K, W, mu, tsp_tour, Customers, depot)
+#     end
     
     Sort_based_on_power(Population, num_nei)
     psize = length(Population)
@@ -191,36 +191,28 @@ function Generate_new_generation(TT::Matrix{Float64}, Close_nodes::Matrix{Int}, 
 #     Mutate(child, Mutation_Chance)
     obj, trips = SPLIT(TT, demands, K, W, child)
     offspring = Chromosome(child, obj, 0.0, trips)
-
-
-#     if round(obj,digits=4) < round(old_best, digits=4)
-#         println("Improvement in generation ", Gen_num, " by crossover: " , crss,"  ", round(old_best, digits=4) ," to ", round(obj,digits=4))
-# #         old_best = obj
-# #         counter2[crss] += 1
-#     end
     
     if rand() < Mutation_Chance
-#         Solve_all_intersections(chrm, Customers, Float64.(depot), T)
         Solve_all_intersections(offspring, Customers, depot, TT)
-        
-#         if rand() < 1.0
-# #             offspring = mutation_cross(offspring, T, n_nodes)
-#         else
-#             pm = 0.5*(1 - improve_count/3000)
-#             offspring = new_mutation(offspring, T, pm)
+        offspring = Enrich_the_chromosome(offspring, TT, Customers, n_nodes)
+#         if rand() < 0.5
+#             offspring = Enrich_the_chromosome(offspring, TT, Customers, n_nodes)
 #         end
     end
-    
-    offspring, imprv = Improve_chromosome(offspring, TT, Close_nodes, demands, W, n_nodes, roullet, old_best)
-   
+#     if rand() < Mutation_Chance
+#         offspring = Enrich_the_chromosome(offspring, TT, Customers, n_nodes)
+#     end
+    if improve_count > 1000
+        offspring, imprv = Improve_chromosome(offspring, TT, Close_nodes, demands, W, n_nodes, roullet, old_best)
+    end
     
     push!(Population, offspring)
     sort!(Population, by=x -> x.fitness)
 
     Perform_Survival_Plan(Population, mu, sigma)
-    if improve_count % 1000 == 0
-        Improve_Population(Population, TT, Close_nodes, demands, W, n_nodes)
-    end
+#     if improve_count % 2000 == 1999
+#         Improve_Population(Population, TT, Close_nodes, demands, W, n_nodes)
+#     end
         
     new_best = Population[1].fitness
     if (old_best - new_best) / new_best > 0.0005
@@ -232,9 +224,9 @@ function Generate_new_generation(TT::Matrix{Float64}, Close_nodes::Matrix{Int}, 
     t2 = time()
     
 
-#     if Gen_num % 1000 == 0
-#         println("Generation ", Gen_num, " the best objective is: ", old_best)
-#     end
+    if Gen_num % 1000 == 0
+        println("Generation ", Gen_num, " the best objective is: ", old_best)
+    end
     Gen_num += 1
     return Gen_num, old_best, Population, improve_count
 end
@@ -248,7 +240,7 @@ function Perform_Genetic_Algorithm(TT::Matrix{Float64}, demands::Vector{Int}, K:
     improve_count = 0
     Gen_num = 0
     old_best = 0.0
-    roullet = ones(Int, 6) * 100
+    roullet = ones(Int, 10) * 100
     tsp_tour, _ = find_tsp_tour1(TT[1:n_nodes+1, 1:n_nodes+1])
     Population, old_best = Generate_initial_population(TT, demands, K, W, mu, tsp_tour, Customers, depot) 
     count = 0

@@ -461,12 +461,16 @@ function tour_crossover(parent1::Chromosome, parent2::Chromosome, T::Matrix{Floa
             r = rand(1:length(P1.tours))
             push!(c, P1.tours[r])
             deleteat!(P1.tours, r)
-            chosen_parent = 2
+            if length(P2.tours)>0
+                chosen_parent = 2
+            end
         else
             r = rand(1:length(P2.tours))
             push!(c, P2.tours[r])
             deleteat!(P2.tours, r)
-            chosen_parent = 1  
+            if length(P1.tours)>0
+                chosen_parent = 1  
+            end
         end
     end
     counters = zeros(n_nodes)

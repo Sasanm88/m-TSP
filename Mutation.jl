@@ -434,10 +434,10 @@ function prob_mutation(chrm::Chromosome, T::Matrix{Float64}, n_nodes::Int, p0::F
         deleteat!(tour2.Sequence, delete2)
     end
     for i in delete1
-        put_one_city_in_one_tour(tour2, t1[i], T::Matrix{Float64}, n_nodes::Int)
+        put_city_in_one_tour(tour2, t1[i], T, n_nodes)
     end
     for i in delete2
-        put_one_city_in_one_tour(tour1, t2[i], T::Matrix{Float64}, n_nodes::Int)
+        put_city_in_one_tour(tour1, t2[i], T, n_nodes)
     end
     chrm.genes = Int[]
     chrm.fitness = maximum([chrm.tours[i].cost for i=1:length(chrm.tours)])
@@ -520,10 +520,10 @@ function prob_chunk_mutation(chrm::Chromosome, T::Matrix{Float64}, n_nodes::Int,
         deleteat!(tour2.Sequence, delete2)
     end
     for i in delete1
-        put_one_city_in_one_tour(tour2, t1[i], T::Matrix{Float64}, n_nodes::Int)
+        put_city_in_one_tour(tour2, t1[i], T::Matrix{Float64}, n_nodes::Int)
     end
     for i in delete2
-        put_one_city_in_one_tour(tour1, t2[i], T::Matrix{Float64}, n_nodes::Int)
+        put_city_in_one_tour(tour1, t2[i], T::Matrix{Float64}, n_nodes::Int)
     end
     chrm.genes = Int[]
     chrm.fitness = maximum([chrm.tours[i].cost for i=1:length(chrm.tours)])

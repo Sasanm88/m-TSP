@@ -270,13 +270,44 @@ function chunk_mutation_rand(chrm::Chromosome, T::Matrix{Float64}, chunk_length:
     return new_chrm
 end
 
-function put_one_city_in_one_tour(c::Tour, city::Int, T::Matrix{Float64}, n_nodes::Int)
+# function put_one_city_in_one_tour(c::Tour, city::Int, T::Matrix{Float64}, n_nodes::Int)
+#     least_increase = Inf
+#     best_position = 0
+#     tour = c.Sequence
+#     nt = length(tour)
+#     if nt==0
+#         increase = T[1, city+1] + T[city+1, n_nodes+2]
+#         best_position = 1
+#     else
+#         increase = T[1, city+1] + T[city+1, tour[1]+1] - T[1, tour[1]+1]
+#         if increase < least_increase
+#             least_increase = increase
+#             best_position = 1
+#         end
+#         for j = 2:nt
+#             increase = T[tour[j-1]+1, city+1] + T[city+1, tour[j]+1] - T[tour[j-1]+1, tour[j]+1]
+#             if increase < least_increase
+#                 least_increase = increase
+#                 best_position = j
+#             end
+#         end
+#         increase = T[tour[nt]+1, city+1] + T[city+1, n_nodes+2] - T[tour[nt]+1, n_nodes+2]
+#         if increase < least_increase
+#             least_increase = increase
+#             best_position = nt+1
+#         end
+#     end
+#     insert!(tour, best_position, city)
+#     c.cost += least_increase
+# end 
+
+function put_city_in_one_tour(c::Tour, city::Int, T::Matrix{Float64}, n_nodes::Int)
     least_increase = Inf
     best_position = 0
     tour = c.Sequence
     nt = length(tour)
     if nt==0
-        increase = T[1, city+1] + T[city+1, n_nodes+2]
+        least_increase = T[1, city+1] + T[city+1, n_nodes+2]
         best_position = 1
     else
         increase = T[1, city+1] + T[city+1, tour[1]+1] - T[1, tour[1]+1]
@@ -297,9 +328,70 @@ function put_one_city_in_one_tour(c::Tour, city::Int, T::Matrix{Float64}, n_node
             best_position = nt+1
         end
     end
-    insert!(tour, best_position, city)
+    insert!(c.Sequence, best_position, city)
     c.cost += least_increase
-end 
+end   
+
+function scatter_mutation(chrm::Chromosome, T::Matrix{Float64}, n_nodes::Int, m::Int, demands::Vector{Int}, W::Int, Customers::Matrix{Float64}, depot::Vector{Float64}, h1::Float64)
+    t1 = chrm.tours[1].Sequence;
+    sort!(chrm.tours, by=x->x.cost, rev=true)
+    means = [mean(Customers[t1, :], dims=1)[1,:] for t1 in [chrm.tours[i].Sequence for i=1:length(chrm.tours)]]
+
+    distances = zeros(m, m)
+    for i = 1:m-1
+        for j = i+1:m
+            distances[i,j] = euclidean(means[i], means[j])
+            distances[j,i] = distances[i,j]
+        end
+    end
+
+    all_tours = [i for i=1:m]
+
+    current_tour = 1
+    while length(all_tours) > 0
+        next_tour = 0
+        least_dist = 100000
+
+        if length(all_tours) == 1
+            next_tour = 1
+        else
+            for i in all_tours
+                if distances[current_tour, i] < least_dist
+                    if distances[current_tour, i] > 0
+                        least_dist = distances[current_tour, i]
+                        next_tour = i
+                    end
+                end
+            end
+        end
+
+        t1 = copy(chrm.tours[current_tour].Sequence)
+        tau = rand(1:Int(round(h1*length(t1))))
+        
+        Candidates = t1[sortperm([euclidean(Customers[i, :], means[next_tour]) for i in t1])][1:tau]
+
+        cities = findall(x->x in Candidates, t1)
+        Remove_cities_from_one_tour(chrm.tours[current_tour], cities, T, n_nodes)
+        deleteat!(chrm.tours[current_tour].Sequence, sort(cities))
+        for city in Candidates
+            put_city_in_one_tour(chrm.tours[next_tour], city, T, n_nodes)
+        end
+
+        deleteat!(all_tours, findfirst(x->x==current_tour, all_tours))
+        current_tour = next_tour
+    end
+    chrm.genes = Int[]
+    chrm.fitness = 0
+    for tour in chrm.tours
+        chrm.genes = vcat(chrm.genes, tour.Sequence)
+        if chrm.fitness < tour.cost
+            chrm.fitness = tour.cost
+        end
+    end
+    obj, trips = SPLIT(T, demands, m, W, chrm.genes)
+    chrm1 = Chromosome(chrm.genes, obj, 0.0, trips)
+    return chrm1
+end
 
 function prob_mutation(chrm::Chromosome, T::Matrix{Float64}, n_nodes::Int, p0::Float64)
     tour1 = chrm.tours[1]
@@ -342,10 +434,10 @@ function prob_mutation(chrm::Chromosome, T::Matrix{Float64}, n_nodes::Int, p0::F
         deleteat!(tour2.Sequence, delete2)
     end
     for i in delete1
-        put_one_city_in_one_tour(tour2, t1[i], T::Matrix{Float64}, n_nodes::Int)
+        put_city_in_one_tour(tour2, t1[i], T, n_nodes)
     end
     for i in delete2
-        put_one_city_in_one_tour(tour1, t2[i], T::Matrix{Float64}, n_nodes::Int)
+        put_city_in_one_tour(tour1, t2[i], T, n_nodes)
     end
     chrm.genes = Int[]
     chrm.fitness = maximum([chrm.tours[i].cost for i=1:length(chrm.tours)])
@@ -428,10 +520,10 @@ function prob_chunk_mutation(chrm::Chromosome, T::Matrix{Float64}, n_nodes::Int,
         deleteat!(tour2.Sequence, delete2)
     end
     for i in delete1
-        put_one_city_in_one_tour(tour2, t1[i], T::Matrix{Float64}, n_nodes::Int)
+        put_city_in_one_tour(tour2, t1[i], T::Matrix{Float64}, n_nodes::Int)
     end
     for i in delete2
-        put_one_city_in_one_tour(tour1, t2[i], T::Matrix{Float64}, n_nodes::Int)
+        put_city_in_one_tour(tour1, t2[i], T::Matrix{Float64}, n_nodes::Int)
     end
     chrm.genes = Int[]
     chrm.fitness = maximum([chrm.tours[i].cost for i=1:length(chrm.tours)])

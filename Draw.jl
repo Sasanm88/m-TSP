@@ -51,17 +51,17 @@ function Draw_Solution(chrm::Chromosome, depot::Vector{Float64}, Customers::Matr
     for i=2:m
         p = plot!(x[i], y[i], marker =:circle, label = "t"*string(i))
     end 
-    for (j,tour) in enumerate(chrm.tours)
-        println("Tour ", j, ":")
-        for (k,i) in enumerate(tour.Sequence)
-            print(i, " ")
-            if k%25==0
-                println()
-            end
-        end
-        println()
-        print("cost=", tour.cost)
-        println()
-    end
+#     for (j,tour) in enumerate(chrm.tours)
+#         println("Tour ", j, ":")
+#         for (k,i) in enumerate(tour.Sequence)
+#             print(i, " ")
+#             if k%25==0
+#                 println()
+#             end
+#         end
+#         println()
+#         print("cost=", tour.cost)
+#         println()
+#     end
     return p
 end

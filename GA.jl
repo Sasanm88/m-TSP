@@ -176,10 +176,10 @@ function Generate_new_generation(TT::Matrix{Float64}, Close_nodes::Matrix{Int}, 
     mu, sigma = popsize
     n_nodes = length(Population[1].genes)
 
-    if improve_count % 1500 == 1499 
+    if improve_count % 1000 == 999 
         Diversify(Population, TT, demands, K, W, mu, tsp_tour, Customers, depot, improve_count)
     end
-#     if improve_count % 5000 == 4999 
+#     if improve_count % 3000 == 2999 
 #         Diversify_(Population, TT, demands, K, W, mu, tsp_tour, Customers, depot)
 #     end
     
@@ -195,24 +195,24 @@ function Generate_new_generation(TT::Matrix{Float64}, Close_nodes::Matrix{Int}, 
     if rand() < Mutation_Chance
         Solve_all_intersections(offspring, Customers, depot, TT)
         offspring = Enrich_the_chromosome(offspring, TT, Customers, n_nodes)
-#         if rand() < 0.5
+#         if rand() < 1
 #             offspring = Enrich_the_chromosome(offspring, TT, Customers, n_nodes)
 #         end
     end
 #     if rand() < Mutation_Chance
 #         offspring = Enrich_the_chromosome(offspring, TT, Customers, n_nodes)
 #     end
-    if improve_count > 1000
-        offspring, imprv = Improve_chromosome(offspring, TT, Close_nodes, demands, W, n_nodes, roullet, old_best)
-    end
+#     if improve_count > 500
+#         offspring, imprv = Improve_chromosome(offspring, TT, Close_nodes, demands, W, n_nodes, roullet, old_best)
+#     end
     
     push!(Population, offspring)
     sort!(Population, by=x -> x.fitness)
 
     Perform_Survival_Plan(Population, mu, sigma)
-#     if improve_count % 2000 == 1999
-#         Improve_Population(Population, TT, Close_nodes, demands, W, n_nodes)
-#     end
+    if improve_count % 500 == 499
+        Improve_Population(Population, TT, Close_nodes, demands, W, n_nodes)
+    end
         
     new_best = Population[1].fitness
     if (old_best - new_best) / new_best > 0.0005
@@ -240,7 +240,7 @@ function Perform_Genetic_Algorithm(TT::Matrix{Float64}, demands::Vector{Int}, K:
     improve_count = 0
     Gen_num = 0
     old_best = 0.0
-    roullet = ones(Int, 10) * 100
+    roullet = ones(Int, 1) * 100
     tsp_tour, _ = find_tsp_tour1(TT[1:n_nodes+1, 1:n_nodes+1])
     Population, old_best = Generate_initial_population(TT, demands, K, W, mu, tsp_tour, Customers, depot) 
     count = 0

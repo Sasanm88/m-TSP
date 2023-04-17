@@ -69,7 +69,8 @@ function SPLIT(TT::Matrix{Float64}, demands::Vector{Int}, K::Int, W::Int, S::Vec
 #     return Labels
     trips = Vector{Tour}()
 
-    rs = argmin(Labels[n].Vir)
+#     rs = argmin(Labels[n].Vir)
+    rs = K
     for i = 1:rs
         push!(trips, Tour(Int[], 0.0))
     end
@@ -162,6 +163,7 @@ function SPLIT_test(TT::Matrix{Float64}, K::Int, S::Vector{Int}) #In m-TSP, dema
     trips = Vector{Tour}()
 
     rs = argmin(Labels[n].Vir)
+#     rs = K
     for i = 1:rs
         push!(trips, Tour(Int[], 0.0))
     end

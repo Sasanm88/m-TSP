@@ -713,9 +713,7 @@ function Improve_Population(P::Vector{Chromosome}, TT::Matrix{Float64}, Close_no
             search = Search_methods[r]
             f = chrm.fitness
             chrm = search(chrm, TT, Close_nodes, demands, W, n_nodes)
-#             if f > 118 && chrm.fitness< 118
-#                 println(string(search), "  ", f, "   ", chrm.fitness)
-#             end
+# 
         end
     end
 #     chrm = P[1]

@@ -194,7 +194,7 @@ function Generate_new_generation(TT::Matrix{Float64}, Close_nodes::Matrix{Int}, 
     
     if rand() < Mutation_Chance
         Solve_all_intersections(offspring, Customers, depot, TT)
-        offspring = Enrich_the_chromosome(offspring, TT, Customers, n_nodes)
+        offspring = Enrich_the_chromosome(offspring, TT, Customers, depot, n_nodes)
 #         if rand() < 1
 #             offspring = Enrich_the_chromosome(offspring, TT, Customers, n_nodes)
 #         end
@@ -224,9 +224,9 @@ function Generate_new_generation(TT::Matrix{Float64}, Close_nodes::Matrix{Int}, 
     t2 = time()
     
 
-    if Gen_num % 1000 == 0
-        println("Generation ", Gen_num, " the best objective is: ", old_best)
-    end
+#     if Gen_num % 1000 == 0
+#         println("Generation ", Gen_num, " the best objective is: ", old_best)
+#     end
     Gen_num += 1
     return Gen_num, old_best, Population, improve_count
 end

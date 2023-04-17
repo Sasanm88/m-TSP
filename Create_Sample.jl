@@ -64,6 +64,32 @@ function Read_TSPLIB_instance(sample_name::Symbol, tspeed::Int)
     return T
 end
 
+function Calculate_TSPLIB(sample::Symbol)
+    tsp = readTSPLIB(sample)
+    allNodes = tsp.nodes
+    num_of_nodes = size(allNodes)[1] - 1
+    T = Matrix{Float64}(undef, num_of_nodes + 2, num_of_nodes + 2)
+    depot = allNodes[1, :]
+    Nodes = allNodes[2:num_of_nodes+1, :]
+
+    T[1, 1] = 0.0
+    T[num_of_nodes+2, num_of_nodes+2] = 0.0
+    T[1, num_of_nodes+2] = 0.0
+    T[num_of_nodes+2, 1] = 0.0
+    @inbounds for i in 1:num_of_nodes
+        T[1, i+1] = euclidean(depot, Nodes[i, :])
+        T[i+1, 1] = T[1, i+1]
+        T[num_of_nodes+2, i+1] = T[1, i+1]
+        T[i+1, num_of_nodes+2] = T[1, i+1]
+        @inbounds for j in 1:num_of_nodes
+            T[i+1, j+1] = euclidean(Nodes[i, :], Nodes[j, :]) 
+            T[j+1, i+1] = T[i+1, j+1]
+        end
+    end
+
+    return T, depot, Nodes
+end
+
 function read_data(dir_name::String, sample_name::String)
     filename = joinpath(@__DIR__, "data/$(dir_name)/$(sample_name).txt")
     f = open(filename, "r")

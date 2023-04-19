@@ -53,7 +53,11 @@ function k_median(Customers::Matrix{Float64}, depot::Vector{Float64}, k::Int)
         # Compute the median of each cluster
         for j in 1:k
             cluster_points = data[findall(x->x==j, assignments_),:]
-            medians[j] = median(cluster_points, dims=1)[1,:]
+            if length(cluster_points) == 0
+                medians[j] = depot
+            else
+                medians[j] = median(cluster_points, dims=1)[1,:]
+            end
         end
 
         # Calculate the sum of distances from each cluster median to the depot
@@ -243,6 +247,7 @@ function Generate_initial_population(TT::Matrix{Float64}, demands::Vector{Int}, 
         if rand() < 1
 #             if rand() < 0.5
             S = Change_initial(tsp_tour, n_nodes)
+#             S = Creat_Random_Cromosome2(TT, n_nodes, K)
             obj, trips = SPLIT(TT, demands, K, W, S)
             chrm = Chromosome(S, obj, 0.0, trips)
             push!(Population, chrm)
@@ -252,7 +257,8 @@ function Generate_initial_population(TT::Matrix{Float64}, demands::Vector{Int}, 
         end
         
     end
-#     sort!(Population, by=x -> x.fitness)
+    sort!(Population, by=x -> x.fitness)
+#     deleteat!(Population, [i for i=mu+1:length(Population)])
     return Population, Population[1].fitness
 end
 
@@ -323,7 +329,7 @@ function find_tour_neighbors(tours::Vector{Tour}, Customers::Matrix{Float64}, de
             distances[j,i] = distances[i,j]
         end
     end
-    return [sortperm(distances[i,:])[2:min(m,3)] for i=1:m]
+    return [sortperm(distances[i,:])[2:min(m,10)] for i=1:m]
 end
 
 

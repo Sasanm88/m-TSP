@@ -377,6 +377,9 @@ function put_city_in_tour(c::Vector{Tour}, city::Int, T::Matrix{Float64}, n_node
 end          
 
 function new_crossover(parent1::Chromosome, parent2::Chromosome, T::Matrix{Float64}, n_nodes::Int64)
+    #7: At each step, select a parent randomly, select its shortest tour, add it to the new tours and remove all of its 
+    #cities from the tours of other parent. When m tours have been added, all the remaining cities will be placed in the 
+    #current tours based on a greedy approach (minimum increase)
     P1 = deepcopy(parent1)
     P2 = deepcopy(parent2)
     c = Tour[]
@@ -451,6 +454,9 @@ function new_crossover(parent1::Chromosome, parent2::Chromosome, T::Matrix{Float
 end
 
 function tour_crossover(parent1::Chromosome, parent2::Chromosome, T::Matrix{Float64}, n_nodes::Int64)
+    #8  At each step, select a different parent (if parent1 chosen at previous step, choose parent2), select a random tour from it,
+    #add it to the new tours. Delete all the repeating cities from the tours. 
+    #All the remaining cities will be placed in the current tours based on a greedy approach (minimum increase)
     P1 = deepcopy(parent1)
     P2 = deepcopy(parent2)
     c = Tour[]
@@ -506,6 +512,10 @@ function tour_crossover(parent1::Chromosome, parent2::Chromosome, T::Matrix{Floa
 end
                 
 function tour_crossover2(parent1::Chromosome, parent2::Chromosome, T::Matrix{Float64}, n_nodes::Int64)
+    #9  At each step, select a tour from parent1, and select the tour with maximum mutual cities from parent2. 
+    # Conduct a simple two point crossover between them and add it to the new tours.
+    # At the end, Delete all the repeating cities from the tours. 
+    # All the remaining cities will be placed in the current tours based on a greedy approach (minimum increase)
     P1 = deepcopy(parent1)
     P2 = deepcopy(parent2)
     c = Tour[]
@@ -593,7 +603,11 @@ function tour_crossover3(parent1::Chromosome, parent2::Chromosome, T::Matrix{Flo
             end
         end
         deleteat!(P2.tours, r2)
-        cc = Crossover_OX1_(tour1, tour2)
+        if min(length(tour1), length(tour2)) < 3
+            cc= tour1
+        else
+            cc = Crossover_OX1_(tour1, tour2)
+        end
         push!(c, Tour(cc, find_tour_length(cc, T)))
     end
     counters = zeros(n_nodes)

@@ -678,9 +678,9 @@ end
 function Improve_chromosome(chrm::Chromosome, TT::Matrix{Float64}, Close_nodes::Matrix{Int}, demands::Vector{Int}, W::Int, n_nodes::Int, roullet::Vector{Int}, old_best::Float64)
 #     Search_methods = [N1, N2, N3, N4, Ni1, Ni2, Ni3, Ni4, Ni5, Ni6, Ni7, N3r, N4sr, N4rs, N4rr, N5, N5r, N6, N6sr, N6rs, N6rr, N7, N7rs, N7sr, N7rr]
 #     Search_methods = [Ni1, Ni2, Ni3, Ni4, Ni5, N1]    #Ni4 not great
-    Search_methods = [N1]
+    Search_methods = [Ni1, Ni2, Ni3, Ni4, Ni5, N1]
 #     Search_methods = [N1, N2, N3, N4, N_cross, Ni1, Ni2, Ni3, Ni4, Ni5]
-    for i=1:1000
+    for i=1:100
         r = sample(1:length(Search_methods), weights(roullet))
 #         r= rand(1:length(Search_methods))
         search = Search_methods[r]

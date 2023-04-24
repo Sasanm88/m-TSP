@@ -413,6 +413,81 @@ function Enrich_the_chromosome(Chrm::Chromosome, T::Matrix{Float64}, Customers::
     return Chrm
 end
 
+function Enrich_the_chromosome2(Chrm::Chromosome, T::Matrix{Float64}, Customers::Matrix{Float64}, depot::Vector{Float64}, n_nodes::Int)   #Shift(0,1)
+    m = length(Chrm.tours)
+    temp = deepcopy(Chrm)
+    max_tour_index = argmax([Chrm.tours[i].cost for i=1:length(Chrm.tours)])
+    max_tour_length = Chrm.fitness
+    tour_neighbors = find_tour_neighbors(Chrm.tours, Customers, depot, m)
+    improved = true
+    count = 0
+    
+    while improved && count < 100
+        count += 1
+        improved = false
+        for r1 = 1:m
+            for r2 in tour_neighbors[r1]
+                if r2 != max_tour_index
+                    
+                    tour1 = Chrm.tours[r1].Sequence
+                    tour2 = Chrm.tours[r2].Sequence
+                    
+                    k1 = 0
+                    became_max = false 
+                    count2 = 0 
+                    while k1 < length(tour1) && !became_max
+
+                        cost1 = Chrm.tours[r1].cost
+                        cost2 = Chrm.tours[r2].cost
+                        k1 += 1
+                        city1 = tour1[k1]
+                        for k2 = 1:length(tour2)+1
+                            if Chrm.tours[r1].cost > Chrm.tours[r2].cost
+                                new_cost2 = Calculate_new_cost_add_one(tour2, cost2, city1, k2, T, n_nodes)
+                                new_cost1 = Calculate_new_cost_remove_one(tour1, cost1, k1, T, n_nodes)
+                                do_it = false
+                                if r1 == max_tour_index
+                                    if new_cost2 < max_tour_length
+                                        do_it = true
+                                    end
+                                else
+                                    if (new_cost2 - cost2) < (cost1 - new_cost1) && new_cost2< max_tour_length
+                                        do_it = true
+                                    end
+                                end
+                                if do_it
+
+                                    Chrm.tours[r1].cost = new_cost1
+                                    Chrm.tours[r2].cost = new_cost2
+                                    insert!(tour2, k2, city1)  
+                                    deleteat!(tour1, k1)
+                                    if new_cost2 > max_tour_length
+                                        max_tour_length = new_cost2
+                                        max_tour_index = r2 
+                                        became_max = true  
+                                    end
+                                    k1 -= 1
+                                    improved = true
+                                    break
+                                end
+                            end
+                        end
+                    end
+                end
+            end
+        end
+    end
+    for tour in Chrm.tours
+        two_opt_on_route(tour, T, n_nodes)
+    end
+    Chrm.genes = Int[]
+    Chrm.fitness = maximum([Chrm.tours[i].cost for i=1:length(Chrm.tours)])
+    for tour in Chrm.tours
+        Chrm.genes = vcat(Chrm.genes, tour.Sequence)
+    end
+    return Chrm
+end
+
 function Find_Closeness(TT::Matrix{Float64}, h::Float64)
     n_nodes = size(TT)[1] - 2
     num = Int(ceil(h * n_nodes))

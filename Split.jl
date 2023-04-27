@@ -6,8 +6,8 @@ mutable struct Label
 end
 
 
-function SPLIT(TT::Matrix{Float64}, demands::Vector{Int}, K::Int, W::Int, S::Vector{Int}) #In m-TSP, demands is a vector of ones and W is infinity
-    n = length(demands)
+function SPLIT(TT::Matrix{Float64}, K::Int, S::Vector{Int}) #In m-TSP, demands is a vector of ones and W is infinity
+    n = length(S)
     Labels = Label[]
     for i=1:n
         R = Int[]
@@ -42,14 +42,13 @@ function SPLIT(TT::Matrix{Float64}, demands::Vector{Int}, K::Int, W::Int, S::Vec
                 load = 0
                 t = 0
                 j = i
-                while (j<=n) && (load<=W)
-                    load += demands[S[j]]
+                while (j<=n)
                     if i==j
                         t = TT[1,S[j]+1] + TT[S[j]+1, n+2]
                     else
                         t = t - TT[S[j-1]+1,1] + TT[S[j-1]+1, S[j]+1] + TT[S[j]+1, n+2]
                     end
-                    if load<=W && r+1 in Labels[j].Ri
+                    if r+1 in Labels[j].Ri
                         old_t = 0.0
                         if i > 1
                             old_t = Labels[i-1].Vir[r]

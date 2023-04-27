@@ -268,15 +268,15 @@ function Creat_Random_Cromosome3(T::Matrix{Float64}, n_nodes::Int64)
     return S
 end
 
-function Generate_initial_population(TT::Matrix{Float64}, demands::Vector{Int}, K::Int, W::Int, mu::Int, tsp_tours::Vector{Vector{Int}}, Customers::Matrix{Float64}, depot::Vector{Float64})
+function Generate_initial_population(TT::Matrix{Float64}, K::Int, mu::Int, tsp_tours::Vector{Vector{Int}}, Customers::Matrix{Float64}, depot::Vector{Float64})
     n_tours = length(tsp_tours)
     if n_tours == 4
         best_tsp_tour = tsp_tours[4]
     end
     Population = Chromosome[]
-    n_nodes = length(demands)
+    n_nodes = size(TT)[1]-2
     for tsp_tour in tsp_tours
-        obj, trips = SPLIT(TT, demands, K, W, tsp_tour)
+        obj, trips = SPLIT(TT, K, tsp_tour)
         push!(Population, Chromosome(tsp_tour, obj, 0.0, trips))
     end
     S = Int[]
@@ -286,7 +286,7 @@ function Generate_initial_population(TT::Matrix{Float64}, demands::Vector{Int}, 
                 best_tsp_tour = tsp_tours[rand(1:n_tours)]
             end
             S = Change_initial(best_tsp_tour, n_nodes, K)
-            obj, trips = SPLIT(TT, demands, K, W, S)
+            obj, trips = SPLIT(TT, K, S)
             chrm = Chromosome(S, obj, 0.0, trips)
             push!(Population, chrm)
         else
@@ -325,9 +325,9 @@ end
 # end
 
 
-function Diversify(Population::Vector{Chromosome}, TT::Matrix{Float64}, demands::Vector{Int}, K::Int, W::Int, mu::Int, tsp_tours::Vector{Vector{Int}}, Customers::Matrix{Float64}, depot::Vector{Float64}, num::Int)
+function Diversify(Population::Vector{Chromosome}, TT::Matrix{Float64}, K::Int, mu::Int, tsp_tours::Vector{Vector{Int}}, Customers::Matrix{Float64}, depot::Vector{Float64}, num::Int)
     n_tours = length(tsp_tours)
-    n_nodes = length(demands)
+    n_nodes = size(TT)[1]-2
     n_best = Int(round(0.15 * mu)) 
     for i=n_best+1:length(Population)
         if rand() < 0.8
@@ -337,7 +337,7 @@ function Diversify(Population::Vector{Chromosome}, TT::Matrix{Float64}, demands:
             else
                 S = Creat_Random_Cromosome2(TT, n_nodes, K)
             end
-            obj, trips = SPLIT(TT, demands, K, W, S)
+            obj, trips = SPLIT(TT, K, S)
             chrm = Chromosome(S, obj, 0.0, trips)
         else
             chrm = initial_kmedian_solution(TT, Customers, depot, K)

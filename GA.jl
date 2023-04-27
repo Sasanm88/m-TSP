@@ -167,7 +167,7 @@ function best_route(Population::Vector{Chromosome})
     end
 end
 
-function Generate_new_generation(TT::Matrix{Float64}, Close_nodes::Matrix{Int}, demands::Vector{Int}, K::Int, W::Int,
+function Generate_new_generation(TT::Matrix{Float64}, Close_nodes::Matrix{Int}, K::Int,
         Population::Vector{Chromosome}, popsize::Tuple{Int64,Int64}, k_tournament::Int64, 
         Gen_num::Int64, old_best::Float64, improve_count::Int64, Mutation_Chance::Float64,
         tsp_tours::Vector{Vector{Int}}, roullet::Vector{Int}, num_nei::Int, crossover_functions::Vector{Int}, Customers::Matrix{Float64}, depot::Vector{Float64})
@@ -177,7 +177,7 @@ function Generate_new_generation(TT::Matrix{Float64}, Close_nodes::Matrix{Int}, 
     n_nodes = length(Population[1].genes)
 
     if improve_count % 1000 == 999 
-        Diversify(Population, TT, demands, K, W, mu, tsp_tours, Customers, depot, improve_count)
+        Diversify(Population, TT, K, mu, tsp_tours, Customers, depot, improve_count)
     end
 #     if improve_count % 3000 == 2999 
 #         Diversify_(Population, TT, demands, K, W, mu, tsp_tour, Customers, depot)
@@ -193,7 +193,7 @@ function Generate_new_generation(TT::Matrix{Float64}, Close_nodes::Matrix{Int}, 
 #     t4 = time()
 #     println("Reproduction took ", t4 - t3, " seconds")
 #     Mutate(child, Mutation_Chance)
-    obj, trips = SPLIT(TT, demands, K, W, child)
+    obj, trips = SPLIT(TT, K, child)
     offspring = Chromosome(child, obj, 0.0, trips)
 #     println("1")
 #     println([length(tour.Sequence) for tour in offspring.tours])
@@ -207,7 +207,7 @@ function Generate_new_generation(TT::Matrix{Float64}, Close_nodes::Matrix{Int}, 
 #     println([length(tour.Sequence) for tour in offspring.tours])
     
     if improve_count > 0
-        offspring, imprv = Improve_chromosome(offspring, TT, Close_nodes, demands, W, n_nodes, roullet, old_best)
+        offspring, imprv = Improve_chromosome(offspring, TT, Close_nodes, n_nodes, roullet, old_best)
     end
     
     push!(Population, offspring)
@@ -228,14 +228,14 @@ function Generate_new_generation(TT::Matrix{Float64}, Close_nodes::Matrix{Int}, 
     t2 = time()
     
 
-    if Gen_num % 10 == 0
+    if Gen_num % 1000 == 0
         println("Generation ", Gen_num, " the best objective is: ", old_best)
     end
     Gen_num += 1
     return Gen_num, old_best, Population, improve_count
 end
 
-function Perform_Genetic_Algorithm(TT::Matrix{Float64}, demands::Vector{Int}, K::Int, W::Int,h::Float64, popsize::Tuple{Int64,Int64},
+function Perform_Genetic_Algorithm(TT::Matrix{Float64}, K::Int, h::Float64, popsize::Tuple{Int64,Int64},
     k_tournament::Int64, num_iter::Int64, time_limit::Float64, Mutation_Chance::Float64, num_nei::Int, crossover_functions::Vector{Int}, Customers::Matrix{Float64}, depot::Vector{Float64}) #, tsp_tour::Vector{Int})
     n_nodes = size(TT)[1] - 2
     t1 = time()
@@ -255,7 +255,7 @@ function Perform_Genetic_Algorithm(TT::Matrix{Float64}, demands::Vector{Int}, K:
         push!(tsp_tours, tsp_tour)
     end
     
-    Population, old_best = Generate_initial_population(TT, demands, K, W, mu, tsp_tours, Customers, depot) 
+    Population, old_best = Generate_initial_population(TT, K, mu, tsp_tours, Customers, depot) 
 #     println("Initial population took ", time() - t1, " seconds")
     count = 0
 
@@ -263,7 +263,7 @@ function Perform_Genetic_Algorithm(TT::Matrix{Float64}, demands::Vector{Int}, K:
         if time() - t1 >= time_limit
             break
         end
-        Gen_num, old_best, Population, improve_count = Generate_new_generation(TT, ClosenessT, demands, K, W,
+        Gen_num, old_best, Population, improve_count = Generate_new_generation(TT, ClosenessT, K,
         Population, popsize, k_tournament, Gen_num, old_best, improve_count, Mutation_Chance, tsp_tours, roullet, num_nei, crossover_functions, Customers, depot)
         count += 1
     end

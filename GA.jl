@@ -170,14 +170,14 @@ end
 function Generate_new_generation(TT::Matrix{Float64}, Close_nodes::Matrix{Int}, demands::Vector{Int}, K::Int, W::Int,
         Population::Vector{Chromosome}, popsize::Tuple{Int64,Int64}, k_tournament::Int64, 
         Gen_num::Int64, old_best::Float64, improve_count::Int64, Mutation_Chance::Float64,
-        tsp_tour::Vector{Int}, roullet::Vector{Int}, num_nei::Int, crossover_functions::Vector{Int}, Customers::Matrix{Float64}, depot::Vector{Float64})
+        tsp_tours::Vector{Vector{Int}}, roullet::Vector{Int}, num_nei::Int, crossover_functions::Vector{Int}, Customers::Matrix{Float64}, depot::Vector{Float64})
     t1 = time()
 
     mu, sigma = popsize
     n_nodes = length(Population[1].genes)
 
     if improve_count % 1000 == 999 
-        Diversify(Population, TT, demands, K, W, mu, tsp_tour, Customers, depot, improve_count)
+        Diversify(Population, TT, demands, K, W, mu, tsp_tours, Customers, depot, improve_count)
     end
 #     if improve_count % 3000 == 2999 
 #         Diversify_(Population, TT, demands, K, W, mu, tsp_tour, Customers, depot)
@@ -219,7 +219,7 @@ function Generate_new_generation(TT::Matrix{Float64}, Close_nodes::Matrix{Int}, 
 #     end
         
     new_best = Population[1].fitness
-    if (old_best - new_best) / new_best > 0.0005
+    if round(old_best, digits=3) > round(new_best, digits=3)
         old_best = new_best
         improve_count = 0
     else
@@ -228,9 +228,9 @@ function Generate_new_generation(TT::Matrix{Float64}, Close_nodes::Matrix{Int}, 
     t2 = time()
     
 
-#     if Gen_num % 10 == 0
-#         println("Generation ", Gen_num, " the best objective is: ", old_best)
-#     end
+    if Gen_num % 10 == 0
+        println("Generation ", Gen_num, " the best objective is: ", old_best)
+    end
     Gen_num += 1
     return Gen_num, old_best, Population, improve_count
 end
@@ -246,8 +246,16 @@ function Perform_Genetic_Algorithm(TT::Matrix{Float64}, demands::Vector{Int}, K:
     Gen_num = 0
     old_best = 0.0
     roullet = ones(Int, 6) * 100
-    tsp_tour, _ = find_tsp_tour1(TT[1:n_nodes+1, 1:n_nodes+1])
-    Population, old_best = Generate_initial_population(TT, demands, K, W, mu, tsp_tour, Customers, depot) 
+    
+    tsp_tours = find_tsp_tour2(TT[1:n_nodes+1, 1:n_nodes+1])
+    
+    if n_nodes < 1400
+#         tsp_tours = Vector{Vector{Int}}()
+        tsp_tour, _ = find_tsp_tour1(TT[1:n_nodes+1, 1:n_nodes+1])
+        push!(tsp_tours, tsp_tour)
+    end
+    
+    Population, old_best = Generate_initial_population(TT, demands, K, W, mu, tsp_tours, Customers, depot) 
 #     println("Initial population took ", time() - t1, " seconds")
     count = 0
 
@@ -256,7 +264,7 @@ function Perform_Genetic_Algorithm(TT::Matrix{Float64}, demands::Vector{Int}, K:
             break
         end
         Gen_num, old_best, Population, improve_count = Generate_new_generation(TT, ClosenessT, demands, K, W,
-        Population, popsize, k_tournament, Gen_num, old_best, improve_count, Mutation_Chance, tsp_tour, roullet, num_nei, crossover_functions, Customers, depot)
+        Population, popsize, k_tournament, Gen_num, old_best, improve_count, Mutation_Chance, tsp_tours, roullet, num_nei, crossover_functions, Customers, depot)
         count += 1
     end
     t2 = time()

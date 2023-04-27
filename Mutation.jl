@@ -130,7 +130,7 @@ end
 
 function Mutate(child::Vector{Int}, Mutation_Chance::Float64)
     n_nodes = length(child)
-    Mutation_functions = [Displacement_mutation, Exchange_mutation, Insertion_mutation, Simple_Inversion_mutation, Inversion_mutation, Scramble_mutation, tour_mutation]
+    Mutation_functions = [Displacement_mutation, Simple_Inversion_mutation, Inversion_mutation]
     if rand() < Mutation_Chance
         Mutation_functions[rand(1:length(Mutation_functions))](child, n_nodes)
     end

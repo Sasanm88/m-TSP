@@ -63,6 +63,21 @@ function Crossover_OX1_(parent1::Vector{Int64}, parent2::Vector{Int64})   #order
     return child
 end
 
+function Crossover_single_point(parent1::Vector{Int64}, parent2::Vector{Int64}) 
+    n1 = length(parent1)
+    n2 = length(parent2)
+    if n1 == 0
+        return parent2
+    elseif n2==0
+        return parent1
+    end
+    idx1 = rand(1:n1)
+    idx2 = rand(1:n2)
+
+    child = vcat(parent1[1:idx1], parent2[idx2:n2])
+    return child
+end
+
 function Crossover_POS(parent1::Vector{Int64}, parent2::Vector{Int64}, n_nodes::Int64)  #position based crossover
     child = zeros(Int64, n_nodes)
     num_pos = rand(1:n_nodes-1)
@@ -377,6 +392,9 @@ function put_city_in_tour(c::Vector{Tour}, city::Int, T::Matrix{Float64}, n_node
 end          
 
 function new_crossover(parent1::Chromosome, parent2::Chromosome, T::Matrix{Float64}, n_nodes::Int64)
+    #7: At each step, select a parent randomly, select its shortest tour, add it to the new tours and remove all of its 
+    #cities from the tours of other parent. When m tours have been added, all the remaining cities will be placed in the 
+    #current tours based on a greedy approach (minimum increase)
     P1 = deepcopy(parent1)
     P2 = deepcopy(parent2)
     c = Tour[]
@@ -451,6 +469,9 @@ function new_crossover(parent1::Chromosome, parent2::Chromosome, T::Matrix{Float
 end
 
 function tour_crossover(parent1::Chromosome, parent2::Chromosome, T::Matrix{Float64}, n_nodes::Int64)
+    #8  At each step, select a different parent (if parent1 chosen at previous step, choose parent2), select a random tour from it,
+    #add it to the new tours. Delete all the repeating cities from the tours. 
+    #All the remaining cities will be placed in the current tours based on a greedy approach (minimum increase)
     P1 = deepcopy(parent1)
     P2 = deepcopy(parent2)
     c = Tour[]
@@ -506,6 +527,10 @@ function tour_crossover(parent1::Chromosome, parent2::Chromosome, T::Matrix{Floa
 end
                 
 function tour_crossover2(parent1::Chromosome, parent2::Chromosome, T::Matrix{Float64}, n_nodes::Int64)
+    #9  At each step, select a tour from parent1, and select the tour with maximum mutual cities from parent2. 
+    # Conduct a simple two point crossover between them and add it to the new tours.
+    # At the end, Delete all the repeating cities from the tours. 
+    # All the remaining cities will be placed in the current tours based on a greedy approach (minimum increase)
     P1 = deepcopy(parent1)
     P2 = deepcopy(parent2)
     c = Tour[]
@@ -527,18 +552,20 @@ function tour_crossover2(parent1::Chromosome, parent2::Chromosome, T::Matrix{Flo
         deleteat!(P2.tours, r2)
         if length(tour1) <= length(tour2)
             if length(tour1) <= 4
-                return P1.genes
+                push!(c, Tour(tour2, find_tour_length(tour2, T)))
+            else
+                idx1 , idx2 = sort(sample(2:length(tour1)-1, 2, replace = false))
+                cc = vcat(tour2[1:idx1-1], tour1[idx1:idx2], tour2[idx2+1:length(tour2)])
+                push!(c, Tour(cc, find_tour_length(cc, T)))
             end
-            idx1 , idx2 = sort(sample(2:length(tour1)-1, 2, replace = false))
-            cc = vcat(tour2[1:idx1-1], tour1[idx1:idx2], tour2[idx2+1:length(tour2)])
-            push!(c, Tour(cc, find_tour_length(cc, T)))
         else
             if length(tour2) <= 4
-                return P1.genes
+                push!(c, Tour(tour1, find_tour_length(tour1, T)))
+            else
+                idx1 , idx2 = sort(sample(2:length(tour2)-1, 2, replace = false))
+                cc = vcat(tour1[1:idx1-1], tour2[idx1:idx2], tour1[idx2+1:length(tour1)])
+                push!(c, Tour(cc, find_tour_length(cc, T)))
             end
-            idx1 , idx2 = sort(sample(2:length(tour2)-1, 2, replace = false))
-            cc = vcat(tour1[1:idx1-1], tour2[idx1:idx2], tour1[idx2+1:length(tour1)])
-            push!(c, Tour(cc, find_tour_length(cc, T)))
         end    
     end
     counters = zeros(n_nodes)
@@ -574,6 +601,10 @@ function tour_crossover2(parent1::Chromosome, parent2::Chromosome, T::Matrix{Flo
 end                
                 
 function tour_crossover3(parent1::Chromosome, parent2::Chromosome, T::Matrix{Float64}, n_nodes::Int64)
+    #9  At each step, select a tour from parent1, and select the tour with maximum mutual cities from parent2. 
+    # Conduct a modified Order crossover between them and add it to the new tours.
+    # At the end, Delete all the repeating cities from the tours. 
+    # All the remaining cities will be placed in the current tours based on a greedy approach (minimum increase)
     P1 = deepcopy(parent1)
     P2 = deepcopy(parent2)
     c = Tour[]
@@ -593,7 +624,11 @@ function tour_crossover3(parent1::Chromosome, parent2::Chromosome, T::Matrix{Flo
             end
         end
         deleteat!(P2.tours, r2)
-        cc = Crossover_OX1_(tour1, tour2)
+#         if min(length(tour1), length(tour2)) < 3
+#             cc= tour1
+#         else
+        cc = Crossover_single_point(tour1, tour2)
+#         end
         push!(c, Tour(cc, find_tour_length(cc, T)))
     end
     counters = zeros(n_nodes)

@@ -54,27 +54,20 @@ function Reproduce(TT::Matrix{Float64}, parent1::Chromosome, parent2::Chromosome
     rs = crossover_functions
     r = rs[rand(1:length(rs))]
     
-#     r = 7
-    if r == 1
-        return Crossover_OX1(parent1.genes, parent2.genes, n_nodes), r  #4730
-    elseif r == 2
-        return Crossover_OX2(parent1.genes, parent2.genes, n_nodes), r  #4618
-    elseif r == 3
-        return Crossover_POS(parent1.genes, parent2.genes, n_nodes), r  #4712
-    elseif r == 4
-        return Crossover_CX(parent1.genes, parent2.genes, n_nodes), r  #4706
-    elseif r == 5
+    if r == 0
+        return Crossover_HX_(TT, parent1.genes, parent2.genes, n_nodes), r
+    elseif r == 1
         return Crossover_HX(TT, parent1.genes, parent2.genes, n_nodes), r #4244
-    elseif r == 6
-        return Crossover_PMX(parent1.genes, parent2.genes, n_nodes), r  #4695
-    elseif r == 7
-        return new_crossover(parent1, parent2, TT, n_nodes), r
-    elseif r == 8
-        return tour_crossover(parent1, parent2, TT, n_nodes), r
-    elseif r == 9
+    elseif r == 2
         return tour_crossover2(parent1, parent2, TT, n_nodes), r
-    elseif r == 10
+    elseif r == 3
         return tour_crossover3(parent1, parent2, TT, n_nodes), r
+    elseif r == 4
+        return tour_crossover4(parent1, parent2, TT, n_nodes), r
+    elseif r == 5
+        return tour_crossover5(parent1, parent2, TT, n_nodes), r
+    elseif r == 6
+        return tour_crossover6(parent1, parent2, TT, n_nodes), r
     end
 end
 
@@ -206,7 +199,7 @@ function Generate_new_generation(TT::Matrix{Float64}, Close_nodes::Matrix{Int}, 
 #     println("2")
 #     println([length(tour.Sequence) for tour in offspring.tours])
     
-    if improve_count > 0
+    if improve_count%10 ==0 
         offspring, imprv = Improve_chromosome(offspring, TT, Close_nodes, n_nodes, roullet, old_best)
     end
     
@@ -215,7 +208,7 @@ function Generate_new_generation(TT::Matrix{Float64}, Close_nodes::Matrix{Int}, 
 
     Perform_Survival_Plan(Population, mu, sigma)
 #     if improve_count % 500 == 499
-#         Improve_Population(Population, TT, Close_nodes, demands, W, n_nodes)
+#         Improve_Population(Population, TT, Close_nodes, n_nodes)
 #     end
         
     new_best = Population[1].fitness
@@ -245,7 +238,7 @@ function Perform_Genetic_Algorithm(TT::Matrix{Float64}, K::Int, h::Float64, pops
     improve_count = 0
     Gen_num = 0
     old_best = 0.0
-    roullet = ones(Int, 6) * 100
+    roullet = ones(Int, 4) * 100
     
     tsp_tours = find_tsp_tour2(TT[1:n_nodes+1, 1:n_nodes+1])
     

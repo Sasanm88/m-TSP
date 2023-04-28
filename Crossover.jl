@@ -1,82 +1,6 @@
 using StatsBase
 
 
-function Crossover_OX1(parent1::Vector{Int64}, parent2::Vector{Int64}, n_nodes::Int64)   #order crossover
-    child = zeros(Int64, n_nodes)
-    idx1 = rand(2:n_nodes-1)
-    idx2 = rand(2:n_nodes-1)
-    if idx1 > idx2
-        temp = idx1
-        idx1 = idx2
-        idx2 = temp
-    end
-    copy_from_P1 = parent1[idx1:idx2] 
-    child[idx1:idx2] = copy_from_P1
-    index = 1
-    for gene in parent2
-        if index == idx1
-            if idx2 == n_nodes
-                break
-            else
-                index = idx2+1
-            end
-        end
-        if !(gene in copy_from_P1)
-            child[index] = gene
-            index += 1
-        end
-    end
-    return child
-end
-
-function Crossover_OX1_(parent1::Vector{Int64}, parent2::Vector{Int64})   #order crossover
-    
-    n_nodes = min(length(parent1), length(parent2))
-    child = zeros(Int64, n_nodes)
-    idx1 = rand(2:n_nodes-1)
-    idx2 = rand(2:n_nodes-1)
-    if idx1 > idx2
-        temp = idx1
-        idx1 = idx2
-        idx2 = temp
-    end
-    copy_from_P1 = parent1[idx1:idx2] 
-    child[idx1:idx2] = copy_from_P1
-    index = 1
-    for (i,gene) in enumerate(parent2)
-        if index == idx1
-            if idx2 == n_nodes
-                break
-            else
-                index = idx2+1
-            end
-        end
-        if !(gene in copy_from_P1)
-            if index > length(child)
-                push!(child, gene)
-            else
-                child[index] = gene
-            end
-            index += 1
-        end
-    end
-    return child
-end
-
-function Crossover_single_point(parent1::Vector{Int64}, parent2::Vector{Int64}) 
-    n1 = length(parent1)
-    n2 = length(parent2)
-    if n1 == 0
-        return parent2
-    elseif n2==0
-        return parent1
-    end
-    idx1 = rand(1:n1)
-    idx2 = rand(1:n2)
-
-    child = vcat(parent1[1:idx1], parent2[idx2:n2])
-    return child
-end
 
 function Crossover_POS(parent1::Vector{Int64}, parent2::Vector{Int64}, n_nodes::Int64)  #position based crossover
     child = zeros(Int64, n_nodes)
@@ -88,42 +12,6 @@ function Crossover_POS(parent1::Vector{Int64}, parent2::Vector{Int64}, n_nodes::
     for i in parent2
         if !(i in selected_p1)
             child[findfirst(x->x==0, child)] = i
-        end
-    end
-    return child
-end
-
-
-function Crossover_CX(parent1::Vector{Int64}, parent2::Vector{Int64}, n_nodes::Int64)  #Cyclic crossover 
-    child = zeros(Int64, n_nodes)
-    cycles = []
-    labels = zeros(n_nodes)
-    abs_p2 = abs.(parent2)
-    while 0 in labels
-        cycle = []
-        idx1 = findfirst(x->x == 0, labels)
-        labels[idx1] = 1
-        node1 = parent1[idx1]
-        push!(cycle, idx1)
-        while true
-            idx = findfirst(x->x == node1, parent2)
-            if idx == idx1
-                break
-            else
-                push!(cycle,idx)
-                node1 = parent1[idx]
-                labels[idx] = 1
-            end
-        end
-        push!(cycles,cycle)
-    end
-    for (i,cycle) in enumerate(cycles)
-        for c in cycle
-            if i%2==0
-                child[c]=parent1[c]
-            else
-                child[c] = parent2[c]
-            end
         end
     end
     return child
@@ -143,56 +31,114 @@ function Crossover_OX2(parent1::Vector{Int64}, parent2::Vector{Int64}, n_nodes::
     return child
 end
 
-
-function find_mapping(Dict, parent_selected_part, i)
-    while true 
-        j = Dict[i]
-        if !(j in parent_selected_part)
-            return j
+function Crossover_HX_(TT::Matrix{Float64}, parent1::Vector{Int64}, parent2::Vector{Int64}, n_nodes::Int64)   #heuristic crossover 
+    
+    remaining_cities = copy(parent1)
+    r = rand(1:n_nodes)
+    current_city = remaining_cities[r]
+    child = [current_city]
+    deleteat!(remaining_cities, r)
+    p = 1
+    child_mask = [false for i=1:n_nodes]
+    child_mask[current_city] = true
+    
+    while sum(child_mask) < n_nodes
+        if p == 1
+            pos1 = r
+            pos2 = findfirst(x->x==current_city, parent2)
         else
-            i=j
+            pos1 = findfirst(x->x==current_city, parent1)
+            pos2 = r
         end
-    end
-end
+        
+        next_city = n_nodes+2
+        min_edge = 100000
 
-function Crossover_PMX(parent1::Vector{Int64}, parent2::Vector{Int64}, n_nodes::Int64)   #Partially mapped crossover
-    child1 = zeros(Int64, n_nodes)
-#     child2 = zeros(Int64, n_nodes)
-    idx1 = rand(2:n_nodes-1)
-    idx2 = rand(2:n_nodes-1)
-    if idx1 > idx2
-        temp = idx1
-        idx1 = idx2
-        idx2 = temp
-    end
-
-    copy_from_P1 = parent1[idx1:idx2] 
-    copy_from_P2 = parent2[idx1:idx2]
-    child1[idx1:idx2] = copy_from_P2
-    child1[1:idx1-1] = parent1[1:idx1-1]
-    child1[idx2+1:n_nodes] = parent1[idx2+1:n_nodes]
-#     child2[idx1:idx2] = copy_from_P1
-#     child2[1:idx1-1] = parent2[1:idx1-1]
-#     child2[idx2+1:n_nodes] = parent2[idx2+1:n_nodes]
-#     change1 = Dict{Int, Int}()
-    change2 = Dict{Int, Int}()
-    for i=1:idx2-idx1+1
-#         change1[copy_from_P1[i]] = copy_from_P2[i]
-        change2[copy_from_P2[i]] = copy_from_P1[i]
-    end
-    for i=1:n_nodes
-        if i < idx1 || i>idx2
-            if child1[i] in copy_from_P2
-                child1[i] = find_mapping(change2, copy_from_P2, child1[i])
+        if pos1 == 1
+            if !child_mask[parent1[pos1+1]]
+                if TT[current_city+1,parent1[pos1+1]+1] < min_edge
+                    next_city = parent1[pos1+1]
+                    min_edge = TT[current_city+1,parent1[pos1+1]+1]
+                    p = 1
+                    r = pos1+1
+                end
             end
-#             if child2[i] in copy_from_P1
-#                 child2[i] = find_mapping(change1, copy_from_P1, child2[i])
-#             end
+        elseif pos1==n_nodes
+            if !child_mask[parent1[pos1-1]] 
+                if TT[current_city+1,parent1[pos1-1]+1] < min_edge
+                    next_city = parent1[pos1-1]
+                    min_edge = TT[current_city+1,parent1[pos1-1]+1]
+                    p = 1
+                    r = pos1-1
+                end
+            end
+        else
+            if !child_mask[parent1[pos1+1]]
+                if TT[current_city+1,parent1[pos1+1]+1] < min_edge
+                    next_city = parent1[pos1+1]
+                    min_edge = TT[current_city+1,parent1[pos1+1]+1]
+                    p = 1
+                    r = pos1+1
+                end
+            end
+            if !child_mask[parent1[pos1-1]]
+                if TT[current_city+1,parent1[pos1-1]+1] < min_edge
+                    next_city = parent1[pos1-1]
+                    min_edge = TT[current_city+1,parent1[pos1-1]+1]
+                    p = 1
+                    r = pos1-1
+                end
+            end
         end
-    end
-    return child1 #, child2
-end
 
+        if pos2 == 1
+            if !child_mask[parent2[pos2+1]]
+                if TT[current_city+1, parent2[pos2+1]+1] < min_edge
+                    next_city = parent2[pos2+1]
+                    min_edge = TT[current_city+1,parent2[pos2+1]+1]
+                    p = 2
+                    r = pos2+1
+                end
+            end
+        elseif pos2==n_nodes
+            if !child_mask[parent2[pos2-1]]
+                if TT[current_city+1, parent2[pos2-1]+1] < min_edge
+                    next_city = parent2[pos2-1]
+                    min_edge = TT[current_city+1,parent2[pos2-1]+1]
+                    p = 2
+                    r = pos2 - 1
+                end
+            end
+        else
+            if !child_mask[parent2[pos2+1]]
+                if TT[current_city+1, parent2[pos2+1]+1] < min_edge
+                    next_city = parent2[pos2+1]
+                    min_edge = TT[current_city+1,parent2[pos2+1]+1]
+                    p = 2
+                    r = pos2+1
+                end
+            end
+            if !child_mask[parent2[pos2-1]]
+                if TT[current_city+1, parent2[pos2-1]+1] < min_edge
+                    next_city = parent2[pos2-1]
+                    min_edge = TT[current_city+1,parent2[pos2-1]+1]
+                    p = 2
+                    r = pos2-1
+                end
+            end
+        end
+
+        if next_city == n_nodes+2
+            remainings = findall(x->x==false, child_mask)
+            next_city = remainings[rand(1:length(remainings))]
+        end
+
+        current_city = next_city
+        push!(child, next_city)
+        child_mask[next_city] = true
+    end
+    return child
+end
 
 function Crossover_HX(TT::Matrix{Float64}, parent1::Vector{Int64}, parent2::Vector{Int64}, n_nodes::Int64)   #heuristic crossover 
     
@@ -391,140 +337,38 @@ function put_city_in_tour(c::Vector{Tour}, city::Int, T::Matrix{Float64}, n_node
     end
 end          
 
-function new_crossover(parent1::Chromosome, parent2::Chromosome, T::Matrix{Float64}, n_nodes::Int64)
-    #7: At each step, select a parent randomly, select its shortest tour, add it to the new tours and remove all of its 
-    #cities from the tours of other parent. When m tours have been added, all the remaining cities will be placed in the 
-    #current tours based on a greedy approach (minimum increase)
-    P1 = deepcopy(parent1)
-    P2 = deepcopy(parent2)
-    c = Tour[]
-    max_tour_length = 0.0
-    m = length(P1.tours)
-    for i=1:m
-        if length(P1.tours) + length(P2.tours) == 0
-            break
-        end
-        if length(P2.tours) == 0
-            pr = 1
-        elseif length(P1.tours) == 0
-            pr = 2
+function put_cities_in_tour(c::Tour, cities::Vector{Int}, T::Matrix{Float64}, n_nodes::Int)
+    tour = c.Sequence
+    for city in cities
+        least_increase = Inf
+        best_position = 0
+        nt = length(tour)
+        if nt==0
+            increase = T[1, city+1] + T[city+1, n_nodes+2]
+            best_position = 1
         else
-            if rand() < 0.5
-                pr = 1
-            else
-                pr = 2
+            increase = T[1, city+1] + T[city+1, tour[1]+1] - T[1, tour[1]+1]
+            if increase < least_increase
+                least_increase = increase
+                best_position = 1
+            end
+            for j = 2:nt
+                increase = T[tour[j-1]+1, city+1] + T[city+1, tour[j]+1] - T[tour[j-1]+1, tour[j]+1]
+                if increase < least_increase
+                    least_increase = increase
+                    best_position = j
+                end
+            end
+            increase = T[tour[nt]+1, city+1] + T[city+1, n_nodes+2] - T[tour[nt]+1, n_nodes+2]
+            if increase < least_increase
+                least_increase = increase
+                best_position = nt+1
             end
         end
-        
-        if pr == 1
-            r = argmin([tour.cost for tour in P1.tours])
-            if P1.tours[r].cost > max_tour_length
-                max_tour_length = P1.tours[r].cost
-                pushfirst!(c, P1.tours[r])
-            else
-                push!(c, P1.tours[r])
-            end
-            for city in P1.tours[r].Sequence
-                Remove_one_city(P2.tours, city, T, n_nodes)
-            end
-            deleteat!(P1.tours, r)
-        else
-            r = argmin([tour.cost for tour in P2.tours])
-#             println("tour ", r, " chosen from parent 2")
-            if P2.tours[r].cost > max_tour_length
-                max_tour_length = P2.tours[r].cost
-                pushfirst!(c, P2.tours[r])
-            else
-                push!(c, P2.tours[r])
-            end
-            
-            for city in P2.tours[r].Sequence
-                Remove_one_city(P1.tours, city, T, n_nodes)
-            end
-            deleteat!(P2.tours, r)
-        end
+        insert!(tour, best_position, city)
+        c.cost += least_increase
     end
-    Remaining = Int[]
-    for tour in P1.tours
-        for city in tour.Sequence
-            push!(Remaining, city)
-        end
-    end
-    for tour in P2.tours
-        for city in tour.Sequence
-            push!(Remaining, city)
-        end
-    end
-    R = collect(Set(Remaining))
-    for city in R 
-        put_city_in_tour(c, city, T, n_nodes)
-    end
-    child = Int[]
-    for tour in c
-        for city in tour.Sequence
-            push!(child, city)
-        end
-    end
-    return child
-end
-
-function tour_crossover(parent1::Chromosome, parent2::Chromosome, T::Matrix{Float64}, n_nodes::Int64)
-    #8  At each step, select a different parent (if parent1 chosen at previous step, choose parent2), select a random tour from it,
-    #add it to the new tours. Delete all the repeating cities from the tours. 
-    #All the remaining cities will be placed in the current tours based on a greedy approach (minimum increase)
-    P1 = deepcopy(parent1)
-    P2 = deepcopy(parent2)
-    c = Tour[]
-    m = length(P1.tours)
-    chosen_parent = 1
-    for i=1:m
-        if chosen_parent == 1
-            r = rand(1:length(P1.tours))
-            push!(c, P1.tours[r])
-            deleteat!(P1.tours, r)
-            if length(P2.tours)>0
-                chosen_parent = 2
-            end
-        else
-            r = rand(1:length(P2.tours))
-            push!(c, P2.tours[r])
-            deleteat!(P2.tours, r)
-            if length(P1.tours)>0
-                chosen_parent = 1  
-            end
-        end
-    end
-    counters = zeros(n_nodes)
-    outsiders = Int[]
-    for tour in c
-        delete_indices = Int[]
-        for (j,node) in enumerate(tour.Sequence)
-            if counters[node] > 0
-                push!(delete_indices, j)
-            else
-                counters[node] += 1
-            end
-        end
-        if length(delete_indices) == length(tour.Sequence)
-            tour.cost = 0.0
-            tour.Sequence = Int[]
-        elseif length(delete_indices)>0
-            tour.cost = Remove_cities_from_one_tour(tour, delete_indices, T, n_nodes)
-            deleteat!(tour.Sequence, delete_indices)
-        end
-    end
-    outsiders = findall(x->x==0, counters)   
-    for city in outsiders 
-        put_city_in_tour(c, city, T, n_nodes)
-    end
-    child = Int[]
-    for tour in c
-        for city in tour.Sequence
-            push!(child, city)
-        end
-    end
-    return child
-end
+end  
                 
 function tour_crossover2(parent1::Chromosome, parent2::Chromosome, T::Matrix{Float64}, n_nodes::Int64)
     #9  At each step, select a tour from parent1, and select the tour with maximum mutual cities from parent2. 
@@ -587,6 +431,86 @@ function tour_crossover2(parent1::Chromosome, parent2::Chromosome, T::Matrix{Flo
             deleteat!(tour.Sequence, delete_indices)
         end
     end
+#     sort!(c, by=x -> x.cost)
+    outsiders = findall(x->x==0, counters)   
+    for city in outsiders 
+        put_city_in_tour(c, city, T, n_nodes)
+    end
+    
+    child = Int[]
+    for tour in c
+        for city in tour.Sequence
+            push!(child, city)
+        end
+    end
+    return child
+end                
+                
+function tour_crossover3(parent1::Chromosome, parent2::Chromosome, T::Matrix{Float64}, n_nodes::Int64)
+    #10  At each step, select a tour from parent1, and select the tour with maximum mutual cities from parent2. 
+    # Just keep the mutual cities in one of the tours
+    # All the remaining cities will be placed in the current tours based on a greedy approach (minimum increase)
+    P1 = deepcopy(parent1)
+    P2 = deepcopy(parent2)
+    c = Tour[]
+    m = length(P1.tours)
+
+    for i=1:m
+        tour1 = P1.tours[i].Sequence
+        max_intersection = -1
+        tour2 = Int[]
+        mutuals = Int[]
+        r2 = 0
+        for j=1:length(P2.tours)
+            mutual_cities = intersect(tour1, P2.tours[j].Sequence)
+            inter = length(mutual_cities)
+            if inter > max_intersection
+                max_intersection = inter
+                tour2 = P2.tours[j].Sequence
+                r2 = j
+                mutuals = mutual_cities
+            end
+        end
+        deleteat!(P2.tours, r2)
+        mutual_indices = Int[]
+        if rand() < 0.5
+            for (j, node) in enumerate(tour1)
+                if node in mutuals 
+                    push!(mutual_indices, j)
+                end
+            end
+            cc = tour1[mutual_indices]
+            push!(c, Tour(cc, find_tour_length(cc, T)))
+        else
+            for (j, node) in enumerate(tour2)
+                if node in mutuals 
+                    push!(mutual_indices, j)
+                end
+            end
+            cc = tour2[mutual_indices]
+            push!(c, Tour(cc, find_tour_length(cc, T)))
+        end
+    end
+    counters = zeros(n_nodes)
+    outsiders = Int[]
+    for tour in c
+        delete_indices = Int[]
+        for (j,node) in enumerate(tour.Sequence)
+            if counters[node] > 0
+                push!(delete_indices, j)
+            else
+                counters[node] += 1
+            end
+        end
+        if length(delete_indices) == length(tour.Sequence)
+            tour.cost = 0.0
+            tour.Sequence = Int[]
+        elseif length(delete_indices)>0
+            tour.cost = Remove_cities_from_one_tour(tour, delete_indices, T, n_nodes)
+            deleteat!(tour.Sequence, delete_indices)
+        end
+    end
+    sort!(c, by=x -> x.cost, rev = true)
     outsiders = findall(x->x==0, counters)   
     for city in outsiders 
         put_city_in_tour(c, city, T, n_nodes)
@@ -598,12 +522,12 @@ function tour_crossover2(parent1::Chromosome, parent2::Chromosome, T::Matrix{Flo
         end
     end
     return child
-end                
-                
-function tour_crossover3(parent1::Chromosome, parent2::Chromosome, T::Matrix{Float64}, n_nodes::Int64)
-    #9  At each step, select a tour from parent1, and select the tour with maximum mutual cities from parent2. 
-    # Conduct a modified Order crossover between them and add it to the new tours.
-    # At the end, Delete all the repeating cities from the tours. 
+end    
+
+
+function tour_crossover4(parent1::Chromosome, parent2::Chromosome, T::Matrix{Float64}, n_nodes::Int64)
+    #10  At each step, select a tour from parent1, and select the tour with maximum mutual cities from parent2. 
+    # Take the order of mutual cities from one tour and enforce it to the other one
     # All the remaining cities will be placed in the current tours based on a greedy approach (minimum increase)
     P1 = deepcopy(parent1)
     P2 = deepcopy(parent2)
@@ -614,22 +538,34 @@ function tour_crossover3(parent1::Chromosome, parent2::Chromosome, T::Matrix{Flo
         tour1 = P1.tours[i].Sequence
         max_intersection = -1
         tour2 = Int[]
+        mutuals = Int[]
         r2 = 0
         for j=1:length(P2.tours)
-            inter = length(intersect(tour1, P2.tours[j].Sequence))
+            mutual_cities = intersect(tour1, P2.tours[j].Sequence)
+            inter = length(mutual_cities)
             if inter > max_intersection
                 max_intersection = inter
                 tour2 = P2.tours[j].Sequence
                 r2 = j
+                mutuals = mutual_cities
             end
         end
         deleteat!(P2.tours, r2)
-#         if min(length(tour1), length(tour2)) < 3
-#             cc= tour1
-#         else
-        cc = Crossover_single_point(tour1, tour2)
-#         end
-        push!(c, Tour(cc, find_tour_length(cc, T)))
+        mutual_indices1 = Int[]
+        mutual_indices2 = Int[]
+
+        for (j, node) in enumerate(tour1)
+            if node in mutuals 
+                push!(mutual_indices1, j)
+            end
+        end
+        for (j, node) in enumerate(tour2)
+            if node in mutuals 
+                push!(mutual_indices2, j)
+            end
+        end
+        tour1[mutual_indices1] = tour2[mutual_indices2]
+        push!(c, Tour(tour1, find_tour_length(tour1, T)))
     end
     counters = zeros(n_nodes)
     outsiders = Int[]
@@ -662,3 +598,86 @@ function tour_crossover3(parent1::Chromosome, parent2::Chromosome, T::Matrix{Flo
     end
     return child
 end    
+
+
+function tour_crossover5(parent1::Chromosome, parent2::Chromosome, T::Matrix{Float64}, n_nodes::Int64)
+    #10  At each step, select a tour from parent1, and select the tour with maximum mutual cities from parent2. 
+    # keep the mutual cities in one of the tours, combine the remaining ones and randomly choose half of them and place them greedily
+    # All the remaining cities will be placed in the current tours based on a greedy approach (minimum increase)
+    P1 = deepcopy(parent1)
+    P2 = deepcopy(parent2)
+    c = Tour[]
+    m = length(P1.tours)
+
+    for i=1:m
+        tour1 = P1.tours[i].Sequence
+        max_intersection = -1
+        tour2 = Int[]
+        mutuals = Int[]
+        r2 = 0
+        for j=1:length(P2.tours)
+            mutual_cities = intersect(tour1, P2.tours[j].Sequence)
+            inter = length(mutual_cities)
+            if inter > max_intersection
+                max_intersection = inter
+                tour2 = P2.tours[j].Sequence
+                r2 = j
+                mutuals = mutual_cities
+            end
+        end
+        deleteat!(P2.tours, r2)
+        mutual_indices1 = Int[]
+        mutual_indices2 = Int[]
+        rest = union(setdiff(tour1, mutuals), setdiff(tour2, mutuals))
+        if length(rest) == 0
+            if rand() < 0.5
+                push!(c, Tour(tour1, find_tour_length(tour1, T)))
+            else
+                push!(c, Tour(tour2, find_tour_length(tour2, T)))
+            end
+        else
+            rest_ = rest[1:rand(1:length(rest))]
+            if rand() < 0.5
+                cc = copy(tour1[mutual_indices1])
+            else
+                cc = copy(tour2[mutual_indices2])
+            end
+            ccc = Tour(cc, find_tour_length(cc, T))
+            put_cities_in_tour(ccc, rest_, T, n_nodes)
+            push!(c, ccc)
+        end
+    end
+    counters = zeros(n_nodes)
+    outsiders = Int[]
+    for tour in c
+        delete_indices = Int[]
+        for (j,node) in enumerate(tour.Sequence)
+            if counters[node] > 0
+                push!(delete_indices, j)
+            else
+                counters[node] += 1
+            end
+        end
+        if length(delete_indices) == length(tour.Sequence)
+            tour.cost = 0.0
+            tour.Sequence = Int[]
+        elseif length(delete_indices)>0
+            tour.cost = Remove_cities_from_one_tour(tour, delete_indices, T, n_nodes)
+            deleteat!(tour.Sequence, delete_indices)
+        end
+    end
+    sort!(c, by=x -> x.cost, rev = true)
+    outsiders = findall(x->x==0, counters)   
+    for city in outsiders 
+        put_city_in_tour(c, city, T, n_nodes)
+    end
+    child = Int[]
+    for tour in c
+        for city in tour.Sequence
+            push!(child, city)
+        end
+    end
+    return child
+end 
+
+             

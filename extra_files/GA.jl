@@ -190,12 +190,12 @@ function Generate_new_generation(TT::Matrix{Float64}, Close_nodes::Matrix{Int}, 
     offspring = Chromosome(child, obj, 0.0, trips)
 #     println("1")
 #     println([length(tour.Sequence) for tour in offspring.tours])
-    if rand() < Mutation_Chance
-        if rand() < 0.1
-            Solve_all_intersections(offspring, Customers, depot, TT)
-        end
-        offspring = Enrich_the_chromosome2(offspring, TT, Customers, depot, n_nodes)
+
+    if rand() < 0.1
+        Solve_all_intersections(offspring, Customers, depot, TT)
     end
+    offspring = Enrich_the_chromosome2(offspring, TT, Customers, depot, n_nodes)
+
 #     println("2")
 #     println([length(tour.Sequence) for tour in offspring.tours])
     

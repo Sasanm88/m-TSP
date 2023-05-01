@@ -261,16 +261,16 @@ end
 #     child[idx] = child[shuffle(idx)]
 # end
 
-# function find_tour_length(tt::Vector{Int}, T::Matrix{Float64})
-#     t = copy(tt)
-#     pushfirst!(t, 0)
-#     push!(t, 0)
-#     z = 0.0
-#     for i = 1:length(t)-1
-#         z += T[t[i]+1, t[i+1]+1]
-#     end
-#     return z
-# end
+function find_tour_length(tt::Vector{Int}, T::Matrix{Float64})
+    t = copy(tt)
+    pushfirst!(t, 0)
+    push!(t, 0)
+    z = 0.0
+    for i = 1:length(t)-1
+        z += T[t[i]+1, t[i+1]+1]
+    end
+    return z
+end
 
 # function new_mutation(child::Chromosome, T::Matrix{Float64}, pm::Float64)
 #     removed_cities = Int[]

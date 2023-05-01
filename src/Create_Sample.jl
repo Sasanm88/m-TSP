@@ -85,7 +85,7 @@ function Calculate_TSPLIB(sample::Symbol)
 end
 
 function read_data(dir_name::String, sample_name::String)
-    filename = joinpath(@__DIR__, "data/$(dir_name)/$(sample_name).txt")
+    filename = joinpath(dirname(@__DIR__), "data\\$(dir_name)\\$(sample_name).txt")
     f = open(filename, "r")
     lines = readlines(f)
     m = parse(Int,split(lines[1]," ")[3])

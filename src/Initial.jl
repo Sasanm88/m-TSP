@@ -280,7 +280,7 @@ function Generate_initial_population(TT::Matrix{Float64}, K::Int, mu::Int, tsp_t
         push!(Population, Chromosome(tsp_tour, obj, 0.0, trips))
     end
     S = Int[]
-    for i=1:mu-n_tours
+    for i=1:100
         if rand() < 1
             if n_tours < 4
                 best_tsp_tour = tsp_tours[rand(1:n_tours)]
@@ -296,7 +296,7 @@ function Generate_initial_population(TT::Matrix{Float64}, K::Int, mu::Int, tsp_t
         
     end
     sort!(Population, by=x -> x.fitness)
-#     deleteat!(Population, [i for i=mu+1:length(Population)])
+    deleteat!(Population, [i for i=mu+1:length(Population)])
     return Population, Population[1].fitness
 end
 

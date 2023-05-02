@@ -1,4 +1,4 @@
-include(joinpath(@__DIR__, "../m-Tsp/src/main.jl")) 
+include(joinpath(@__DIR__, "../src/main.jl")) 
 
 instances = [:eil51]
 Ms = [2]

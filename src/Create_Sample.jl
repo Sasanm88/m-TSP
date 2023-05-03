@@ -1,6 +1,4 @@
-using Distances
-using Random
-using TSPLIB
+
 
 function Create_random_sample(n::Int)
     allNodes = rand(n+1,2)
@@ -85,7 +83,7 @@ function Calculate_TSPLIB(sample::Symbol)
 end
 
 function read_data(dir_name::String, sample_name::String)
-    filename = joinpath(dirname(@__DIR__), "data\\$(dir_name)\\$(sample_name).txt")
+    filename = joinpath(dirname(@__DIR__), "data/$(dir_name)/$(sample_name).txt")
     f = open(filename, "r")
     lines = readlines(f)
     m = parse(Int,split(lines[1]," ")[3])

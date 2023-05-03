@@ -1,3 +1,12 @@
+using Distances
+using Random
+using TSPLIB
+using StatsBase
+using Random, Distances, Clustering, TSPSolvers
+
+
+
+
 include("Create_Sample.jl")
 include("Split.jl")
 include("GA.jl")
@@ -8,6 +17,81 @@ include("Neighborhood.jl")
 include("Neighborhood_intra.jl")
 include("costs.jl")
 include("intersection.jl")
+
+
+
+
+"""
+    In this function, `dist_mtx` does not have the dummy node added to the end.
+"""
+function solve_mTSP(
+    n_vehicles::Int, 
+    dist_mtx::AbstractMatrix{Float64},
+    coordinates::AbstractMatrix{Float64};
+    n_runs::Int = 1, 
+    n_iterations::Int = 100, 
+    time_limit_per_run::Float64 = 10.0,
+    W::Int = 1000,
+    h::Float64 = 0.3,
+    popsize::Tuple{Int, Int} = (10, 20),
+    k_tournament::Int = 2,
+    mutation_chance::Float64 = 0.0,
+    num_nei::Int = 2,
+)
+
+    n_nodes = size(dist_mtx)[1]
+    @assert size(coordinates, 1) == n_nodes
+
+    depot_coordinates = coordinates[1, :]
+    customer_coordinates = coordinates[2:end, :]
+    @assert length(depot_coordinates) == 2
+    @assert size(customer_coordinates, 1) == n_nodes - 1
+
+    dist_mtx_with_dummy =  [
+        dist_mtx          dist_mtx[:, 1];
+        dist_mtx[1, :]'    0.0
+    ]
+    
+    best = Inf
+    worst = 0.0
+    crossover_functions = Int[2, 3]
+    avg = 0.0 
+
+    best_chrm = Chromosome(Int[], 0.0, 0.0, Tour[])
+    worst_chrm = Chromosome(Int[], 0.0, 0.0, Tour[])
+    all_chrms = Chromosome[]
+
+    for _ in 1:n_runs
+        P, roullet = Perform_Genetic_Algorithm(
+            dist_mtx_with_dummy, 
+            n_vehicles, 
+            h, 
+            popsize, 
+            k_tournament, 
+            n_iterations, 
+            time_limit_per_run, 
+            mutation_chance, 
+            num_nei, 
+            crossover_functions, 
+            customer_coordinates, 
+            depot_coordinates
+        )
+
+        avg += P[1].fitness
+        push!(all_chrms, P[1])
+        if P[1].fitness < best
+            best = P[1].fitness
+            best_chrm = P[1]
+        end
+        if P[1].fitness > worst
+            worst = P[1].fitness
+            worst_chrm = P[1]
+        end
+    end
+
+end
+
+
 
 function Solve_instances(dir_name::String, sample_names::Vector{String})
     

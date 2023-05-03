@@ -1,6 +1,6 @@
 
 
-function Ni1(Chrm::Chromosome, TT::Matrix{Float64}, Close_nodes::Matrix{Int}, n_nodes::Int)   #Reinsert
+function Ni1!(Chrm::Chromosome, TT::Matrix{Float64}, Close_nodes::Matrix{Int}, n_nodes::Int)   #Reinsert
     r1 = 1
     if rand() < 0.5
         r1 = argmax([Chrm.tours[i].cost for i=1:length(Chrm.tours)])
@@ -14,7 +14,7 @@ function Ni1(Chrm::Chromosome, TT::Matrix{Float64}, Close_nodes::Matrix{Int}, n_
     
     nt = length(tour1)
     if nt <= 1
-        return Chrm
+        return
     end
     
     k1 = rand(1:length(tour1))
@@ -37,7 +37,7 @@ function Ni1(Chrm::Chromosome, TT::Matrix{Float64}, Close_nodes::Matrix{Int}, n_
     end
     Candidates = collect(setdiff(Set(Candidates),Set([k1])))
     if length(Candidates) == 0
-        return Chrm
+        return 
     end
     
     k2 = Candidates[rand(1:length(Candidates))]
@@ -45,7 +45,7 @@ function Ni1(Chrm::Chromosome, TT::Matrix{Float64}, Close_nodes::Matrix{Int}, n_
     new_cost1 = Calculate_new_cost_exchange_one(tour1, cost1, city1, k1, k2, TT, n_nodes)
     
     if new_cost1 >= cost1
-        return Chrm
+        return 
     end
 
     deleteat!(tour1, k1)
@@ -58,11 +58,10 @@ function Ni1(Chrm::Chromosome, TT::Matrix{Float64}, Close_nodes::Matrix{Int}, n_
         Chrm.genes = vcat(Chrm.genes, tour.Sequence)
     end
     # print("Ni1  ")
-    return Chrm
 end
 
 
-function Ni2(Chrm::Chromosome, TT::Matrix{Float64}, Close_nodes::Matrix{Int}, n_nodes::Int)   #Exchange (permutation between two customers)
+function Ni2!(Chrm::Chromosome, TT::Matrix{Float64}, Close_nodes::Matrix{Int}, n_nodes::Int)   #Exchange (permutation between two customers)
     r1 = 1
     if rand() < 0.5
         r1 = argmax([Chrm.tours[i].cost for i=1:length(Chrm.tours)])
@@ -71,7 +70,7 @@ function Ni2(Chrm::Chromosome, TT::Matrix{Float64}, Close_nodes::Matrix{Int}, n_
     end
     tour1 = Chrm.tours[r1].Sequence
     if length(tour1) <= 1
-        return Chrm
+        return 
     end
     cost1 = Chrm.tours[r1].cost
     nt = length(tour1)
@@ -98,7 +97,7 @@ function Ni2(Chrm::Chromosome, TT::Matrix{Float64}, Close_nodes::Matrix{Int}, n_
         end
     end
     if length(Candidates) == 0
-        return Chrm
+        return
     end
     k2 = Candidates[rand(1:length(Candidates))]
 #     k2 = rand(1:nt)
@@ -106,7 +105,7 @@ function Ni2(Chrm::Chromosome, TT::Matrix{Float64}, Close_nodes::Matrix{Int}, n_
 
     new_cost1= Calculate_new_cost_exchange_two(tour1, cost1, city1, k1, city2, k2, TT, n_nodes)
     if new_cost1 >= cost1 
-        return Chrm
+        return 
     end
     tour1[k1] = city2
     tour1[k2] = city1
@@ -117,10 +116,9 @@ function Ni2(Chrm::Chromosome, TT::Matrix{Float64}, Close_nodes::Matrix{Int}, n_
         Chrm.genes = vcat(Chrm.genes, tour.Sequence)
     end
 #     print("Ni2 ")
-    return Chrm
 end
 
-function Ni3(Chrm::Chromosome, T::Matrix{Float64}, Close_nodes::Matrix{Int}, n_nodes::Int)   #Or-opt2 
+function Ni3!(Chrm::Chromosome, T::Matrix{Float64}, Close_nodes::Matrix{Int}, n_nodes::Int)   #Or-opt2 
     r1 = 1
     if rand() < 0.5
         r1 = argmax([Chrm.tours[i].cost for i=1:length(Chrm.tours)])
@@ -129,7 +127,7 @@ function Ni3(Chrm::Chromosome, T::Matrix{Float64}, Close_nodes::Matrix{Int}, n_n
     end
     tour1 = Chrm.tours[r1].Sequence
     if length(tour1) <= 2
-        return Chrm
+        return
     end
     cost1 = Chrm.tours[r1].cost
     nt = length(tour1)
@@ -155,7 +153,7 @@ function Ni3(Chrm::Chromosome, T::Matrix{Float64}, Close_nodes::Matrix{Int}, n_n
     end
     Candidates = collect(setdiff(Set(Candidates),Set([k1])))
     if length(Candidates) == 0
-        return Chrm
+        return
     end
     
 #     k2 = rand(1:length(tour1)-1)   #Way to improve 
@@ -164,7 +162,7 @@ function Ni3(Chrm::Chromosome, T::Matrix{Float64}, Close_nodes::Matrix{Int}, n_n
     z1 = Calculate_new_cost_or_opt2(tour1, cost1, city1, k1, city2, k2, T, n_nodes)
 
     if z1 >= cost1 
-        return Chrm
+        return
     end
     deleteat!(tour1, [k1,k1+1])
     insert!(tour1, k2, city1)
@@ -176,11 +174,11 @@ function Ni3(Chrm::Chromosome, T::Matrix{Float64}, Close_nodes::Matrix{Int}, n_n
         Chrm.genes = vcat(Chrm.genes, tour.Sequence)
     end
 
-    return Chrm
+    return
 end
 
 
-function Ni4(Chrm::Chromosome, T::Matrix{Float64}, Close_nodes::Matrix{Int}, n_nodes::Int)   #Or-opt3 
+function Ni4!(Chrm::Chromosome, T::Matrix{Float64}, Close_nodes::Matrix{Int}, n_nodes::Int)   #Or-opt3 
     r1 = 1
     if rand() < 0.5
         r1 = argmax([Chrm.tours[i].cost for i=1:length(Chrm.tours)])
@@ -189,7 +187,7 @@ function Ni4(Chrm::Chromosome, T::Matrix{Float64}, Close_nodes::Matrix{Int}, n_n
     end
     tour1 = Chrm.tours[r1].Sequence
     if length(tour1) <= 3
-        return Chrm
+        return
     end
     cost1 = Chrm.tours[r1].cost
     nt = length(tour1)
@@ -215,14 +213,14 @@ function Ni4(Chrm::Chromosome, T::Matrix{Float64}, Close_nodes::Matrix{Int}, n_n
     end
     Candidates = collect(setdiff(Set(Candidates),Set([k1])))
     if length(Candidates) == 0
-        return Chrm
+        return
     end
 
     k2 = Candidates[rand(1:length(Candidates))]
     new_cost1 = Calculate_new_cost_or_opt3(tour1, cost1, city1, city2, city3, k1, k2, T, n_nodes)
 
     if new_cost1 >= cost1 
-        return Chrm
+        return
     end
     deleteat!(tour1, [k1, k1+1, k1+2])
     insert!(tour1, k2, city1)
@@ -235,10 +233,10 @@ function Ni4(Chrm::Chromosome, T::Matrix{Float64}, Close_nodes::Matrix{Int}, n_n
         Chrm.genes = vcat(Chrm.genes, tour.Sequence)
     end
 
-    return Chrm
+    return
 end
 
-function Ni5(Chrm::Chromosome, T::Matrix{Float64}, Close_nodes::Matrix{Int}, n_nodes::Int)   #2-opt 
+function Ni5!(Chrm::Chromosome, T::Matrix{Float64}, Close_nodes::Matrix{Int}, n_nodes::Int)   #2-opt 
     r1 = 1
     if rand() < 0.5
         r1 = argmax([Chrm.tours[i].cost for i=1:length(Chrm.tours)])
@@ -247,7 +245,7 @@ function Ni5(Chrm::Chromosome, T::Matrix{Float64}, Close_nodes::Matrix{Int}, n_n
     end
     tour1 = Chrm.tours[r1].Sequence
     if length(tour1) <= 2
-        return Chrm
+        return
     end
     cost1 = Chrm.tours[r1].cost
     nt = length(tour1)
@@ -289,7 +287,7 @@ function Ni5(Chrm::Chromosome, T::Matrix{Float64}, Close_nodes::Matrix{Int}, n_n
     end
 
     if length(Candidates) == 0
-        return Chrm
+        return
     end
     Candidates = collect(Set(Candidates))
     i2 = Candidates[rand(1:length(Candidates))]
@@ -297,7 +295,7 @@ function Ni5(Chrm::Chromosome, T::Matrix{Float64}, Close_nodes::Matrix{Int}, n_n
     new_cost = Calculate_new_cost_2_opt(tour1, cost1, k1, k2, T, n_nodes)
 
     if new_cost >= cost1 
-        return Chrm
+        return
     end
     tour1[k1:k2] = reverse(tour1[k1:k2])
     Chrm.tours[r1].cost = new_cost
@@ -307,10 +305,10 @@ function Ni5(Chrm::Chromosome, T::Matrix{Float64}, Close_nodes::Matrix{Int}, n_n
         Chrm.genes = vcat(Chrm.genes, tour.Sequence)
     end
 
-    return Chrm
+    return
 end
 
-function Ni6(Chrm::Chromosome, T::Matrix{Float64}, Close_nodes::Matrix{Int}, n_nodes::Int)   #3-opt 
+function Ni6!(Chrm::Chromosome, T::Matrix{Float64}, Close_nodes::Matrix{Int}, n_nodes::Int)   #3-opt 
     r1 = 1
     if rand() < 0.5
         r1 = argmax([Chrm.tours[i].cost for i=1:length(Chrm.tours)])
@@ -319,7 +317,7 @@ function Ni6(Chrm::Chromosome, T::Matrix{Float64}, Close_nodes::Matrix{Int}, n_n
     end
     tour1 = Chrm.tours[r1].Sequence
     if length(tour1) <= 2
-        return Chrm
+        return
     end
     cost1 = Chrm.tours[r1].cost
     nt = length(tour1)
@@ -327,7 +325,7 @@ function Ni6(Chrm::Chromosome, T::Matrix{Float64}, Close_nodes::Matrix{Int}, n_n
 
     new_cost = Calculate_new_cost_3_opt(tour1, cost1, k1, k2, k3, T, n_nodes)
     if new_cost >= cost1 
-        return Chrm
+        return
     end
     if k2 - k1 >=3
         tour1[k1+1:k2-1] = reverse(tour1[k1+1:k2-1])
@@ -341,11 +339,9 @@ function Ni6(Chrm::Chromosome, T::Matrix{Float64}, Close_nodes::Matrix{Int}, n_n
     for tour in Chrm.tours
         Chrm.genes = vcat(Chrm.genes, tour.Sequence)
     end
-
-    return Chrm
 end
 
-function Ni7(Chrm::Chromosome, T::Matrix{Float64}, Close_nodes::Matrix{Int}, n_nodes::Int)   #3-permute 
+function Ni7!(Chrm::Chromosome, T::Matrix{Float64}, Close_nodes::Matrix{Int}, n_nodes::Int)   #3-permute 
     r1 = 1
     if rand() < 0.5
         r1 = argmax([Chrm.tours[i].cost for i=1:length(Chrm.tours)])
@@ -354,7 +350,7 @@ function Ni7(Chrm::Chromosome, T::Matrix{Float64}, Close_nodes::Matrix{Int}, n_n
     end
     tour1 = Chrm.tours[r1].Sequence
     if length(tour1) <= 2
-        return Chrm
+        return
     end
     cost1 = Chrm.tours[r1].cost
     nt = length(tour1)
@@ -365,7 +361,7 @@ function Ni7(Chrm::Chromosome, T::Matrix{Float64}, Close_nodes::Matrix{Int}, n_n
     new_cost = Calculate_new_cost_3_permute(tour1, cost1, temp1, temp2, k1, T, n_nodes)
     
     if new_cost >= cost1 
-        return Chrm
+        return
     end
     tour1[k1:k1+2] = temp2
     Chrm.tours[r1].cost = new_cost
@@ -375,5 +371,4 @@ function Ni7(Chrm::Chromosome, T::Matrix{Float64}, Close_nodes::Matrix{Int}, n_n
         Chrm.genes = vcat(Chrm.genes, tour.Sequence)
     end
 
-    return Chrm
 end

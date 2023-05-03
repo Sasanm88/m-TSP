@@ -97,8 +97,8 @@ function Reproduce(TT::Matrix{Float64}, parent1::Chromosome, parent2::Chromosome
         return tour_crossover4(parent1, parent2, TT, n_nodes), r
     elseif r == 5
         return tour_crossover5(parent1, parent2, TT, n_nodes), r
-    elseif r == 6
-        return tour_crossover6(parent1, parent2, TT, n_nodes), r
+    # elseif r == 6
+    #     return tour_crossover6(parent1, parent2, TT, n_nodes), r
     end
 end
 
@@ -228,7 +228,7 @@ function Generate_new_generation(TT::Matrix{Float64}, Close_nodes::Matrix{Int}, 
 
 
     if improve_count%1 ==0 
-        offspring, imprv = Improve_chromosome(offspring, TT, Close_nodes, n_nodes, roullet, old_best)
+        offspring, imprv = Improve_chromosome!(offspring, TT, Close_nodes, n_nodes, roullet, old_best)
     end
     
     push!(Population, offspring)
@@ -236,7 +236,7 @@ function Generate_new_generation(TT::Matrix{Float64}, Close_nodes::Matrix{Int}, 
 
     Perform_Survival_Plan(Population, mu, sigma)
 #     if improve_count % 500 == 499
-#         Improve_Population(Population, TT, Close_nodes, n_nodes)
+#         Improve_Population!(Population, TT, Close_nodes, n_nodes)
 #     end
         
     new_best = Population[1].fitness

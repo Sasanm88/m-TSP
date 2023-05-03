@@ -1,10 +1,9 @@
-using Distances
-using Random
-using TSPLIB
+using Clustering
+using Distances 
+using Random 
 using StatsBase
-using Random, Distances, Clustering, TSPSolvers
-
-
+using TSPLIB 
+using TSPSolvers
 
 
 include("Create_Sample.jl")

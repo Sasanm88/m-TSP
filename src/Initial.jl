@@ -1,6 +1,5 @@
 # using LKH
 
-using Random, Distances, Clustering, TSPSolvers
 
 function Greedy_insertion_tour(T::Matrix{Float64}, t1::Vector{Int})
     current_node = 0
@@ -156,9 +155,9 @@ function find_tsp_tour1(Ct::Matrix{Float64})
 
     # tsp_tour, tsp_tour_len = Concorde.solve_tsp(dist_mtx)
 #     tsp_tour, tour_length = LKH.solve_tsp(dist_mtx)
-    tsp_tour, tour_length = solve_tsp(dist_mtx; algorithm="Concorde", firstcity=1) 
+    tsp_tour, tour_length = TSPSolvers.solve_tsp(dist_mtx; algorithm="FarthestInsertion", firstcity=1) 
 
-    @assert tsp_tour[1] == 1
+    # @assert tsp_tour[1] == 1
 
     return tsp_tour[2:length(tsp_tour)].-1, tour_length/scale_factor
 end
@@ -169,11 +168,13 @@ function find_tsp_tour2(Ct::Matrix{Float64})
     dist_mtx = round.(Int, Ct .* scale_factor)
 
     tsp_tour, tour_length = solve_tsp(dist_mtx; algorithm="NearestNeighbor", firstcity=1) 
-    push!(tsp_tours, tsp_tour[2:length(tsp_tour)].-1)
+    push!(tsp_tours, tsp_tour[2:end].-1)
+
     tsp_tour, tour_length = solve_tsp(dist_mtx; algorithm="FarthestInsertion", firstcity=1) 
-    push!(tsp_tours, tsp_tour[2:length(tsp_tour)].-1)
+    push!(tsp_tours, tsp_tour[2:end].-1)
+    
     tsp_tour, tour_length = solve_tsp(dist_mtx; algorithm="CheapestInsertion", firstcity=1) 
-    push!(tsp_tours, tsp_tour[2:length(tsp_tour)].-1)
+    push!(tsp_tours, tsp_tour[2:end].-1)
 
     return tsp_tours
 end

@@ -34,13 +34,13 @@ function SPLIT(TT::Matrix{Float64}, K::Int, S::Vector{Int}) #In m-TSP, demands i
             R = Labels[i-1].Ri
         end
         for r in R
-            Current_V = 0
+            Current_V = 0.0
             if i > 1
                 Current_V = Labels[i].Vir[r]
             end
             if Current_V < Inf    #This is V^i_r
                 load = 0
-                t = 0
+                t = zero(eltype(TT))
                 j = i
                 while (j<=n)
                     if i==j
@@ -73,15 +73,15 @@ function SPLIT(TT::Matrix{Float64}, K::Int, S::Vector{Int}) #In m-TSP, demands i
     for i = 1:rs
         push!(trips, Tour(Int[], 0.0))
     end
-    t = rs
+    tt = rs
     j = n
-    while t>0
-        i = Labels[j].Pir[t]
-        trips[t].cost = Labels[j].Cir[t] 
+    while tt > 0
+        i = Labels[j].Pir[tt]
+        trips[tt].cost = Labels[j].Cir[tt] 
         for k=i+1:j
-            push!(trips[t].Sequence, S[k])
+            push!(trips[tt].Sequence, S[k])
         end
-        t -= 1
+        tt -= 1
         j = i
     end
     obj = minimum(Labels[n].Vir)

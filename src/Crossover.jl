@@ -1,6 +1,3 @@
-using StatsBase
-
-
 
 function Crossover_POS(parent1::Vector{Int64}, parent2::Vector{Int64}, n_nodes::Int64)  #position based crossover
     child = zeros(Int64, n_nodes)
@@ -36,7 +33,7 @@ function Crossover_HX_(TT::Matrix{Float64}, parent1::Vector{Int64}, parent2::Vec
     remaining_cities = copy(parent1)
     r = rand(1:n_nodes)
     current_city = remaining_cities[r]
-    child = [current_city]
+    child = Int[current_city]
     deleteat!(remaining_cities, r)
     p = 1
     child_mask = [false for i=1:n_nodes]
@@ -144,7 +141,7 @@ function Crossover_HX(TT::Matrix{Float64}, parent1::Vector{Int64}, parent2::Vect
     
     remaining_cities = copy(parent1)
     current_city = rand(1:n_nodes)
-    child = [current_city]
+    child = Int[current_city]
     deleteat!(remaining_cities, findfirst(x->x==current_city, remaining_cities))
     while length(remaining_cities)>0
         pos1 = findfirst(x->x==current_city, parent1)

@@ -82,7 +82,7 @@ function test(instances::Vector{Symbol}, Ms::Vector{Int})
             avg = 0.0
             best = Inf
             worst = 0.0
-            crossover_functions = [1, 2, 3]
+            crossover_functions = [1, 2]
             
             
             P = Chromosome[]

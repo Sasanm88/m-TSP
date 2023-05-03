@@ -371,7 +371,7 @@ function put_cities_in_tour(c::Tour, cities::Vector{Int}, T::Matrix{Float64}, n_
 end  
                 
 function tour_crossover2(parent1::Chromosome, parent2::Chromosome, T::Matrix{Float64}, n_nodes::Int64)
-    #9  At each step, select a tour from parent1, and select the tour with maximum mutual cities from parent2. 
+    #2  At each step, select a tour from parent1, and select the tour with maximum mutual cities from parent2. 
     # Conduct a simple two point crossover between them and add it to the new tours.
     # At the end, Delete all the repeating cities from the tours. 
     # All the remaining cities will be placed in the current tours based on a greedy approach (minimum increase)
@@ -437,17 +437,30 @@ function tour_crossover2(parent1::Chromosome, parent2::Chromosome, T::Matrix{Flo
         put_city_in_tour(c, city, T, n_nodes)
     end
     
+#     chrm = Chromosome(Int[], 0.0, 0.0, c)
+#     for tour in c
+#         if tour.cost > chrm.fitness
+#             chrm.fitness = tour.cost
+#         end
+#         for city in tour.Sequence
+#             push!(chrm.genes, city)
+#         end
+#     end
+#     return chrm
+    
     child = Int[]
+    
     for tour in c
         for city in tour.Sequence
             push!(child, city)
         end
     end
+    
     return child
 end                
                 
 function tour_crossover3(parent1::Chromosome, parent2::Chromosome, T::Matrix{Float64}, n_nodes::Int64)
-    #10  At each step, select a tour from parent1, and select the tour with maximum mutual cities from parent2. 
+    #3  At each step, select a tour from parent1, and select the tour with maximum mutual cities from parent2. 
     # Just keep the mutual cities in one of the tours
     # All the remaining cities will be placed in the current tours based on a greedy approach (minimum increase)
     P1 = deepcopy(parent1)
@@ -515,6 +528,18 @@ function tour_crossover3(parent1::Chromosome, parent2::Chromosome, T::Matrix{Flo
     for city in outsiders 
         put_city_in_tour(c, city, T, n_nodes)
     end
+    
+#     chrm = Chromosome(Int[], 0.0, 0.0, c)
+#     for tour in c
+#         if tour.cost > chrm.fitness
+#             chrm.fitness = tour.cost
+#         end
+#         for city in tour.Sequence
+#             push!(chrm.genes, city)
+#         end
+#     end
+#     return chrm
+    
     child = Int[]
     for tour in c
         for city in tour.Sequence

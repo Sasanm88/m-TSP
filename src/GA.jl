@@ -51,11 +51,42 @@ end
 
 function Reproduce(TT::Matrix{Float64}, parent1::Chromosome, parent2::Chromosome, n_nodes::Int64, crossover_functions::Vector{Int})
     #     r = sample(1:length(crsovr_chances), Weights(crsovr_chances),1)
-    rs = crossover_functions
-    r = rs[rand(1:length(rs))]
+    rs = 0
+    if crossover_functions[1] == 0
+        if parent1.genes == parent2.genes || parent1.genes == reverse(parent2.genes)
+            rs = rand(2:length(crossover_functions))
+#             println("Bad")
+        else
+#             println("Good")
+            rs = rand(1:length(crossover_functions))
+#             rs = 1
+        end
+    else
+        rs = rand(1:length(crossover_functions))
+    end
+    r = crossover_functions[rs]
     
     if r == 0
-        return Crossover_HX_(TT, parent1.genes, parent2.genes, n_nodes), r
+        c = eax_1ab(parent1.genes, parent2.genes, TT)
+        if length(c) != length(parent1.genes)
+            println()
+            println("parent1 with length $(length(parent1.genes))")
+            for i in parent1.genes
+                print(i,",")
+            end
+            println()
+            println("parent2 with length $(length(parent2.genes))")
+            for i in parent2.genes
+                print(i,",")
+            end
+            println()
+            println("child with length $(length(c))")
+            for i in c
+                print(i,",")
+            end
+            println()
+        end
+        return c, r
     elseif r == 1
         return Crossover_HX(TT, parent1.genes, parent2.genes, n_nodes), r #4244
     elseif r == 2
@@ -183,22 +214,19 @@ function Generate_new_generation(TT::Matrix{Float64}, Close_nodes::Matrix{Int}, 
     parent1, parent2 = Select_parents(Population, k_tournament, psize)
 
     child, crss = Reproduce(TT, parent1, parent2, n_nodes, crossover_functions)
-#     t4 = time()
-#     println("Reproduction took ", t4 - t3, " seconds")
-#     Mutate(child, Mutation_Chance)
-    obj, trips = SPLIT(TT, K, child)
-    offspring = Chromosome(child, obj, 0.0, trips)
-#     println("1")
-#     println([length(tour.Sequence) for tour in offspring.tours])
+    if typeof(child) == Vector{Int}
+        obj, trips = SPLIT(TT, K, child)
+        offspring = Chromosome(child, obj, 0.0, trips)
+    else
+        offspring = child
+    end
 
     if rand() < 0.1
         Solve_all_intersections(offspring, Customers, depot, TT)
     end
     offspring = Enrich_the_chromosome2(offspring, TT, Customers, depot, n_nodes)
 
-#     println("2")
-#     println([length(tour.Sequence) for tour in offspring.tours])
-    
+
     if improve_count%1 ==0 
         offspring, imprv = Improve_chromosome(offspring, TT, Close_nodes, n_nodes, roullet, old_best)
     end

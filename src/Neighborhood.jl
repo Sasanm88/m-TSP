@@ -699,6 +699,10 @@ function Improve_chromosome!(chrm::Chromosome, TT::Matrix{Float64}, Close_nodes:
             Ni3!(chrm, TT, Close_nodes, n_nodes)
         elseif r == 4
             Ni4!(chrm, TT, Close_nodes, n_nodes)
+        elseif r == 5
+            Ni5!(chrm, TT, Close_nodes, n_nodes)
+        elseif r == 6
+            N1!(chrm, TT, Close_nodes, n_nodes)
         else
             error("This should not happen...")
         end

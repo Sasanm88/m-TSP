@@ -120,7 +120,7 @@ function Solve_instances(dir_name::String, sample_names::Vector{String})
         avg = 0.0
         best = Inf
         worst = 0.0
-        crossover_functions = [2, 3]
+        crossover_functions = Int[2, 3]
 
         t1 = time()
         for i=1:num_runs
@@ -161,7 +161,7 @@ function test(instances::Vector{Symbol}, Ms::Vector{Int})
             num_iter = 2500
             time_limit = Inf
             Mutation_Chance = 0.0
-            num_runs = 20
+            num_runs = 10
             num_nei = 2
             avg = 0.0
             best = Inf

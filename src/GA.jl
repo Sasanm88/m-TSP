@@ -12,11 +12,6 @@ mutable struct Chromosome
 end
 
 
-function Creat_Random_Cromosome(n_nodes::Int64)
-    chromosome = shuffle!([i for i = 1:n_nodes])
-    chromosome
-end
-
 function Parent_Selection_RWS(Population::Vector{Chromosome}, total_p::Float64, popsize::Int64)  #Random Wheel Selection
     r = -rand() * total_p
     summ = 0

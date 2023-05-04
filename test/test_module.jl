@@ -1,11 +1,4 @@
-# To use HGSmTSP module without installing as a package
-try 
-    using .HGSmTSP
-catch e 
-    include(joinpath(@__DIR__, "../src/HGSmTSP.jl")) 
-    using .HGSmTSP
-end
-
+using HGSmTSP
 
 n_vehicles = 3
 n_nodes = 10

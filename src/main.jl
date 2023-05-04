@@ -1,10 +1,9 @@
-using Distances
-using Random
-using TSPLIB
+using Clustering
+using Distances 
+using Random 
 using StatsBase
-using Random, Distances, Clustering, TSPSolvers
-
-
+using TSPLIB 
+using TSPSolvers
 
 
 include("Create_Sample.jl")
@@ -26,8 +25,8 @@ include("intersection.jl")
 """
 function solve_mTSP(
     n_vehicles::Int, 
-    dist_mtx::AbstractMatrix{Float64},
-    coordinates::AbstractMatrix{Float64};
+    dist_mtx::Matrix{Float64},
+    coordinates::Matrix{Float64};
     n_runs::Int = 1, 
     n_iterations::Int = 100, 
     time_limit_per_run::Float64 = 10.0,

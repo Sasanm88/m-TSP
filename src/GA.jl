@@ -276,6 +276,7 @@ function Perform_Genetic_Algorithm(TT::Matrix{Float64}, K::Int, h::Float64, pops
     count = 0
 
     while improve_count < num_iter
+        @show time() - t1
         if time() - t1 >= time_limit
             break
         end

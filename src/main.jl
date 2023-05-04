@@ -28,8 +28,8 @@ function solve_mTSP(
     dist_mtx::Matrix{Float64},
     coordinates::Matrix{Float64};
     n_runs::Int = 1, 
-    n_iterations::Int = 100, 
-    time_limit_per_run::Float64 = 10.0,
+    n_generations_without_improvement::Int = 100, 
+    time_limit::Float64 = 10.0,
     W::Int = 1000,
     h::Float64 = 0.3,
     popsize::Tuple{Int, Int} = (10, 20),
@@ -37,6 +37,9 @@ function solve_mTSP(
     mutation_chance::Float64 = 0.0,
     num_nei::Int = 2,
 ) :: Chromosome
+
+
+    t0 = time() 
 
     n_nodes = size(dist_mtx)[1]
     @assert size(coordinates, 1) == n_nodes
@@ -61,14 +64,15 @@ function solve_mTSP(
     all_chrms = Chromosome[]
 
     for _ in 1:n_runs
+        time_limit_for_this_run = time_limit - (time() - t0)
         P, roullet = Perform_Genetic_Algorithm(
             dist_mtx_with_dummy, 
             n_vehicles, 
             h, 
             popsize, 
             k_tournament, 
-            n_iterations, 
-            time_limit_per_run, 
+            n_generations_without_improvement, 
+            time_limit_for_this_run, 
             mutation_chance, 
             num_nei, 
             crossover_functions, 

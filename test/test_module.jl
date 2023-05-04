@@ -11,4 +11,7 @@ for i=1:n_nodes
     end
 end
 
-@time solve_mTSP(n_vehicles, dist_mtx, coordinates)
+@time result = solve_mTSP(
+    n_vehicles, dist_mtx, coordinates;
+    n_iterations=100
+)

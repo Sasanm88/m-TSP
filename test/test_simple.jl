@@ -5,8 +5,8 @@ include(joinpath(@__DIR__, "../src/main.jl"))
 
 function test_simple()
 
-    n_vehicles = 3
-    n_nodes = 10
+    n_vehicles = 4
+    n_nodes = 100
     coordinates = rand(n_nodes, 2) .* 1000
 
     dist_mtx = zeros(n_nodes, n_nodes)
@@ -16,7 +16,7 @@ function test_simple()
         end
     end
 
-    solve_mTSP(n_vehicles, dist_mtx, coordinates)
+    sol = solve_mTSP(n_vehicles, dist_mtx, coordinates; n_iterations=2000, time_limit_per_run=Inf)
 
 end
 

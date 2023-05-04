@@ -36,7 +36,7 @@ function solve_mTSP(
     k_tournament::Int = 2,
     mutation_chance::Float64 = 0.0,
     num_nei::Int = 2,
-)
+) :: Chromosome
 
     n_nodes = size(dist_mtx)[1]
     @assert size(coordinates, 1) == n_nodes
@@ -88,6 +88,7 @@ function solve_mTSP(
         end
     end
 
+    return best_chrm
 end
 
 
@@ -142,6 +143,8 @@ function Solve_instances(dir_name::String, sample_names::Vector{String})
         println("Best: ", round(best, digits = 2), "  Average: ", round(avg/num_runs, digits = 2), 
             "  Worst: ", round(worst, digits = 2), " , run time= ", round((t2-t1)/num_runs, digits=0))
     end
+
+    return best_chrm
 end
 
 function test(instances::Vector{Symbol}, Ms::Vector{Int})

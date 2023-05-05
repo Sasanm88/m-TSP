@@ -682,9 +682,7 @@ function Improve_chromosome!(chrm::Chromosome, TT::Matrix{Float64}, Close_nodes:
 #     Search_methods = [N1, N2, N3, N4, N_cross, Ni1, Ni2, Ni3, Ni4, Ni5]
     for i=1:100
         # r = sample(1:length(Search_methods), weights(roullet))
-        r = sample(1:4, weights(roullet))
-
-        #         r= rand(1:length(Search_methods))
+        r = sample(1:length(roullet), weights(roullet))
         
         f1::Float64 = chrm.fitness
         
@@ -707,19 +705,11 @@ function Improve_chromosome!(chrm::Chromosome, TT::Matrix{Float64}, Close_nodes:
             error("This should not happen...")
         end
 
-
-
-#         if round(chrm.fitness, digits=4) < round(old_best, digits=4)
-#             println("Improvement by local search: " , r ,"  ", round(old_best, digits=4) ," to ", round(chrm.fitness,digits=4))
-#             old_best = chrm.fitness
-#         end
         if chrm.fitness < f1
             roullet[r] +=1
-#             return chrm, r
         end
     end
 
-    return chrm, 0
 end
 
 function Improve_Population!(P::Vector{Chromosome}, TT::Matrix{Float64}, Close_nodes::Matrix{Int}, n_nodes::Int)

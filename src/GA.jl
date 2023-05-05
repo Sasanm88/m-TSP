@@ -164,16 +164,24 @@ function best_route(Population::Vector{Chromosome})
     end
 end
 
-function educate_and_add_the_offspring(offspring::Chromosome, Population::Vector{Chromosome}, TT::Matrix{Float64}, Close_nodes::Matrix{Int}, Customers::Matrix{Float64}, depot::Vector{Float64}, old_best::Float64, roullet::Vector{Int}, n_nodes::Int)
-
-    if rand() < 0.1
-        Solve_all_intersections(offspring, Customers, depot, TT)
-    end
-    offspring = Enrich_the_chromosome2(offspring, TT, Customers, depot, n_nodes)
-
-    offspring, imprv = Improve_chromosome!(offspring, TT, Close_nodes, n_nodes, roullet, old_best)
-
+function educate_and_add_the_offspring(offspring::Chromosome, Population::Vector{Chromosome}, TT::Matrix{Float64}, Close_nodes::Matrix{Int}, Customers::Matrix{Float64}, depot::Vector{Float64}, old_best::Float64, roullet::Vector{Int}, n_nodes::Int, improve_count::Int)
     
+    
+    if rand() < 0.3
+        Solve_all_intersections(offspring, Customers, depot, TT)
+        offspring = Enrich_the_chromosome2(offspring, TT, Customers, depot, n_nodes)
+    end
+
+
+    if rand() < 0.3
+        Solve_all_intersections(offspring, Customers, depot, TT)
+        offspring = Enrich_the_chromosome2(offspring, TT, Customers, depot, n_nodes)
+    end
+    
+    offspring = Enrich_the_chromosome2(offspring, TT, Customers, depot, n_nodes)
+    
+    Improve_chromosome!(offspring, TT, Close_nodes, n_nodes, roullet, old_best)
+        
     push!(Population, offspring)
 end
 
@@ -186,8 +194,7 @@ function Generate_new_generation(TT::Matrix{Float64}, Close_nodes::Matrix{Int}, 
     mu, sigma = popsize
     n_nodes = length(Population[1].genes)
 
-    if improve_count % 1000 == 999 
-#         crossover_functions = Int[0,2]
+    if improve_count % 100 == 99 
         Diversify(Population, TT, K, mu, tsp_tours, Customers, depot, improve_count)
     end
     
@@ -212,15 +219,15 @@ function Generate_new_generation(TT::Matrix{Float64}, Close_nodes::Matrix{Int}, 
     if typeof(child) == Vector{Int}
         obj, trips = SPLIT(TT, K, child)
         offspring = Chromosome(child, obj, 0.0, trips)
-        educate_and_add_the_offspring(offspring, Population, TT, Close_nodes, Customers, depot, old_best, roullet, n_nodes)
+        educate_and_add_the_offspring(offspring, Population, TT, Close_nodes, Customers, depot, old_best, roullet, n_nodes, improve_count)
     elseif typeof(child) == Vector{Vector{Int}}
         for S in child
             obj, trips = SPLIT(TT, K, S)
             offspring = Chromosome(S, obj, 0.0, trips)
-            educate_and_add_the_offspring(offspring, Population, TT, Close_nodes, Customers, depot, old_best, roullet, n_nodes)
+            educate_and_add_the_offspring(offspring, Population, TT, Close_nodes, Customers, depot, old_best, roullet, n_nodes, improve_count)
         end
     else
-        educate_and_add_the_offspring(child, Population, TT, Close_nodes, Customers, depot, old_best, roullet, n_nodes)
+        educate_and_add_the_offspring(child, Population, TT, Close_nodes, Customers, depot, old_best, roullet, n_nodes, improve_count)
     end
 
     
@@ -254,6 +261,7 @@ end
 
 function Perform_Genetic_Algorithm(TT::Matrix{Float64}, K::Int, h::Float64, popsize::Tuple{Int64,Int64},
     k_tournament::Int64, num_iter::Int64, time_limit::Float64, Mutation_Chance::Float64, num_nei::Int, crossover_functions::Vector{Int}, Customers::Matrix{Float64}, depot::Vector{Float64}) #, tsp_tour::Vector{Int})
+    Random.seed!(Int(round(time())))
     n_nodes = size(TT)[1] - 2
     t1 = time()
     ClosenessT= Find_Closeness(TT, h) 
@@ -262,7 +270,7 @@ function Perform_Genetic_Algorithm(TT::Matrix{Float64}, K::Int, h::Float64, pops
     improve_count = 0
     Gen_num = 0
     old_best = 0.0
-    roullet = ones(Int, 4) * 100
+    roullet = ones(Int, 6) * 100
     
     tsp_tours = find_tsp_tour2(TT[1:n_nodes+1, 1:n_nodes+1])
     

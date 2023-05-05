@@ -281,7 +281,7 @@ function Generate_initial_population(TT::Matrix{Float64}, K::Int, mu::Int, tsp_t
         push!(Population, Chromosome(tsp_tour, obj, 0.0, trips))
     end
     S = Int[]
-    for i=1:100
+    for i=1:mu
         if rand() < 1
             if n_tours < 4
                 best_tsp_tour = tsp_tours[rand(1:n_tours)]
@@ -409,8 +409,20 @@ function find_tour_neighbors(tours::Vector{Tour}, Customers::Matrix{Float64}, de
             distances[j,i] = distances[i,j]
         end
     end
-    return [sortperm(distances[i,:])[2:min(m,10)] for i=1:m]
+    return [sortperm(distances[i,:])[2:min(m,5)] for i=1:m]
 end
+
+# function find_tour_neighbors(tours::Vector{Tour}, T::Matrix{Float64}, m::Int)
+
+#     distances = ones(m, m) * -1
+#     for i = 1:m-1
+#         for j = i+1:m
+#             distances[i,j] = sum(T[tours[i].Sequence .+ 1, tours[j].Sequence .+ 1])
+#             distances[j,i] = distances[i,j]
+#         end
+#     end
+#     return [sortperm(distances[i,:])[2:min(m,10)] for i=1:m]
+# end
 
 
 function Enrich_the_chromosome(Chrm::Chromosome, T::Matrix{Float64}, Customers::Matrix{Float64}, depot::Vector{Float64}, n_nodes::Int)   #Shift(0,1)
@@ -418,7 +430,12 @@ function Enrich_the_chromosome(Chrm::Chromosome, T::Matrix{Float64}, Customers::
     temp = deepcopy(Chrm)
     max_tour_index = argmax([Chrm.tours[i].cost for i=1:length(Chrm.tours)])
     max_tour_length = Chrm.fitness
-    tour_neighbors = find_tour_neighbors(Chrm.tours, Customers, depot, m)
+    if m < 10
+        tour_neighbors = [setdiff([i for i=1:m], j) for j=1:m]
+    else
+        tour_neighbors = find_tour_neighbors(Chrm.tours, Customers, depot, m)
+    end
+#     tour_neighbors = find_tour_neighbors(Chrm.tours, T, m)
     improved = true
     count = 0
     

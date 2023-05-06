@@ -4,7 +4,7 @@ using Random
 using StatsBase
 using TSPLIB 
 using TSPSolvers
-
+using LinearAlgebra
 
 include("Create_Sample.jl")
 include("Split.jl")

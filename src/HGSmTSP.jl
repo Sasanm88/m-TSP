@@ -28,6 +28,6 @@ module HGSmTSP
             dist_mtx[i, j] = norm(coordinates[i, :] - coordinates[j, :])
         end
     end    
-    solve_mTSP(n_vehicles, dist_mtx, coordinates)
+    solve_mTSP(n_vehicles, dist_mtx, coordinates; time_limit=1.0)
 
 end

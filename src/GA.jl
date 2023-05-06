@@ -219,20 +219,27 @@ function Generate_new_generation(TT::Matrix{Float64}, Close_nodes::Matrix{Int}, 
         @info("------- SPLIT  done")
 
         offspring = Chromosome(child, obj, 0.0, trips)
+        @info("------- Chromosome  done")
+
     else
         offspring = child
     end
 
     if rand() < 0.1
+        @info("------- Solve_all_intersections  start")
+
         Solve_all_intersections(offspring, Customers, depot, TT)
         @info("------- Solve_all_intersections  done")
 
     end
+    @info("------- Enrich_the_chromosome2!  start")
     Enrich_the_chromosome2!(offspring, TT, Customers, depot, n_nodes)
     @info("------- Enrich_the_chromosome2!  done")
 
 
     if improve_count%1 ==0 
+        @info("------- Improve_chromosome!  start")
+
         Improve_chromosome!(offspring, TT, Close_nodes, n_nodes, roullet, old_best)
         @info("------- Improve_chromosome!  done")
 
@@ -240,6 +247,8 @@ function Generate_new_generation(TT::Matrix{Float64}, Close_nodes::Matrix{Int}, 
     
     push!(Population, offspring)
     sort!(Population, by=x -> x.fitness)
+
+    @info("------- Perform_Survival_Plan!  start")
 
     Perform_Survival_Plan!(Population, mu, sigma)
     @info("------- Perform_Survival_Plan!  done")

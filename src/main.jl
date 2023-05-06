@@ -38,6 +38,13 @@ function solve_mTSP(
     num_nei::Int = 2,
 ) :: Tuple{Vector{Vector{Int}}, Vector{Float64}}
 
+    if n_vehicles == 1
+        dist_mtx_int = round.(Int, dist_mtx)
+
+        tour, tour_len = TSPSolvers.solve_tsp(dist_mtx_int; algorithm="HGS", nbIter=n_iterations, timeLimit=time_limit) 
+        return [tour], [Float64(tour_len)]
+    end
+
 
     t0 = time() 
 

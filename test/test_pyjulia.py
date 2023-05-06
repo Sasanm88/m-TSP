@@ -7,8 +7,8 @@ from timeit import default_timer as timer
 
 
 
-n = 500
-m = 5
+n = 10
+m = 3
 
 
 x = np.random.rand(n) * 1000
@@ -24,12 +24,13 @@ print(f"---- HGSmTSP ------")
 print(f"Time: {t1-t0}")
 print(f"Obj : {max(hgs_route_lengths)}")
 
+hgs_time = t1 - t0 
 # Comparison with NCE 
 try:
     import nce.solver
 
     t0 = timer()
-    routes, route_lengths = nce.solver.solve_mTSP(m, dist_mtx, num_candidates=1, perturbation=1, time_limit=5.0)
+    routes, route_lengths = nce.solver.solve_mTSP(m, dist_mtx, num_candidates=5, perturbation=3, time_limit=hgs_time)
     t1 = timer()
     print("---- NCE ------")
     print(f"Time: {t1-t0}")

@@ -148,6 +148,7 @@ function Solve_one_intersections(t1::Vector{Int}, t2::Vector{Int}, T::Matrix{Flo
 end
 
 function Solve_all_intersections(chrm::Chromosome, Customers::Matrix{Float64}, depot::Vector{Float64}, T::Matrix{Float64})
+    @info("****  Solve_all_intersections  ****")
     m = length(chrm.tours)
     n_nodes = length(chrm.genes)
     intersected_ = true
@@ -160,6 +161,8 @@ function Solve_all_intersections(chrm::Chromosome, Customers::Matrix{Float64}, d
                 tour2 = chrm.tours[j].Sequence
                 if length(tour1) > 0 && length(tour2)>0
                     intersected = true
+                    @info("****  inner while loop started  ****")
+
                     while intersected 
                         k1, k2 , intersected = find_intersections(tour1, tour2, Customers, depot)
                         if intersected 
@@ -174,6 +177,9 @@ function Solve_all_intersections(chrm::Chromosome, Customers::Matrix{Float64}, d
         #                     println("tour ", i, " , tour ", j, " ,k1=", k1, " ,k2=", k2)
                         end
                     end
+
+                    @info("****  inner while loop ended  ****")
+
                 end
             end
         end
@@ -181,9 +187,20 @@ function Solve_all_intersections(chrm::Chromosome, Customers::Matrix{Float64}, d
             two_opt_on_route(tour, T, n_nodes)
         end
     end
+
+    @info("****  while loop done  ****")
+
     if rand() < 0.1
+        @info("****  Improve_after_removing_intersectionse  start****")
+
         Improve_after_removing_intersections(chrm.tours, T, n_nodes, m, Customers, depot)
+        @info("****  Improve_after_removing_intersectionse end ****")
+
     end
+
+    @info("****  Improve_after_removing_intersectionse  ****")
+
+
     chrm.genes = Int[]
     chrm.fitness = 0.0
     for tour in chrm.tours
@@ -192,6 +209,7 @@ function Solve_all_intersections(chrm::Chromosome, Customers::Matrix{Float64}, d
             chrm.fitness = tour.cost
         end
     end
+    
 end
 
 function two_opt_on_route(tour::Tour, T::Matrix{Float64}, n_nodes::Int)   #2-opt 

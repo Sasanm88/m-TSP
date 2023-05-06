@@ -197,62 +197,40 @@ function Generate_new_generation(TT::Matrix{Float64}, Close_nodes::Matrix{Int}, 
 
     if improve_count % 1000 == 999 
         Diversify!(Population, TT, K, mu, tsp_tours, Customers, depot, improve_count)
-        @info("------- Diversify!  done")
     end
 #     if improve_count % 3000 == 2999 
 #         Diversify_(Population, TT, demands, K, W, mu, tsp_tour, Customers, depot)
 #     end
     
     Sort_based_on_power!(Population, num_nei)
-    @info("------- Sort_based_on_power!  done")
 #     t3 = time()
 #     println("sorting took ", t3 - t1, " seconds")
     psize = length(Population)
     parent1, parent2 = Select_parents(Population, k_tournament, psize)
-    @info("------- Select_parents  done")
 
     child::Vector{Int}, crss::Int = Reproduce(TT, parent1, parent2, n_nodes, crossover_functions)
-    @info("------- Reproduce  done")
     
     if isa(child, Vector{Int})
         obj, trips = SPLIT(TT, K, child)
-        @info("------- SPLIT  done")
-
         offspring = Chromosome(child, obj, 0.0, trips)
-        @info("------- Chromosome  done")
-
     else
         offspring = child
     end
 
     if rand() < 0.1
-        @info("------- Solve_all_intersections  start")
-
         Solve_all_intersections(offspring, Customers, depot, TT)
-        @info("------- Solve_all_intersections  done")
-
     end
-    @info("------- Enrich_the_chromosome2!  start")
     Enrich_the_chromosome2!(offspring, TT, Customers, depot, n_nodes)
-    @info("------- Enrich_the_chromosome2!  done")
 
 
     if improve_count%1 ==0 
-        @info("------- Improve_chromosome!  start")
-
         Improve_chromosome!(offspring, TT, Close_nodes, n_nodes, roullet, old_best)
-        @info("------- Improve_chromosome!  done")
-
     end
     
     push!(Population, offspring)
     sort!(Population, by=x -> x.fitness)
 
-    @info("------- Perform_Survival_Plan!  start")
-
     Perform_Survival_Plan!(Population, mu, sigma)
-    @info("------- Perform_Survival_Plan!  done")
-
 #     if improve_count % 500 == 499
 #         Improve_Population!(Population, TT, Close_nodes, n_nodes)
 #     end
@@ -274,16 +252,15 @@ function Generate_new_generation(TT::Matrix{Float64}, Close_nodes::Matrix{Int}, 
     return Gen_num, old_best, Population, improve_count
 end
 
-function Perform_Genetic_Algorithm(TT::Matrix{Float64}, K::Int, h::Float64, popsize::Tuple{Int64,Int64},
+function Perform_Genetic_Algorithm(
+    TT::Matrix{Float64}, K::Int, h::Float64, popsize::Tuple{Int64,Int64},
     k_tournament::Int64, num_iter::Int64, time_limit::Float64, Mutation_Chance::Float64, num_nei::Int, crossover_functions::Vector{Int},
-    Customers::Matrix{Float64}, depot::Vector{Float64}) 
-    
-    @info("Perform_Genetic_Algorithm")
+    Customers::Matrix{Float64}, depot::Vector{Float64}
+) 
+
     n_nodes = size(TT)[1] - 2
     t1 = time()
-    ClosenessT = Find_Closeness(TT, h) 
-    @info("Find_Closeness done")
-
+    ClosenessT= Find_Closeness(TT, h) 
 #     println("Closeness took ", time() - t1, " seconds")
     mu, sigma = popsize
     improve_count = 0
@@ -292,19 +269,15 @@ function Perform_Genetic_Algorithm(TT::Matrix{Float64}, K::Int, h::Float64, pops
     roullet = ones(Int, 4) * 100
     
     tsp_tours = find_tsp_tour2(TT[1:n_nodes+1, 1:n_nodes+1])
-    @info("find_tsp_tour2 done")
     
     if n_nodes < 1400
 #         tsp_tours = Vector{Vector{Int}}()
         tsp_tour, _ = find_tsp_tour1(TT[1:n_nodes+1, 1:n_nodes+1])
-        @info("find_tsp_tour1 done")
-
         push!(tsp_tours, tsp_tour)
     end
     
     Population, old_best = Generate_initial_population(TT, K, mu, tsp_tours, Customers, depot) 
-    @info("Generate_initial_population done")
-    #     println("Initial population took ", time() - t1, " seconds")
+#     println("Initial population took ", time() - t1, " seconds")
     count = 0
 
     while improve_count < num_iter
@@ -314,8 +287,6 @@ function Perform_Genetic_Algorithm(TT::Matrix{Float64}, K::Int, h::Float64, pops
         end
         Gen_num, old_best, Population, improve_count =  Generate_new_generation(TT, ClosenessT, K,
         Population, popsize, k_tournament, Gen_num, old_best, improve_count, Mutation_Chance, tsp_tours, roullet, num_nei, crossover_functions, Customers, depot)
-        @info("Generate_new_generation done")
-
         count += 1
     end
     t2 = time()

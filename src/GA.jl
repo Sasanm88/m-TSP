@@ -253,10 +253,15 @@ function Generate_new_generation(TT::Matrix{Float64}, Close_nodes::Matrix{Int}, 
 end
 
 function Perform_Genetic_Algorithm(TT::Matrix{Float64}, K::Int, h::Float64, popsize::Tuple{Int64,Int64},
-    k_tournament::Int64, num_iter::Int64, time_limit::Float64, Mutation_Chance::Float64, num_nei::Int, crossover_functions::Vector{Int}, Customers::Matrix{Float64}, depot::Vector{Float64}) #, tsp_tour::Vector{Int})
+    k_tournament::Int64, num_iter::Int64, time_limit::Float64, Mutation_Chance::Float64, num_nei::Int, crossover_functions::Vector{Int},
+    Customers::Matrix{Float64}, depot::Vector{Float64}) 
+    
+    @info("Perform_Genetic_Algorithm")
     n_nodes = size(TT)[1] - 2
     t1 = time()
-    ClosenessT= Find_Closeness(TT, h) 
+    ClosenessT = Find_Closeness(TT, h) 
+    @info("Find_Closeness done")
+
 #     println("Closeness took ", time() - t1, " seconds")
     mu, sigma = popsize
     improve_count = 0
@@ -265,23 +270,30 @@ function Perform_Genetic_Algorithm(TT::Matrix{Float64}, K::Int, h::Float64, pops
     roullet = ones(Int, 4) * 100
     
     tsp_tours = find_tsp_tour2(TT[1:n_nodes+1, 1:n_nodes+1])
+    @info("find_tsp_tour2 done")
     
     if n_nodes < 1400
 #         tsp_tours = Vector{Vector{Int}}()
         tsp_tour, _ = find_tsp_tour1(TT[1:n_nodes+1, 1:n_nodes+1])
+        @info("find_tsp_tour1 done")
+
         push!(tsp_tours, tsp_tour)
     end
     
     Population, old_best = Generate_initial_population(TT, K, mu, tsp_tours, Customers, depot) 
-#     println("Initial population took ", time() - t1, " seconds")
+    @info("Generate_initial_population done")
+    #     println("Initial population took ", time() - t1, " seconds")
     count = 0
 
     while improve_count < num_iter
+        @show improve_count
         if time() - t1 >= time_limit
             break
         end
         Gen_num, old_best, Population, improve_count =  Generate_new_generation(TT, ClosenessT, K,
         Population, popsize, k_tournament, Gen_num, old_best, improve_count, Mutation_Chance, tsp_tours, roullet, num_nei, crossover_functions, Customers, depot)
+        @info("Generate_new_generation done")
+
         count += 1
     end
     t2 = time()

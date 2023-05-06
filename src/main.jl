@@ -36,7 +36,7 @@ function solve_mTSP(
     k_tournament::Int = 2,
     mutation_chance::Float64 = 0.0,
     num_nei::Int = 2,
-) :: Chromosome
+) :: Tuple{Vector{Vector{Int}}, Vector{Float64}}
 
 
     t0 = time() 
@@ -92,9 +92,8 @@ function solve_mTSP(
         end
     end
 
-    hgs_routes = Vector{Int}[t.Sequence for t in best_chrm.tours]
-    hgs_route_lengths = Float64[t.cost for t in best_chrm.tours]
-
+    hgs_routes = [t.Sequence for t in best_chrm.tours]
+    hgs_route_lengths = [t.cost for t in best_chrm.tours]
 
     return hgs_routes, hgs_route_lengths
 end

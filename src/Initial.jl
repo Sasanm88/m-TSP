@@ -326,7 +326,7 @@ end
 # end
 
 
-function Diversify(Population::Vector{Chromosome}, TT::Matrix{Float64}, K::Int, mu::Int, tsp_tours::Vector{Vector{Int}}, Customers::Matrix{Float64}, depot::Vector{Float64}, num::Int)
+function Diversify!(Population::Vector{Chromosome}, TT::Matrix{Float64}, K::Int, mu::Int, tsp_tours::Vector{Vector{Int}}, Customers::Matrix{Float64}, depot::Vector{Float64}, num::Int)
     n_tours = length(tsp_tours)
     n_nodes = size(TT)[1]-2
     n_best = Int(round(0.15 * mu)) 
@@ -493,7 +493,7 @@ function Enrich_the_chromosome(Chrm::Chromosome, T::Matrix{Float64}, Customers::
     return Chrm
 end
 
-function Enrich_the_chromosome2(Chrm::Chromosome, T::Matrix{Float64}, Customers::Matrix{Float64}, depot::Vector{Float64}, n_nodes::Int)   #Shift(0,1)
+function Enrich_the_chromosome2!(Chrm::Chromosome, T::Matrix{Float64}, Customers::Matrix{Float64}, depot::Vector{Float64}, n_nodes::Int)   #Shift(0,1)
     m = length(Chrm.tours)
     temp = deepcopy(Chrm)
     max_tour_index = argmax([Chrm.tours[i].cost for i=1:length(Chrm.tours)])
@@ -565,7 +565,7 @@ function Enrich_the_chromosome2(Chrm::Chromosome, T::Matrix{Float64}, Customers:
     for tour in Chrm.tours
         Chrm.genes = vcat(Chrm.genes, tour.Sequence)
     end
-    return Chrm
+
 end
 
 function Find_Closeness(TT::Matrix{Float64}, h::Float64)

@@ -18,7 +18,7 @@ dist_mtx = np.sqrt((x[:,None] - x[None,:])**2 + (y[:,None] - y[None,:])**2)
 
 coordinates = np.concatenate((x, y)).reshape(-1, 2)
 t0 = timer()
-best_chrm = HGSmTSP.solve_mTSP(m, dist_mtx, coordinates, n_generations_without_improvement=1000, time_limit_per_run=2.5)
+best_chrm = HGSmTSP.solve_mTSP(m, dist_mtx, coordinates, n_iterations=1000, time_limit=2.5)
 t1 = timer()
 print(f"---- HGSmTSP ------")
 print(f"Time: {t1-t0}")

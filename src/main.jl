@@ -28,7 +28,7 @@ function solve_mTSP(
     dist_mtx::Matrix{Float64},
     coordinates::Matrix{Float64};
     n_runs::Int = 1, 
-    n_generations_without_improvement::Int = 100, 
+    n_iterations::Int = 100, 
     time_limit::Float64 = 10.0,
     W::Int = 1000,
     h::Float64 = 0.3,
@@ -71,7 +71,7 @@ function solve_mTSP(
             h, 
             popsize, 
             k_tournament, 
-            n_generations_without_improvement, 
+            n_iterations, 
             time_limit_for_this_run, 
             mutation_chance, 
             num_nei, 

@@ -16,7 +16,7 @@ function test_simple()
         end
     end
 
-    sol = solve_mTSP(n_vehicles, dist_mtx, coordinates; n_iterations=2000, time_limit_per_run=Inf)
+    sol = solve_mTSP(n_vehicles, dist_mtx, coordinates; n_iterations=2000, time_limit=Inf)
 
 end
 

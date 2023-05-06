@@ -18,14 +18,11 @@ dist_mtx = np.sqrt((x[:,None] - x[None,:])**2 + (y[:,None] - y[None,:])**2)
 
 coordinates = np.concatenate((x, y)).reshape(-1, 2)
 t0 = timer()
-best_chrm = HGSmTSP.solve_mTSP(m, dist_mtx, coordinates, n_iterations=1000, time_limit=2.5)
+hgs_routes, hgs_route_lengths = HGSmTSP.solve_mTSP(m, dist_mtx, coordinates, n_iterations=1000, time_limit=2.5)
 t1 = timer()
 print(f"---- HGSmTSP ------")
 print(f"Time: {t1-t0}")
-print(f"Obj : {best_chrm.fitness}")
-
-hgs_routes = [t.Sequence.tolist() for t in best_chrm.tours]
-hgs_route_lengths = [t.cost for t in best_chrm.tours]
+print(f"Obj : {max(hgs_route_lengths)}")
 
 # Comparison with NCE 
 try:

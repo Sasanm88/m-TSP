@@ -92,7 +92,11 @@ function solve_mTSP(
         end
     end
 
-    return best_chrm
+    hgs_routes = Vector{Int}[t.Sequence for t in best_chrm.tours]
+    hgs_route_lengths = Float64[t.cost for t in best_chrm.tours]
+
+
+    return hgs_routes, hgs_route_lengths
 end
 
 

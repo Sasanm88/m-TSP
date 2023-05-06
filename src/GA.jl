@@ -197,21 +197,27 @@ function Generate_new_generation(TT::Matrix{Float64}, Close_nodes::Matrix{Int}, 
 
     if improve_count % 1000 == 999 
         Diversify!(Population, TT, K, mu, tsp_tours, Customers, depot, improve_count)
+        @info("------- Diversify!  done")
     end
 #     if improve_count % 3000 == 2999 
 #         Diversify_(Population, TT, demands, K, W, mu, tsp_tour, Customers, depot)
 #     end
     
     Sort_based_on_power!(Population, num_nei)
+    @info("------- Sort_based_on_power!  done")
 #     t3 = time()
 #     println("sorting took ", t3 - t1, " seconds")
     psize = length(Population)
     parent1, parent2 = Select_parents(Population, k_tournament, psize)
+    @info("------- Select_parents  done")
 
     child::Vector{Int}, crss::Int = Reproduce(TT, parent1, parent2, n_nodes, crossover_functions)
+    @info("------- Reproduce  done")
     
     if isa(child, Vector{Int})
         obj, trips = SPLIT(TT, K, child)
+        @info("------- SPLIT  done")
+
         offspring = Chromosome(child, obj, 0.0, trips)
     else
         offspring = child
@@ -219,18 +225,25 @@ function Generate_new_generation(TT::Matrix{Float64}, Close_nodes::Matrix{Int}, 
 
     if rand() < 0.1
         Solve_all_intersections(offspring, Customers, depot, TT)
+        @info("------- Solve_all_intersections  done")
+
     end
     Enrich_the_chromosome2!(offspring, TT, Customers, depot, n_nodes)
+    @info("------- Enrich_the_chromosome2!  done")
 
 
     if improve_count%1 ==0 
         Improve_chromosome!(offspring, TT, Close_nodes, n_nodes, roullet, old_best)
+        @info("------- Improve_chromosome!  done")
+
     end
     
     push!(Population, offspring)
     sort!(Population, by=x -> x.fitness)
 
     Perform_Survival_Plan!(Population, mu, sigma)
+    @info("------- Perform_Survival_Plan!  done")
+
 #     if improve_count % 500 == 499
 #         Improve_Population!(Population, TT, Close_nodes, n_nodes)
 #     end

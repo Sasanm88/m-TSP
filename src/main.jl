@@ -38,6 +38,9 @@ function solve_mTSP(
     num_nei::Int = 2,
 ) :: Tuple{Vector{Vector{Int}}, Vector{Float64}}
 
+    @show dist_mtx 
+    @show coordinates
+
     if n_vehicles == 1
         dist_mtx_int = round.(Int, dist_mtx)
 

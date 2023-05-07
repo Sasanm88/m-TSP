@@ -15,9 +15,14 @@ module HGSmTSP
     dist_mtx = zeros(n_nodes, n_nodes)
     for i=1:n_nodes
         for j=1:n_nodes
+
+
+    t0 = time()
+
             dist_mtx[i, j] = norm(coordinates[i, :] - coordinates[j, :])
         end
     end    
+
     solve_mTSP(n_vehicles, dist_mtx, coordinates)
 
     

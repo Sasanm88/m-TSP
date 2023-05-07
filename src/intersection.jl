@@ -147,7 +147,7 @@ function Solve_one_intersections(t1::Vector{Int}, t2::Vector{Int}, T::Matrix{Flo
     end
 end
 
-function Solve_all_intersections(chrm::Chromosome, Customers::Matrix{Float64}, depot::Vector{Float64}, T::Matrix{Float64})
+function Solve_all_intersections!(chrm::Chromosome, Customers::Matrix{Float64}, depot::Vector{Float64}, T::Matrix{Float64})
     m = length(chrm.tours)
     n_nodes = length(chrm.genes)
     intersected_ = true
@@ -155,7 +155,6 @@ function Solve_all_intersections(chrm::Chromosome, Customers::Matrix{Float64}, d
         intersected_ = false
         for i = 1:m-1
             for j = i+1:m
-    #             println("tour ", i, " , tour ", j)
                 tour1 = chrm.tours[i].Sequence
                 tour2 = chrm.tours[j].Sequence
                 if length(tour1) > 0 && length(tour2)>0
@@ -171,7 +170,6 @@ function Solve_all_intersections(chrm::Chromosome, Customers::Matrix{Float64}, d
                             chrm.tours[i].Sequence = tour1
                             chrm.tours[j].Sequence = tour2
                             intersected_ = true
-        #                     println("tour ", i, " , tour ", j, " ,k1=", k1, " ,k2=", k2)
                         end
                     end
                 end

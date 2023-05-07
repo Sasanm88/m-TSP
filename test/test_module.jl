@@ -11,4 +11,11 @@ for i=1:n_nodes
     end
 end
 
+
+@time hgs_routes, hgs_route_lengths = solve_mTSP(
+    n_vehicles, dist_mtx, coordinates;
+    n_iterations=100
+)
+
 @time solve_mTSP(n_vehicles, dist_mtx, coordinates)
+

@@ -6,7 +6,8 @@ mutable struct Label
 end
 
 
-function SPLIT(TT::Matrix{Float64}, K::Int, S::Vector{Int}) #In m-TSP, demands is a vector of ones and W is infinity
+function SPLIT(TT::Matrix{Float64}, K::Int, S::Vector{Int}) 
+    #In m-TSP, demands is a vector of ones and W is infinity
     n = length(S)
     Labels = Label[]
     for i=1:n

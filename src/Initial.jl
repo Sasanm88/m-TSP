@@ -299,7 +299,7 @@ end
 
 
 
-function Diversify(Population::Vector{Chromosome}, TT::Matrix{Float64}, K::Int, mu::Int, tsp_tours::Vector{Vector{Int}}, Customers::Matrix{Float64}, depot::Vector{Float64}, num::Int)
+function Diversify!(Population::Vector{Chromosome}, TT::Matrix{Float64}, K::Int, mu::Int, tsp_tours::Vector{Vector{Int}}, Customers::Matrix{Float64}, depot::Vector{Float64}, num::Int)
     n_tours = length(tsp_tours)
     n_nodes = size(TT)[1]-2
     n_best = Int(round(0.15 * mu)) 
@@ -351,6 +351,7 @@ end
 
 
 function Enrich_the_chromosome!(Chrm::Chromosome, T::Matrix{Float64}, Customers::Matrix{Float64}, depot::Vector{Float64}, n_nodes::Int)   
+
     m = length(Chrm.tours)
     temp = deepcopy(Chrm)
     max_tour_index = argmax([Chrm.tours[i].cost for i=1:length(Chrm.tours)])

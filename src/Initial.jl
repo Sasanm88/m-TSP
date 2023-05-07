@@ -155,7 +155,7 @@ function find_tsp_tour1(Ct::Matrix{Float64})
 
     # tsp_tour, tsp_tour_len = Concorde.solve_tsp(dist_mtx)
 #     tsp_tour, tour_length = LKH.solve_tsp(dist_mtx)
-    tsp_tour, tour_length = TSPSolvers.solve_tsp(dist_mtx; algorithm="Concorde", firstcity=1) 
+    tsp_tour, tour_length = TSPSolvers.solve_tsp(dist_mtx; algorithm="LKH", firstcity=1) 
 
     # @assert tsp_tour[1] == 1
 
@@ -281,7 +281,7 @@ function Generate_initial_population(TT::Matrix{Float64}, K::Int, mu::Int, tsp_t
         push!(Population, Chromosome(tsp_tour, obj, 0.0, trips))
     end
     S = Int[]
-    for i=1:mu
+    for i=1:mu-n_tours
         if rand() < 1
             if n_tours < 4
                 best_tsp_tour = tsp_tours[rand(1:n_tours)]
@@ -297,7 +297,7 @@ function Generate_initial_population(TT::Matrix{Float64}, K::Int, mu::Int, tsp_t
         
     end
     sort!(Population, by=x -> x.fitness)
-    deleteat!(Population, [i for i=mu+1:length(Population)])
+#     deleteat!(Population, [i for i=mu+1:length(Population)])
     return Population, Population[1].fitness
 end
 
@@ -409,7 +409,7 @@ function find_tour_neighbors(tours::Vector{Tour}, Customers::Matrix{Float64}, de
             distances[j,i] = distances[i,j]
         end
     end
-    return [sortperm(distances[i,:])[2:min(m,5)] for i=1:m]
+    return [sortperm(distances[i,:])[2:min(m,10)] for i=1:m]
 end
 
 # function find_tour_neighbors(tours::Vector{Tour}, T::Matrix{Float64}, m::Int)
@@ -430,11 +430,12 @@ function Enrich_the_chromosome(Chrm::Chromosome, T::Matrix{Float64}, Customers::
     temp = deepcopy(Chrm)
     max_tour_index = argmax([Chrm.tours[i].cost for i=1:length(Chrm.tours)])
     max_tour_length = Chrm.fitness
-    if m < 10
-        tour_neighbors = [setdiff([i for i=1:m], j) for j=1:m]
-    else
-        tour_neighbors = find_tour_neighbors(Chrm.tours, Customers, depot, m)
-    end
+#     if m < 10
+#         tour_neighbors = [setdiff([i for i=1:m], j) for j=1:m]
+#     else
+#         tour_neighbors = find_tour_neighbors(Chrm.tours, Customers, depot, m)
+#     end
+    tour_neighbors = find_tour_neighbors(Chrm.tours, Customers, depot, m)
 #     tour_neighbors = find_tour_neighbors(Chrm.tours, T, m)
     improved = true
     count = 0

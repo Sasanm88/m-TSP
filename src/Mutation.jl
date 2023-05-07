@@ -33,9 +33,10 @@ function cross_mutation(Chrm::Chromosome, Customers::Matrix{Float64}, depot::Vec
     else
         r1 = rand(1:length(Chrm.tours))
     end
-    tour_neighbors = find_tour_neighbors(Chrm.tours, Customers, depot, m)
-    r2 = tour_neighbors[r1][rand(1:length(tour_neighbors[r1]))]
-    
+#     tour_neighbors = find_tour_neighbors(Chrm.tours, Customers, depot, m)
+#     r2 = tour_neighbors[r1][rand(1:length(tour_neighbors[r1]))]
+    routes = [i for i=1:length(Chrm.tours)]
+    r2 = setdiff(routes, r1)[rand(1:length(Chrm.tours)-1)]
     t1 = Chrm.tours[r1].Sequence
     t2 = Chrm.tours[r2].Sequence
     cost1 = Chrm.tours[r1].cost
@@ -147,15 +148,58 @@ function scatter_mutation(Chrm::Chromosome, T::Matrix{Float64}, n_nodes::Int)
     return Chrm
 end
 
+function rearange_nodes(chrm_::Chromosome, T::Matrix{Float64}, n_nodes::Int)
+    c = deepcopy(chrm_.tours)
+    deleted_nodes = Int[]
+    for tour in c
+        dlt_idx = Int[]
+        for (i, node) in enumerate(tour.Sequence)
+            if rand() < 0.05
+                push!(dlt_idx, i)
+            end
+        end
+        
+        if !isempty(dlt_idx)
+            deleted_nodes = vcat(deleted_nodes, tour.Sequence[dlt_idx])
+            if length(dlt_idx) == length(tour.Sequence)
+                tour.cost = 0.0
+                tour.Sequence = Int[]
+            else
+                Remove_cities_from_one_tour(tour, dlt_idx, T, n_nodes)
+                deleteat!(tour.Sequence, dlt_idx)
+            end
+            
+        end
+        
+    end
+    if isempty(deleted_nodes)
+        return chrm_
+    end
+    sort!(c, by=x -> x.cost, rev = true)
+    for node in deleted_nodes
+        put_city_in_tour(c, node, T, n_nodes)
+    end
+    chrm = Chromosome(Int[], 0.0, 0.0, c)
+    for tour in c
+        if tour.cost > chrm.fitness
+            chrm.fitness = tour.cost
+        end
+        for city in tour.Sequence
+            push!(chrm.genes, city)
+        end
+    end
+    return chrm
+end
+
 function mutate(Chrm::Chromosome, Customers::Matrix{Float64}, depot::Vector{Float64}, T::Matrix{Float64}, n_nodes::Int)
-    
+    new_chrm = deepcopy(Chrm)
     r = rand()
-    if r < 0.3
-        return two_opt_mutation(Chrm, T, n_nodes)
-    elseif r < 0.7
-        return cross_mutation(Chrm, Customers, depot, T, n_nodes)
+    if r < 0
+        return two_opt_mutation(new_chrm, T, n_nodes)
+    elseif r < 0
+        return cross_mutation(new_chrm, Customers, depot, T, n_nodes)
     else
-        return scatter_mutation(Chrm, T, n_nodes)
+        return rearange_nodes(new_chrm, T, n_nodes)
     end
         
 end

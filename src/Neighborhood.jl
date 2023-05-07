@@ -1,3 +1,61 @@
+# function N1!(Chrm::Chromosome, TT::Matrix{Float64}, Close_nodes::Matrix{Int}, n_nodes::Int)   #Shift(0,1)
+#     r1 = argmax([Chrm.tours[i].cost for i=1:length(Chrm.tours)])
+#     routes = [i for i=1:length(Chrm.tours)]
+#     tour1 = Chrm.tours[r1].Sequence
+#     cost1 = Chrm.tours[r1].cost
+#     for r2 in setdiff(routes, r1)    
+#         tour2 = Chrm.tours[r2].Sequence
+#         cost2 = Chrm.tours[r2].cost
+#         k1 = rand(1:length(tour1))
+#         city1 = tour1[k1]
+#         Candidates = Int[] 
+#         nt = length(tour2)
+#         if nt == 0
+#             Candidates = [1]
+#         elseif nt == 1
+#             Candidates = [1,2]
+#         elseif nt == 2
+#             Candidates = [1,2,3]
+#         else
+#             if city1 in Close_nodes[n_nodes+1,:] || tour2[1] in Close_nodes[city1,:] 
+#                 push!(Candidates, 1)
+#             end
+#             for i=2:nt
+#                 if tour2[i-1] in Close_nodes[city1,:] || tour2[i] in Close_nodes[city1,:]
+#                     push!(Candidates, i)
+#                 end
+#             end
+#             if city1 in Close_nodes[n_nodes+1,:] || tour2[nt] in Close_nodes[city1,:] 
+#                 push!(Candidates, nt+1)
+#             end
+#         end
+
+#         if length(Candidates) > 0
+#             k2 = Candidates[rand(1:length(Candidates))]
+
+#             new_cost2 = Calculate_new_cost_add_one(tour2, cost2, city1, k2, TT, n_nodes)
+#             new_cost1 = Calculate_new_cost_remove_one(tour1, cost1, k1, TT, n_nodes)
+#             if new_cost2 - cost2 < 2 * (cost1 - new_cost1)
+
+#                 if new_cost2 < cost1
+
+#                     insert!(tour2, k2, city1)
+
+#                     deleteat!(tour1, k1)
+#                     Chrm.tours[r1].cost = new_cost1
+#                     Chrm.tours[r2].cost = new_cost2
+#                     Chrm.genes = Int[]
+#                     Chrm.fitness = maximum([Chrm.tours[i].cost for i=1:length(Chrm.tours)])
+#                     for tour in Chrm.tours
+#                         Chrm.genes = vcat(Chrm.genes, tour.Sequence)
+#                     end
+#                     return 
+#                 end
+#             end
+#         end
+#     end
+# end
+
 function N1!(Chrm::Chromosome, TT::Matrix{Float64}, Close_nodes::Matrix{Int}, n_nodes::Int)   #Shift(0,1)
     r1 = argmax([Chrm.tours[i].cost for i=1:length(Chrm.tours)])
     routes = [i for i=1:length(Chrm.tours)]
@@ -29,27 +87,21 @@ function N1!(Chrm::Chromosome, TT::Matrix{Float64}, Close_nodes::Matrix{Int}, n_
             push!(Candidates, nt+1)
         end
     end
-    # Candidates = collect(setdiff(Set(Candidates),Set([k1])))
     
     if length(Candidates) == 0
         return 
     end
     k2 = Candidates[rand(1:length(Candidates))]
-#     k2 = rand(1:length(tour2)+1)
     
     new_cost2 = Calculate_new_cost_add_one(tour2, cost2, city1, k2, TT, n_nodes)
     new_cost1 = Calculate_new_cost_remove_one(tour1, cost1, k1, TT, n_nodes)
-    if new_cost2 - cost2 > 2 * (cost1 - new_cost1)
-        return 
-    end
+#     if new_cost2 - cost2 > 2 * (cost1 - new_cost1)
+#         return 
+#     end
     if new_cost2 >= cost1
         return 
     end
 
-#     println(cost1)
-#     println(new_cost1)
-#     println(cost2)
-#     println(new_cost2)
     insert!(tour2, k2, city1)
     
     deleteat!(tour1, k1)
@@ -62,7 +114,6 @@ function N1!(Chrm::Chromosome, TT::Matrix{Float64}, Close_nodes::Matrix{Int}, n_
     end
     return 
 end
-
 
 function N2!(Chrm::Chromosome, TT::Matrix{Float64}, Close_nodes::Matrix{Int}, n_nodes::Int)   #Swap(1,1)
     r1 = argmax([Chrm.tours[i].cost for i=1:length(Chrm.tours)])
@@ -676,18 +727,11 @@ function N8!(Chrm::Chromosome, TT::Matrix{Float64}, n_nodes::Int)   #divides the
 end
 
 function Improve_chromosome!(chrm::Chromosome, TT::Matrix{Float64}, Close_nodes::Matrix{Int}, n_nodes::Int, roullet::Vector{Int}, old_best::Float64)
-#     Search_methods = [N1, N2, N3, N4, Ni1, Ni2, Ni3, Ni4, Ni5, Ni6, Ni7, N3r, N4sr, N4rs, N4rr, N5, N5r, N6, N6sr, N6rs, N6rr, N7, N7rs, N7sr, N7rr]
-#     Search_methods = [Ni1, Ni2, Ni3, Ni4, Ni5, N1]    #Ni4 not great
-    # Search_methods = Function[Ni1!, Ni2!, Ni3!, Ni4!] #, Ni5, N1]
-#     Search_methods = [N1, N2, N3, N4, N_cross, Ni1, Ni2, Ni3, Ni4, Ni5]
+
     for i=1:100
-        # r = sample(1:length(Search_methods), weights(roullet))
         r = sample(1:length(roullet), weights(roullet))
         
         f1::Float64 = chrm.fitness
-        
-        # search::Function = Search_methods[r]
-        # search(chrm, TT, Close_nodes, n_nodes)
 
         if r == 1
             Ni1!(chrm, TT, Close_nodes, n_nodes)

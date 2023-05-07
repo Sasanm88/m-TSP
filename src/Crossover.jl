@@ -300,29 +300,32 @@ function put_city_in_tour(c::Vector{Tour}, city::Int, T::Matrix{Float64}, n_node
         nt = length(tour)
         if nt==0
             increase = T[1, city+1] + T[city+1, n_nodes+2]
-            best_tour = i
-            best_position = 1
-            break
-        end
-        increase = T[1, city+1] + T[city+1, tour[1]+1] - T[1, tour[1]+1]
-        if increase < least_increase
-            least_increase = increase
-            best_tour = i
-            best_position = 1
-        end
-        for j = 2:nt
-            increase = T[tour[j-1]+1, city+1] + T[city+1, tour[j]+1] - T[tour[j-1]+1, tour[j]+1]
             if increase < least_increase
                 least_increase = increase
                 best_tour = i
-                best_position = j
+                best_position = 1
             end
-        end
-        increase = T[tour[nt]+1, city+1] + T[city+1, n_nodes+2] - T[tour[nt]+1, n_nodes+2]
-        if increase < least_increase
-            least_increase = increase
-            best_tour = i
-            best_position = nt+1
+        else
+            increase = T[1, city+1] + T[city+1, tour[1]+1] - T[1, tour[1]+1]
+            if increase < least_increase
+                least_increase = increase
+                best_tour = i
+                best_position = 1
+            end
+            for j = 2:nt
+                increase = T[tour[j-1]+1, city+1] + T[city+1, tour[j]+1] - T[tour[j-1]+1, tour[j]+1]
+                if increase < least_increase
+                    least_increase = increase
+                    best_tour = i
+                    best_position = j
+                end
+            end
+            increase = T[tour[nt]+1, city+1] + T[city+1, n_nodes+2] - T[tour[nt]+1, n_nodes+2]
+            if increase < least_increase
+                least_increase = increase
+                best_tour = i
+                best_position = nt+1
+            end
         end
     end
     insert!(c[best_tour].Sequence, best_position, city)
@@ -432,7 +435,7 @@ function tour_crossover2(parent1::Chromosome, parent2::Chromosome, T::Matrix{Flo
             deleteat!(tour.Sequence, delete_indices)
         end
     end
-#     sort!(c, by=x -> x.cost)
+    sort!(c, by=x -> x.cost, rev = true)
     outsiders = findall(x->x==0, counters)   
     for city in outsiders 
         put_city_in_tour(c, city, T, n_nodes)

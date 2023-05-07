@@ -51,7 +51,9 @@ You can also do
 julia --sysimage sysimage/sys_hgsmtsp.so test/test_module.jl
 ```
 
-## How to use the sysimage from Python via pyjulia
+
+## How to the sysimage from Python via pyjulia
+
 
 First install [`pyjulia`](https://github.com/JuliaPy/pyjulia).
 

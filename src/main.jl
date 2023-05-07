@@ -5,6 +5,8 @@ using StatsBase
 using TSPLIB 
 using TSPSolvers
 
+using LinearAlgebra
+
 
 include("Create_Sample.jl")
 include("Split.jl")
@@ -29,14 +31,24 @@ function solve_mTSP(
     coordinates::Matrix{Float64};
     n_runs::Int = 1, 
     n_iterations::Int = 100, 
-    time_limit_per_run::Float64 = 10.0,
+    time_limit::Float64 = 10.0,
     W::Int = 1000,
     h::Float64 = 0.3,
     popsize::Tuple{Int, Int} = (10, 20),
     k_tournament::Int = 2,
     mutation_chance::Float64 = 0.0,
     num_nei::Int = 2,
-)
+) :: Tuple{Vector{Vector{Int}}, Vector{Float64}}
+
+    if n_vehicles == 1
+        dist_mtx_int = round.(Int, dist_mtx)
+
+        tour, tour_len = TSPSolvers.solve_tsp(dist_mtx_int; algorithm="HGS", nbIter=n_iterations, timeLimit=time_limit) 
+        return [tour], [Float64(tour_len)]
+    end
+
+
+    t0 = time() 
 
     n_nodes = size(dist_mtx)[1]
     @assert size(coordinates, 1) == n_nodes
@@ -61,6 +73,7 @@ function solve_mTSP(
     all_chrms = Chromosome[]
 
     for _ in 1:n_runs
+        time_limit_for_this_run = time_limit - (time() - t0)
         P, roullet = Perform_Genetic_Algorithm(
             dist_mtx_with_dummy, 
             n_vehicles, 
@@ -68,7 +81,7 @@ function solve_mTSP(
             popsize, 
             k_tournament, 
             n_iterations, 
-            time_limit_per_run, 
+            time_limit_for_this_run, 
             mutation_chance, 
             num_nei, 
             crossover_functions, 
@@ -88,6 +101,10 @@ function solve_mTSP(
         end
     end
 
+    hgs_routes = [t.Sequence for t in best_chrm.tours]
+    hgs_route_lengths = [t.cost for t in best_chrm.tours]
+
+    return hgs_routes, hgs_route_lengths
 end
 
 
@@ -142,6 +159,8 @@ function Solve_instances(dir_name::String, sample_names::Vector{String})
         println("Best: ", round(best, digits = 2), "  Average: ", round(avg/num_runs, digits = 2), 
             "  Worst: ", round(worst, digits = 2), " , run time= ", round((t2-t1)/num_runs, digits=0))
     end
+
+    return best_chrm
 end
 
 function test(instances::Vector{Symbol}, Ms::Vector{Int})

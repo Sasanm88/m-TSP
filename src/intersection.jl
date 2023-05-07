@@ -181,6 +181,7 @@ function Solve_all_intersections(chrm::Chromosome, Customers::Matrix{Float64}, d
             two_opt_on_route(tour, T, n_nodes)
         end
     end
+    
     if rand() < 0.1
         Improve_after_removing_intersections(chrm.tours, T, n_nodes, m, Customers, depot)
     end

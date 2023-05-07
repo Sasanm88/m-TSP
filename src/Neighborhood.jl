@@ -719,7 +719,6 @@ function Improve_chromosome!(chrm::Chromosome, TT::Matrix{Float64}, Close_nodes:
         end
     end
 
-    return chrm, 0
 end
 
 function Improve_Population!(P::Vector{Chromosome}, TT::Matrix{Float64}, Close_nodes::Matrix{Int}, n_nodes::Int)

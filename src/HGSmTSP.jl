@@ -14,9 +14,9 @@ module HGSmTSP
 
     dist_mtx = zeros(n_nodes, n_nodes)
     for i=1:n_nodes
-    for j=1:n_nodes
-        dist_mtx[i, j] = sum(abs.(coordinates[i, :] - coordinates[j, :]))
-    end
+        for j=1:n_nodes
+            dist_mtx[i, j] = sum(abs.(coordinates[i, :] - coordinates[j, :]))
+        end
     end
 
     t0 = time()

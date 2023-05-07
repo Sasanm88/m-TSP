@@ -1,3 +1,5 @@
+using OffsetArrays
+
 mutable struct abEdge
     edge::Tuple{Int, Int}
     first::Bool
@@ -6,6 +8,7 @@ end
 mutable struct ABcycle
     edges::Vector{abEdge}
     length::Int
+    nodes::Vector{Int}
 end
 
 function find_AB_cycles(p1::Vector{Int}, p2::Vector{Int}, n::Int)
@@ -68,7 +71,7 @@ function find_AB_cycles(p1::Vector{Int}, p2::Vector{Int}, n::Int)
 #                     print(i, " ")
 #                 end
 #                 println()
-                push!(AB_Cycles, ABcycle(temp, count-masks[vertex+1]))
+                push!(AB_Cycles, ABcycle(temp, count-masks[vertex+1], temp2[1:end-1]))
                 push!(paths, temp2)
                 
                 if vertex == path[1] 
@@ -125,7 +128,7 @@ function select_effective_cycles(AB_Cycles::Vector{ABcycle})
     deleteat!(AB_Cycles, delete_idx)
     sort!(AB_Cycles, by=x->x.length, rev=true)
 end
-    
+   
 
 function form_Eset_rand(AB_Cycles::Vector{ABcycle})
     Eset = abEdge[]
@@ -516,4 +519,32 @@ function eax_1ab(p1::Vector{Int}, p2::Vector{Int}, T::Matrix{Float64})
     subtours = generate_subtours_fast(p1, Eset)
     new_tour = modify_intermediate_solution(subtours, T)
     return new_tour
+end
+
+function have_intersects(a::Vector{Int}, b::Vector{Int})
+    return any(x -> x in b, a)
+end
+
+function eax_block(p1::Vector{Int}, p2::Vector{Int}, T::Matrix{Float64}, nchr::Int)
+    n = length(p1)
+    AB_Cycles, EA = find_AB_cycles(p1, p2, n)
+    select_effective_cycles(AB_Cycles)
+    new_tours = Vector{Vector{Int}}()
+    for k=1:min(nchr, length(AB_Cycles))
+        Eset = AB_Cycles[k].edges
+        subtours = generate_subtours_fast(p1, Eset)
+        sort!(subtours, by=x->length(x), rev=true)
+        for j = k+1:length(AB_Cycles)
+            for i = 2:length(subtours)
+                if have_intersects(subtours[i], AB_Cycles[j].nodes)
+                    Eset = vcat(Eset, AB_Cycles[j].edges)
+                    break
+                end
+            end
+        end
+        subtours = generate_subtours_fast(p1, Eset)
+        new_tour = modify_intermediate_solution(subtours, T)
+        push!(new_tours, new_tour)
+    end
+    return new_tours
 end

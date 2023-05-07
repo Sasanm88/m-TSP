@@ -45,14 +45,14 @@ function Draw_Solution(chrm::Chromosome, depot::Vector{Float64}, Customers::Matr
     max_y = max_y + magnify*(max_y-min_y)
     tit = title_ * " Cmax = " * string(round(obj, digits=1))
     p = plot(x[1], y[1], marker =:circle, title = tit, label = "t1", xlim=(min_x, max_x), ylim=(min_y, max_y))
-#     for i=1:m
-#         annotate!.(x[i][1:length(x[i])-1], y[i][1:length(y[i])-1], text.(labels[i], :left,8))
-#     end
+    for i=1:m
+        annotate!.(x[i][1:length(x[i])-1]*1.02, y[i][1:length(y[i])-1]*1.02, text.(labels[i], :left,8))
+    end
     for i=2:m
         p = plot!(x[i], y[i], marker =:circle, label = "t"*string(i))
     end 
-#     for (j,tour) in enumerate(chrm.tours)
-#         println("Tour ", j, ":")
+    for (j,tour) in enumerate(chrm.tours)
+        println("Tour ", j, ":" , tour.cost)
 #         for (k,i) in enumerate(tour.Sequence)
 #             print(i, " ")
 #             if k%25==0
@@ -62,6 +62,6 @@ function Draw_Solution(chrm::Chromosome, depot::Vector{Float64}, Customers::Matr
 #         println()
 #         print("cost=", tour.cost)
 #         println()
-#     end
+    end
     return p
 end

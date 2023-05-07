@@ -155,7 +155,7 @@ function find_tsp_tour1(Ct::Matrix{Float64})
 
     # tsp_tour, tsp_tour_len = Concorde.solve_tsp(dist_mtx)
 #     tsp_tour, tour_length = LKH.solve_tsp(dist_mtx)
-    tsp_tour, tour_length = TSPSolvers.solve_tsp(dist_mtx; algorithm="FarthestInsertion", firstcity=1) 
+    tsp_tour, tour_length = TSPSolvers.solve_tsp(dist_mtx; algorithm="Concorde", firstcity=1) 
 
     # @assert tsp_tour[1] == 1
 

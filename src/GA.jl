@@ -189,16 +189,20 @@ function best_route(Population::Vector{Chromosome})
 end
 
 function educate_and_add_the_offspring(offspring::Chromosome, Population::Vector{Chromosome}, TT::Matrix{Float64}, Close_nodes::Matrix{Int}, Customers::Matrix{Float64}, depot::Vector{Float64}, old_best::Float64, roullet::Vector{Int}, n_nodes::Int, improve_count::Int)
-    
-    if rand() < 0.1
-        Solve_all_intersections(offspring, Customers, depot, TT)
-#         offspring = Enrich_the_chromosome2(offspring, TT, Customers, depot, n_nodes)
+    if n_nodes < 700 && length(offspring.tours) < 20
+        if rand() < 0.3
+            Solve_all_intersections(offspring, Customers, depot, TT)
+            offspring = Enrich_the_chromosome2(offspring, TT, Customers, depot, n_nodes)
+        end
+        if rand() < 0.3
+            Solve_all_intersections(offspring, Customers, depot, TT)
+            offspring = Enrich_the_chromosome2(offspring, TT, Customers, depot, n_nodes)
+        end
+    else
+        if rand() < 0.1
+            Solve_all_intersections(offspring, Customers, depot, TT)
+        end
     end
-#     if rand() < 0.3
-#         Solve_all_intersections(offspring, Customers, depot, TT)
-#         offspring = Enrich_the_chromosome2(offspring, TT, Customers, depot, n_nodes)
-#     end
-
     offspring = Enrich_the_chromosome2(offspring, TT, Customers, depot, n_nodes)
     Improve_chromosome!(offspring, TT, Close_nodes, n_nodes, roullet, old_best)
         

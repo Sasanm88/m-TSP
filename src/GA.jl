@@ -45,7 +45,7 @@ function Select_parents(Population::Vector{Chromosome}, k_tournament::Int64, pop
 end
 
 
-function Reproduce(TT::Matrix{Float64}, parent1::Chromosome, parent2::Chromosome, n_nodes::Int64, crossover_functions::Vector{Int}) :: Tuple{Vector{Int}, Int}
+function Reproduce(TT::Matrix{Float64}, parent1::Chromosome, parent2::Chromosome, n_nodes::Int64, crossover_functions::Vector{Int}) :: Vector{Int}
     r::Int = rand(crossover_functions)
     if r == 1
         return Crossover_HX(TT, parent1.genes, parent2.genes, n_nodes)
@@ -174,19 +174,19 @@ function best_route(Population::Vector{Chromosome})
     end
 end
 
-function educate_and_add_the_offspring!(offspring::Chromosome, Population::Vector{Chromosome}, TT::Matrix{Float64}, Close_nodes::Matrix{Int}, Customers::Matrix{Float64}, depot::Vector{Float64}, old_best::Float64, roullet::Vector{Int}, n_nodes::Int, improve_count::Int)
+function educate_and_add_the_offspring!(offspring::Chromosome, Population::Vector{Chromosome}, TT::Matrix{Float64}, Close_nodes::Matrix{Int}, Customers::Matrix{Float64}, depot::Vector{Float64}, old_best::Float64, roullet::Vector{Int}, n_nodes::Int)
     if n_nodes < 700 && length(offspring.tours) < 20
         if rand() < 0.3
-            Solve_all_intersections(offspring, Customers, depot, TT)
+            Solve_all_intersections!(offspring, Customers, depot, TT)
             Enrich_the_chromosome!(offspring, TT, Customers, depot, n_nodes)
         end
         if rand() < 0.3
-            Solve_all_intersections(offspring, Customers, depot, TT)
+            Solve_all_intersections!(offspring, Customers, depot, TT)
             Enrich_the_chromosome!(offspring, TT, Customers, depot, n_nodes)
         end
     else
         if rand() < 0.1
-            Solve_all_intersections(offspring, Customers, depot, TT)
+            Solve_all_intersections!(offspring, Customers, depot, TT)
         end
     end
     Enrich_the_chromosome!(offspring, TT, Customers, depot, n_nodes)

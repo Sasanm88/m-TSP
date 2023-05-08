@@ -87,21 +87,21 @@ function initial_kmedian_solution(T::Matrix{Float64}, Customers::Matrix{Float64}
     else
         assignments_ = k_median(Customers, depot, K)
     end
-    tours = Tour[]
+    tours = Vector{Tour}(undef, K)
     genes = Int[]
     obj = 0.0
     for i in 1:K
         t1 = findall(x -> x == i, assignments_)
         if length(t1) == 1
             obj1 = T[1, t1[1]+1] + T[t1[1]+1, 1]
-            push!(tours, Tour(t1, obj1))
+            tours[i] = Tour(t1, obj1)
             push!(genes, t1[1])
             if obj1 > obj
                 obj = obj1
             end
         else
             tour = greedy_insertion_tour(T, t1)
-            push!(tours, tour)
+            tours[i] = tour
             genes = vcat(genes, tour.sequence)
             if tour.cost > obj
                 obj = tour.cost
@@ -159,18 +159,18 @@ function find_tsp_tour1(Ct::Matrix{Float64})
 end
 
 function find_tsp_tour2(Ct::Matrix{Float64})
-    tsp_tours = Vector{Vector{Int}}()
+    tsp_tours = Vector{Vector{Int}}(undef, 3)
     scale_factor = 1000
     dist_mtx = round.(Int, Ct .* scale_factor)
 
     tsp_tour, tour_length = solve_tsp(dist_mtx; algorithm="NearestNeighbor", firstcity=1)
-    push!(tsp_tours, tsp_tour[2:end] .- 1)
+    tsp_tours[1] = tsp_tour[2:end] .- 1
 
     tsp_tour, tour_length = solve_tsp(dist_mtx; algorithm="FarthestInsertion", firstcity=1)
-    push!(tsp_tours, tsp_tour[2:end] .- 1)
+    tsp_tours[2] = tsp_tour[2:end] .- 1
 
     tsp_tour, tour_length = solve_tsp(dist_mtx; algorithm="CheapestInsertion", firstcity=1)
-    push!(tsp_tours, tsp_tour[2:end] .- 1)
+    tsp_tours[3] = tsp_tour[2:end] .- 1
 
     return tsp_tours
 end
@@ -270,30 +270,28 @@ function generate_initial_population(TT::Matrix{Float64}, K::Int, mu::Int, tsp_t
     if n_tours == 4
         best_tsp_tour = tsp_tours[4]
     end
-    Population = Chromosome[]
+    population = Vector{Chromosome}(undef, mu)
     n_nodes = size(TT)[1] - 2
-    for tsp_tour in tsp_tours
-        obj, trips = SPLIT(TT, K, tsp_tour)
-        push!(Population, Chromosome(tsp_tour, obj, 0.0, trips))
+    for i in eachindex(tsp_tours)
+        obj, trips = SPLIT(TT, K, tsp_tours[i])
+        population[i] = Chromosome(tsp_tours[i], obj, 0.0, trips)
     end
-    S = Int[]
-    for i in 1:mu-n_tours
+
+    for i in n_tours+1:mu
         if rand() < 1
             if n_tours < 4
                 best_tsp_tour = tsp_tours[rand(1:n_tours)]
             end
-            S = change_initial(best_tsp_tour, n_nodes, K)
+            S::Vector{Int} = change_initial(best_tsp_tour, n_nodes, K)
             obj, trips = SPLIT(TT, K, S)
-            chrm = Chromosome(S, obj, 0.0, trips)
-            push!(Population, chrm)
+            population[i] = Chromosome(S, obj, 0.0, trips)
         else
-            chrm = initial_kmedian_solution(TT, customers, depot, K)
-            push!(Population, chrm)
+            population[i] = initial_kmedian_solution(TT, customers, depot, K)
         end
 
     end
-    sort!(Population, by=x -> x.fitness)
-    return Population, Population[1].fitness
+    sort!(population, by=x -> x.fitness)
+    return population, population[1].fitness
 end
 
 

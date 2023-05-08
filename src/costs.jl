@@ -332,8 +332,8 @@ function calculate_new_cost_exchange_one(tour1::Vector{Int}, cost::Float64, city
 end
 
 function calculate_new_cost_cross(tour1::Vector{Int}, cost1::Float64, tour2::Vector{Int}, cost2::Float64, k11::Int, k12::Int, k21::Int, k22::Int, T::Matrix{Float64}, n_nodes::Int)
-    c1 = sum(T[tour1[i]+1, tour1[i+1]+1] for i = k11:k12-1)
-    c2 = sum(T[tour2[i]+1, tour2[i+1]+1] for i = k21:k22-1)
+    c1 = sum(T[tour1[i]+1, tour1[i+1]+1] for i in k11:k12-1)
+    c2 = sum(T[tour2[i]+1, tour2[i+1]+1] for i in k21:k22-1)
     t1 = copy(tour1)
     t2 = copy(tour2)
     pushfirst!(t1, 0)
@@ -364,8 +364,8 @@ function calculate_new_cost_cross(tour1::Vector{Int}, cost1::Float64, tour2::Vec
 end
 
 function calculate_new_cost_cross_upgraded(tour1::Vector{Int}, cost1::Float64, tour2::Vector{Int}, cost2::Float64, k11::Int, k12::Int, k21::Int, k22::Int, k13::Int, k23::Int, T::Matrix{Float64}, n_nodes::Int)
-    c1 = sum(T[tour1[i]+1, tour1[i+1]+1] for i = k11:k12-1)
-    c2 = sum(T[tour2[i]+1, tour2[i+1]+1] for i = k21:k22-1)
+    c1 = sum(T[tour1[i]+1, tour1[i+1]+1] for i in k11:k12-1)
+    c2 = sum(T[tour2[i]+1, tour2[i+1]+1] for i in k21:k22-1)
     t1 = copy(tour1)
     t2 = copy(tour2)
     pushfirst!(t1, 0)

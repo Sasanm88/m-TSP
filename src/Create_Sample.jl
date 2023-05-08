@@ -1,6 +1,6 @@
 
 
-function Create_random_sample(n::Int)
+function create_random_sample(n::Int)
     allNodes = rand(n+1,2)
     num_of_nodes = n - 1
     T = Matrix{Float64}(undef, num_of_nodes + 2, num_of_nodes + 2)
@@ -25,7 +25,7 @@ function Create_random_sample(n::Int)
     return T, depot, Nodes
 end
 
-function Calculate_distance_matrices_TSPLIB(tspeed::Int, allNodes::Matrix{Float64})
+function calculate_distance_matrices_TSPLIB(tspeed::Int, allNodes::Matrix{Float64})
     num_of_nodes = size(allNodes)[1] - 1
     T = Matrix{Float64}(undef, num_of_nodes + 2, num_of_nodes + 2)
     depot = allNodes[1, :]
@@ -49,14 +49,14 @@ function Calculate_distance_matrices_TSPLIB(tspeed::Int, allNodes::Matrix{Float6
     return T
 end
 
-function Read_TSPLIB_instance(sample_name::Symbol, tspeed::Int)
+function read_TSPLIB_instance(sample_name::Symbol, tspeed::Int)
     tsp = readTSPLIB(sample_name)
     dEligible = Int[]
-    T = Calculate_distance_matrices_TSPLIB(tspeed, tsp.nodes)
+    T = calculate_distance_matrices_TSPLIB(tspeed, tsp.nodes)
     return T
 end
 
-function Calculate_TSPLIB(sample::Symbol)
+function calculate_TSPLIB(sample::Symbol)
     tsp = readTSPLIB(sample)
     allNodes = tsp.nodes
     num_of_nodes = size(allNodes)[1] - 1

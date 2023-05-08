@@ -1,4 +1,4 @@
-function Calculate_new_cost_add_one(tour::Vector{Int}, cost::Float64, city::Int, position::Int, T::Matrix{Float64}, n_nodes::Int)
+function calculate_new_cost_add_one(tour::Vector{Int}, cost::Float64, city::Int, position::Int, T::Matrix{Float64}, n_nodes::Int)
     nt = length(tour)
     if nt == 0 
         return T[1, city+1] + T[city+1, n_nodes+2]
@@ -14,7 +14,7 @@ function Calculate_new_cost_add_one(tour::Vector{Int}, cost::Float64, city::Int,
     return cost
 end
 
-function Calculate_new_cost_add_two(tour::Vector{Int}, cost::Float64, city1::Int, city2::Int, position::Int, T::Matrix{Float64}, n_nodes::Int)
+function calculate_new_cost_add_two(tour::Vector{Int}, cost::Float64, city1::Int, city2::Int, position::Int, T::Matrix{Float64}, n_nodes::Int)
     nt = length(tour)
     cost1 = cost
     cost2 = cost
@@ -40,7 +40,7 @@ function Calculate_new_cost_add_two(tour::Vector{Int}, cost::Float64, city1::Int
     end
 end
 
-function Calculate_new_cost_add_three(tour::Vector{Int}, cost::Float64, city1::Int, city2::Int, city3::Int, position::Int, T::Matrix{Float64}, n_nodes::Int)
+function calculate_new_cost_add_three(tour::Vector{Int}, cost::Float64, city1::Int, city2::Int, city3::Int, position::Int, T::Matrix{Float64}, n_nodes::Int)
     nt = length(tour)
     cost1 = cost
     cost2 = cost
@@ -66,7 +66,7 @@ function Calculate_new_cost_add_three(tour::Vector{Int}, cost::Float64, city1::I
     end
 end
 
-function Calculate_new_cost_remove_one(tour::Vector{Int}, cost::Float64, position::Int, T::Matrix{Float64}, n_nodes::Int)
+function calculate_new_cost_remove_one(tour::Vector{Int}, cost::Float64, position::Int, T::Matrix{Float64}, n_nodes::Int)
     nt = length(tour)
     if nt == 1
         return 0.0
@@ -82,7 +82,7 @@ function Calculate_new_cost_remove_one(tour::Vector{Int}, cost::Float64, positio
     return cost
 end
 
-function Calculate_new_cost_remove_two(tour::Vector{Int}, cost::Float64, position::Int, T::Matrix{Float64}, n_nodes::Int)
+function calculate_new_cost_remove_two(tour::Vector{Int}, cost::Float64, position::Int, T::Matrix{Float64}, n_nodes::Int)
     nt = length(tour)
     if nt == 2
         return 0.0
@@ -98,7 +98,7 @@ function Calculate_new_cost_remove_two(tour::Vector{Int}, cost::Float64, positio
     return cost
 end
 
-function Calculate_new_cost_remove_three(tour::Vector{Int}, cost::Float64, position::Int, T::Matrix{Float64}, n_nodes::Int)
+function calculate_new_cost_remove_three(tour::Vector{Int}, cost::Float64, position::Int, T::Matrix{Float64}, n_nodes::Int)
     nt = length(tour)
     if nt == 3
         return 0.0
@@ -114,7 +114,7 @@ function Calculate_new_cost_remove_three(tour::Vector{Int}, cost::Float64, posit
     return cost
 end
 
-function Calculate_new_cost_swap_one(tour1::Vector{Int}, cost1::Float64, city1::Int, position1::Int, tour2::Vector{Int}, cost2::Float64, city2::Int, position2::Int,T::Matrix{Float64}, n_nodes::Int)
+function calculate_new_cost_swap_one(tour1::Vector{Int}, cost1::Float64, city1::Int, position1::Int, tour2::Vector{Int}, cost2::Float64, city2::Int, position2::Int,T::Matrix{Float64}, n_nodes::Int)
     nt1 = length(tour1)
     nt2 = length(tour2)
     new_cost1 = cost1
@@ -145,7 +145,7 @@ function Calculate_new_cost_swap_one(tour1::Vector{Int}, cost1::Float64, city1::
 end
 
 
-function Calculate_new_cost_swap_two_updated(tour1::Vector{Int}, cost1::Float64, city11::Int, city12::Int, position1::Int, tour2::Vector{Int}, cost2::Float64, city21::Int, city22::Int, position2::Int,T::Matrix{Float64}, n_nodes::Int)
+function calculate_new_cost_swap_two_updated(tour1::Vector{Int}, cost1::Float64, city11::Int, city12::Int, position1::Int, tour2::Vector{Int}, cost2::Float64, city21::Int, city22::Int, position2::Int,T::Matrix{Float64}, n_nodes::Int)
     nt1 = length(tour1)
     nt2 = length(tour2)
     new_cost11 = cost1
@@ -198,7 +198,7 @@ function Calculate_new_cost_swap_two_updated(tour1::Vector{Int}, cost1::Float64,
     end
 end
 
-function Calculate_new_cost_swap_three_updated(tour1::Vector{Int}, cost1::Float64, city11::Int, city12::Int, city13::Int, position1::Int, tour2::Vector{Int}, cost2::Float64, city21::Int, city22::Int, city23::Int, position2::Int,T::Matrix{Float64}, n_nodes::Int)
+function calculate_new_cost_swap_three_updated(tour1::Vector{Int}, cost1::Float64, city11::Int, city12::Int, city13::Int, position1::Int, tour2::Vector{Int}, cost2::Float64, city21::Int, city22::Int, city23::Int, position2::Int,T::Matrix{Float64}, n_nodes::Int)
     nt1 = length(tour1)
     nt2 = length(tour2)
     new_cost11 = cost1
@@ -252,7 +252,7 @@ function Calculate_new_cost_swap_three_updated(tour1::Vector{Int}, cost1::Float6
 end
 
 
-function Calculate_new_cost_swap_three_with_two_updated(tour1::Vector{Int}, cost1::Float64, city11::Int, city12::Int, city13::Int, position1::Int, tour2::Vector{Int}, cost2::Float64, city21::Int, city22::Int, position2::Int,T::Matrix{Float64}, n_nodes::Int)
+function calculate_new_cost_swap_three_with_two_updated(tour1::Vector{Int}, cost1::Float64, city11::Int, city12::Int, city13::Int, position1::Int, tour2::Vector{Int}, cost2::Float64, city21::Int, city22::Int, position2::Int,T::Matrix{Float64}, n_nodes::Int)
     nt1 = length(tour1)
     nt2 = length(tour2)
     new_cost11 = cost1
@@ -305,7 +305,7 @@ function Calculate_new_cost_swap_three_with_two_updated(tour1::Vector{Int}, cost
     end
 end
 
-function Calculate_new_cost_exchange_one(tour1::Vector{Int}, cost::Float64, city::Int, position1::Int, 
+function calculate_new_cost_exchange_one(tour1::Vector{Int}, cost::Float64, city::Int, position1::Int, 
     position2::Int, T::Matrix{Float64}, n_nodes::Int)
     tour = copy(tour1)
     nt = length(tour)
@@ -331,7 +331,7 @@ function Calculate_new_cost_exchange_one(tour1::Vector{Int}, cost::Float64, city
     return cost
 end
 
-function Calculate_new_cost_cross(tour1::Vector{Int}, cost1::Float64, tour2::Vector{Int}, cost2::Float64, k11::Int, k12::Int, k21::Int, k22::Int, T::Matrix{Float64}, n_nodes::Int)
+function calculate_new_cost_cross(tour1::Vector{Int}, cost1::Float64, tour2::Vector{Int}, cost2::Float64, k11::Int, k12::Int, k21::Int, k22::Int, T::Matrix{Float64}, n_nodes::Int)
     c1 = sum(T[tour1[i]+1, tour1[i+1]+1] for i=k11:k12-1)
     c2 = sum(T[tour2[i]+1, tour2[i+1]+1] for i=k21:k22-1)
     t1 = copy(tour1)
@@ -363,7 +363,7 @@ function Calculate_new_cost_cross(tour1::Vector{Int}, cost1::Float64, tour2::Vec
     end
 end
 
-function Calculate_new_cost_cross_upgraded(tour1::Vector{Int}, cost1::Float64, tour2::Vector{Int}, cost2::Float64, k11::Int, k12::Int, k21::Int, k22::Int, k13::Int, k23::Int, T::Matrix{Float64}, n_nodes::Int)
+function calculate_new_cost_cross_upgraded(tour1::Vector{Int}, cost1::Float64, tour2::Vector{Int}, cost2::Float64, k11::Int, k12::Int, k21::Int, k22::Int, k13::Int, k23::Int, T::Matrix{Float64}, n_nodes::Int)
     c1 = sum(T[tour1[i]+1, tour1[i+1]+1] for i=k11:k12-1)
     c2 = sum(T[tour2[i]+1, tour2[i+1]+1] for i=k21:k22-1)
     t1 = copy(tour1)
@@ -409,7 +409,7 @@ function Calculate_new_cost_cross_upgraded(tour1::Vector{Int}, cost1::Float64, t
 end
 
 
-function Calculate_new_cost_exchange_two(tour::Vector{Int}, cost::Float64, city1::Int, position1::Int, city2::Int,
+function calculate_new_cost_exchange_two(tour::Vector{Int}, cost::Float64, city1::Int, position1::Int, city2::Int,
     position2::Int, T::Matrix{Float64}, n_nodes::Int)
     nt = length(tour)
     
@@ -464,7 +464,7 @@ function Calculate_new_cost_exchange_two(tour::Vector{Int}, cost::Float64, city1
     return cost
 end
 
-function Calculate_new_cost_or_opt2(tour1::Vector{Int}, cost::Float64, city1::Int, position1::Int, 
+function calculate_new_cost_or_opt2(tour1::Vector{Int}, cost::Float64, city1::Int, position1::Int, 
     city2::Int, position2::Int, T::Matrix{Float64}, n_nodes::Int)
     
     if position1 == position2
@@ -493,7 +493,7 @@ function Calculate_new_cost_or_opt2(tour1::Vector{Int}, cost::Float64, city1::In
 end
 
 
-function Calculate_new_cost_or_opt3(tour1::Vector{Int}, cost::Float64, city1::Int, city2::Int, city3::Int, position1::Int, 
+function calculate_new_cost_or_opt3(tour1::Vector{Int}, cost::Float64, city1::Int, city2::Int, city3::Int, position1::Int, 
      position2::Int, T::Matrix{Float64}, n_nodes::Int)
     
     if position1 == position2
@@ -521,7 +521,7 @@ function Calculate_new_cost_or_opt3(tour1::Vector{Int}, cost::Float64, city1::In
     return cost
 end
 
-function Calculate_new_cost_2_opt(tour::Vector{Int}, cost::Float64, position1::Int,
+function calculate_new_cost_2_opt(tour::Vector{Int}, cost::Float64, position1::Int,
         position2::Int, T::Matrix{Float64}, n_nodes::Int)
 
     nt = length(tour)
@@ -539,7 +539,7 @@ function Calculate_new_cost_2_opt(tour::Vector{Int}, cost::Float64, position1::I
     return cost
 end
 
-function Calculate_new_cost_3_opt(tour::Vector{Int}, cost::Float64, k1::Int, k2::Int, k3::Int,
+function calculate_new_cost_3_opt(tour::Vector{Int}, cost::Float64, k1::Int, k2::Int, k3::Int,
          T::Matrix{Float64}, n_nodes::Int)
 
     nt = length(tour)
@@ -556,7 +556,7 @@ function Calculate_new_cost_3_opt(tour::Vector{Int}, cost::Float64, k1::Int, k2:
     return cost
 end
 
-function Calculate_new_cost_3_permute(tour::Vector{Int}, cost::Float64, S1::Vector{Int}, S2::Vector{Int}
+function calculate_new_cost_3_permute(tour::Vector{Int}, cost::Float64, S1::Vector{Int}, S2::Vector{Int}
         ,k1::Int, T::Matrix{Float64}, n_nodes::Int)
     if S1 == S2 
         return cost

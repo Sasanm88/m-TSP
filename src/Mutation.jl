@@ -13,7 +13,7 @@ function two_opt_mutation(Chrm::Chromosome, T::Matrix{Float64}, n_nodes::Int)   
     nt = length(tour1)
     k1, k2 = sort(sample(1:length(tour1), 2, replace = false))
 
-    new_cost = Calculate_new_cost_2_opt(tour1, cost1, k1, k2, T, n_nodes)
+    new_cost = calculate_new_cost_2_opt(tour1, cost1, k1, k2, T, n_nodes)
 
     tour1[k1:k2] = reverse(tour1[k1:k2])
     Chrm.tours[r1].cost = new_cost
@@ -51,7 +51,7 @@ function cross_mutation(Chrm::Chromosome, Customers::Matrix{Float64}, depot::Vec
     k11, k12 = sort(sample(1:n1, 2, replace = false))
     k21, k22 = sort(sample(1:n2, 2, replace = false))
     
-    new_cost1, new_cost2, straight1, straight2 = Calculate_new_cost_cross(t1, cost1, t2, cost2, k11, k12, k21, k22, T, n_nodes)
+    new_cost1, new_cost2, straight1, straight2 = calculate_new_cost_cross(t1, cost1, t2, cost2, k11, k12, k21, k22, T, n_nodes)
 
     if straight2
         alpha1 = copy(t1[k11:k12])

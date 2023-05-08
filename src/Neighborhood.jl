@@ -93,8 +93,8 @@ function N1!(Chrm::Chromosome, TT::Matrix{Float64}, Close_nodes::Matrix{Int}, n_
     end
     k2 = Candidates[rand(1:length(Candidates))]
     
-    new_cost2 = Calculate_new_cost_add_one(tour2, cost2, city1, k2, TT, n_nodes)
-    new_cost1 = Calculate_new_cost_remove_one(tour1, cost1, k1, TT, n_nodes)
+    new_cost2 = calculate_new_cost_add_one(tour2, cost2, city1, k2, TT, n_nodes)
+    new_cost1 = calculate_new_cost_remove_one(tour1, cost1, k1, TT, n_nodes)
 #     if new_cost2 - cost2 > 2 * (cost1 - new_cost1)
 #         return 
 #     end
@@ -153,7 +153,7 @@ function N2!(Chrm::Chromosome, TT::Matrix{Float64}, Close_nodes::Matrix{Int}, n_
     k2 = Candidates[rand(1:length(Candidates))]
     city2 = tour2[k2]
 
-    new_cost1, new_cost2 = Calculate_new_cost_swap_one(tour1, cost1, city1, k1, tour2, cost2, city2, k2, TT, n_nodes)
+    new_cost1, new_cost2 = calculate_new_cost_swap_one(tour1, cost1, city1, k1, tour2, cost2, city2, k2, TT, n_nodes)
 
     if new_cost1 >= cost1 || new_cost2 >= cost1
         return 
@@ -223,7 +223,7 @@ function N3!(Chrm::Chromosome, TT::Matrix{Float64}, Close_nodes::Matrix{Int}, n_
     k2 = Candidates[rand(1:length(Candidates))]
 #     k2 = rand(1:length(tour2)+1)
 
-    new_cost2, straight = Calculate_new_cost_add_two(tour2, cost2, city1, city2, k2, TT, n_nodes)
+    new_cost2, straight = calculate_new_cost_add_two(tour2, cost2, city1, city2, k2, TT, n_nodes)
     
     if new_cost2 >= cost1
         return 
@@ -235,7 +235,7 @@ function N3!(Chrm::Chromosome, TT::Matrix{Float64}, Close_nodes::Matrix{Int}, n_
         insert!(tour2, k2, city2)
         insert!(tour2, k2+1, city1)
     end
-    new_cost1 = Calculate_new_cost_remove_two(tour1, cost1, k1, TT, n_nodes)
+    new_cost1 = calculate_new_cost_remove_two(tour1, cost1, k1, TT, n_nodes)
     deleteat!(tour1, [k1, k1+1])
     Chrm.tours[r1].cost = new_cost1
     Chrm.tours[r2].cost = new_cost2
@@ -299,7 +299,7 @@ function N4!(Chrm::Chromosome, TT::Matrix{Float64}, Close_nodes::Matrix{Int}, n_
     city21 = tour2[k2]
     city22 = tour2[k2+1]
 
-    new_cost1, new_cost2, straight1, straight2 = Calculate_new_cost_swap_two_updated(tour1, cost1, city11, city12, k1, tour2, cost2, city21, city22, k2, TT, n_nodes)
+    new_cost1, new_cost2, straight1, straight2 = calculate_new_cost_swap_two_updated(tour1, cost1, city11, city12, k1, tour2, cost2, city21, city22, k2, TT, n_nodes)
     if new_cost1 >= cost1 || new_cost2 >= cost1
         return 
     end
@@ -381,7 +381,7 @@ function N5!(Chrm::Chromosome, TT::Matrix{Float64}, Close_nodes::Matrix{Int}, n_
     k2 = Candidates[rand(1:length(Candidates))]
 #     k2 = rand(1:length(tour2)+1)
 
-    new_cost2, straight = Calculate_new_cost_add_three(tour2, cost2, city1, city2, city3, k2, TT, n_nodes)
+    new_cost2, straight = calculate_new_cost_add_three(tour2, cost2, city1, city2, city3, k2, TT, n_nodes)
     
     if new_cost2 >= cost1
         return 
@@ -396,7 +396,7 @@ function N5!(Chrm::Chromosome, TT::Matrix{Float64}, Close_nodes::Matrix{Int}, n_
         insert!(tour2, k2+2, city1)
     end
     
-    new_cost1 = Calculate_new_cost_remove_three(tour1, cost1, k1, TT, n_nodes)
+    new_cost1 = calculate_new_cost_remove_three(tour1, cost1, k1, TT, n_nodes)
     deleteat!(tour1, [k1, k1+1, k1+2])
     Chrm.tours[r1].cost = new_cost1
     Chrm.tours[r2].cost = new_cost2
@@ -461,7 +461,7 @@ function N6!(Chrm::Chromosome, TT::Matrix{Float64}, Close_nodes::Matrix{Int}, n_
     city22 = tour2[k2+1]
     city23 = tour2[k2+2]
     
-    new_cost1, new_cost2, straight1, straight2 = Calculate_new_cost_swap_three_updated(tour1, cost1, city11, city12, city13, k1, tour2, cost2, city21, city22, city23, k2, TT, n_nodes)
+    new_cost1, new_cost2, straight1, straight2 = calculate_new_cost_swap_three_updated(tour1, cost1, city11, city12, city13, k1, tour2, cost2, city21, city22, city23, k2, TT, n_nodes)
     if new_cost1 >= cost1 || new_cost2 >= cost1
         return 
     end
@@ -543,7 +543,7 @@ function N7!(Chrm::Chromosome, TT::Matrix{Float64}, Close_nodes::Matrix{Int}, n_
     city21 = tour2[k2]
     city22 = tour2[k2+1]
     
-    new_cost1, new_cost2, straight1, straight2 = Calculate_new_cost_swap_three_with_two_updated(tour1, cost1, city11, city12, city13, k1, tour2, cost2, city21, city22,  k2, TT, n_nodes)
+    new_cost1, new_cost2, straight1, straight2 = calculate_new_cost_swap_three_with_two_updated(tour1, cost1, city11, city12, city13, k1, tour2, cost2, city21, city22,  k2, TT, n_nodes)
     if new_cost1 >= cost1 || new_cost2 >= cost1
         return 
     end
@@ -613,7 +613,7 @@ function N_cross!(Chrm::Chromosome, T::Matrix{Float64}, Close_nodes::Matrix{Int}
     l2 = rand(1:tau)
     k22 = k21 + l2
     
-    new_cost1, new_cost2, straight1, straight2 = Calculate_new_cost_cross(t1, cost1, t2, cost2, k11, k12, k21, k22, T, n_nodes)
+    new_cost1, new_cost2, straight1, straight2 = calculate_new_cost_cross(t1, cost1, t2, cost2, k11, k12, k21, k22, T, n_nodes)
     if new_cost1 >= cost1 || new_cost2 >= cost1
         return 
     end

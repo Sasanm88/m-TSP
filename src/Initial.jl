@@ -382,8 +382,8 @@ function Enrich_the_chromosome!(Chrm::Chromosome, T::Matrix{Float64}, Customers:
                         city1 = tour1[k1]
                         for k2 = 1:length(tour2)+1
                             if Chrm.tours[r1].cost > Chrm.tours[r2].cost
-                                new_cost2 = Calculate_new_cost_add_one(tour2, cost2, city1, k2, T, n_nodes)
-                                new_cost1 = Calculate_new_cost_remove_one(tour1, cost1, k1, T, n_nodes)
+                                new_cost2 = calculate_new_cost_add_one(tour2, cost2, city1, k2, T, n_nodes)
+                                new_cost1 = calculate_new_cost_remove_one(tour1, cost1, k1, T, n_nodes)
                                 do_it = false
                                 if r1 == max_tour_index
                                     if new_cost2 < max_tour_length

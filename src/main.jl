@@ -8,14 +8,14 @@ using TSPSolvers
 using LinearAlgebra
 
 
-include("Create_Sample.jl")
-include("Split.jl")
-include("GA.jl")
-include("Initial.jl")
-include("Mutation.jl")
-include("Crossover.jl")
-include("Neighborhood.jl")
-include("Neighborhood_intra.jl")
+include("create_sample.jl")
+include("split.jl")
+include("genetic_algorithm.jl")
+include("initial.jl")
+include("mutation.jl")
+include("crossover.jl")
+include("neighborhood.jl")
+include("neighborhood_intra.jl")
 include("costs.jl")
 include("intersection.jl")
 
@@ -166,7 +166,7 @@ end
 function test(instances::Vector{Symbol}, Ms::Vector{Int})
     for instance in instances
         for K in Ms
-            T = Read_TSPLIB_instance(instance, 1)
+            T = read_TSPLIB_instance(instance, 1)
             n = size(T)[1]-2
             tsp = readTSPLIB(instance)
             allNodes = tsp.nodes

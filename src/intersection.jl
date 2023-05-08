@@ -205,7 +205,7 @@ function two_opt_on_route(tour::Tour, T::Matrix{Float64}, n_nodes::Int)   #2-opt
                 break
             end
             for i2 = i1+1:nt
-                new_cost = Calculate_new_cost_2_opt(tour1, cost1, i1, i2, T, n_nodes)
+                new_cost = calculate_new_cost_2_opt(tour1, cost1, i1, i2, T, n_nodes)
                 if round(new_cost, digits=2) < round(cost1 , digits = 2)
                     cost1 = new_cost
                     improved = true
@@ -246,11 +246,11 @@ function Improve_after_removing_intersections(tours::Vector{Tour}, T::Matrix{Flo
             tour2 = tours[next_tour].Sequence
             cost2 = tours[next_tour].cost
             for i=1:length(tour1)
-                new_cost1 = Calculate_new_cost_remove_one(tour1, cost1, i, T, n_nodes)
+                new_cost1 = calculate_new_cost_remove_one(tour1, cost1, i, T, n_nodes)
                 new_cost2 = Inf
                 best_position = 0
                 for j = 1:length(tour2)+1
-                    temp = Calculate_new_cost_add_one(tour2, cost2, tour1[i], j, T, n_nodes)
+                    temp = calculate_new_cost_add_one(tour2, cost2, tour1[i], j, T, n_nodes)
                     if temp < new_cost2 
                         new_cost2 = temp
                         best_position = j

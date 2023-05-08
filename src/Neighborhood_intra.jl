@@ -42,7 +42,7 @@ function Ni1!(Chrm::Chromosome, TT::Matrix{Float64}, Close_nodes::Matrix{Int}, n
     
     k2 = Candidates[rand(1:length(Candidates))]
 #     k2 = rand(1:length(tour1))
-    new_cost1 = Calculate_new_cost_exchange_one(tour1, cost1, city1, k1, k2, TT, n_nodes)
+    new_cost1 = calculate_new_cost_exchange_one(tour1, cost1, city1, k1, k2, TT, n_nodes)
     
     if new_cost1 >= cost1
         return 
@@ -103,7 +103,7 @@ function Ni2!(Chrm::Chromosome, TT::Matrix{Float64}, Close_nodes::Matrix{Int}, n
 #     k2 = rand(1:nt)
     city2 = tour1[k2]
 
-    new_cost1= Calculate_new_cost_exchange_two(tour1, cost1, city1, k1, city2, k2, TT, n_nodes)
+    new_cost1= calculate_new_cost_exchange_two(tour1, cost1, city1, k1, city2, k2, TT, n_nodes)
     if new_cost1 >= cost1 
         return 
     end
@@ -159,7 +159,7 @@ function Ni3!(Chrm::Chromosome, T::Matrix{Float64}, Close_nodes::Matrix{Int}, n_
 #     k2 = rand(1:length(tour1)-1)   #Way to improve 
     k2 = Candidates[rand(1:length(Candidates))]
 
-    z1 = Calculate_new_cost_or_opt2(tour1, cost1, city1, k1, city2, k2, T, n_nodes)
+    z1 = calculate_new_cost_or_opt2(tour1, cost1, city1, k1, city2, k2, T, n_nodes)
 
     if z1 >= cost1 
         return
@@ -217,7 +217,7 @@ function Ni4!(Chrm::Chromosome, T::Matrix{Float64}, Close_nodes::Matrix{Int}, n_
     end
 
     k2 = Candidates[rand(1:length(Candidates))]
-    new_cost1 = Calculate_new_cost_or_opt3(tour1, cost1, city1, city2, city3, k1, k2, T, n_nodes)
+    new_cost1 = calculate_new_cost_or_opt3(tour1, cost1, city1, city2, city3, k1, k2, T, n_nodes)
 
     if new_cost1 >= cost1 
         return
@@ -292,7 +292,7 @@ function Ni5!(Chrm::Chromosome, T::Matrix{Float64}, Close_nodes::Matrix{Int}, n_
     Candidates = collect(Set(Candidates))
     i2 = Candidates[rand(1:length(Candidates))]
     k1, k2 = min(i1, i2), max(i1,i2)
-    new_cost = Calculate_new_cost_2_opt(tour1, cost1, k1, k2, T, n_nodes)
+    new_cost = calculate_new_cost_2_opt(tour1, cost1, k1, k2, T, n_nodes)
 
     if new_cost >= cost1 
         return
@@ -323,7 +323,7 @@ function Ni6!(Chrm::Chromosome, T::Matrix{Float64}, Close_nodes::Matrix{Int}, n_
     nt = length(tour1)
     k1, k2, k3 = sort!(sample(1:length(tour1), 3, replace = false))
 
-    new_cost = Calculate_new_cost_3_opt(tour1, cost1, k1, k2, k3, T, n_nodes)
+    new_cost = calculate_new_cost_3_opt(tour1, cost1, k1, k2, k3, T, n_nodes)
     if new_cost >= cost1 
         return
     end
@@ -358,7 +358,7 @@ function Ni7!(Chrm::Chromosome, T::Matrix{Float64}, Close_nodes::Matrix{Int}, n_
     temp1 = copy(tour1[k1:k1+2])
     temp2 = shuffle(temp1)
     
-    new_cost = Calculate_new_cost_3_permute(tour1, cost1, temp1, temp2, k1, T, n_nodes)
+    new_cost = calculate_new_cost_3_permute(tour1, cost1, temp1, temp2, k1, T, n_nodes)
     
     if new_cost >= cost1 
         return

@@ -375,29 +375,31 @@ function tour_crossover2(parent1::Chromosome, parent2::Chromosome, T::Matrix{Flo
     # Conduct a simple two point crossover between them and add it to the new tours.
     # At the end, Delete all the repeating cities from the tours. 
     # All the remaining cities will be placed in the current tours based on a greedy approach (minimum increase)
-    P1 = deepcopy(parent1)
-    P2 = deepcopy(parent2)
+    # P1 = deepcopy(parent1)
+    # P2 = deepcopy(parent2)
+    P1_tours = deepcopy(parent1.tours)
+    P2_tours = deepcopy(parent2.tours)
     c = Tour[]
-    m = length(P1.tours)
+    m = length(P1_tours)
 
     for i in 1:m
-        tour1 = P1.tours[i].sequence
-        cost1 = P1.tours[i].cost
+        tour1 = P1_tours[i].sequence
+        cost1 = P1_tours[i].cost
         cost2 = 0.0
         max_intersection = -1
         tour2 = Int[]
         r2 = 0
-        for j in 1:length(P2.tours)
-            inter = length(intersect(tour1, P2.tours[j].sequence))
+        for j in 1:length(P2_tours)
+            inter = length(intersect(tour1, P2_tours[j].sequence))
             if inter > max_intersection
                 max_intersection = inter
-                tour2 = P2.tours[j].sequence
-                cost2 = P2.tours[j].cost
+                tour2 = P2_tours[j].sequence
+                cost2 = P2_tours[j].cost
                 r2 = j
             end
         end
 
-        deleteat!(P2.tours, r2)
+        deleteat!(P2_tours, r2)
         if length(tour1) <= length(tour2)
             if length(tour1) <= 4
                 push!(c, Tour(tour2, cost2))

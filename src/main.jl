@@ -37,7 +37,8 @@ function solve_mTSP(
     popsize::Tuple{Int,Int}=(10, 20),
     k_tournament::Int=2,
     mutation_chance::Float64=0.0,
-    num_nei::Int=2
+    num_nei::Int=2,
+    verbose::Bool=false
 )::Tuple{Vector{Vector{Int}},Vector{Float64}}
 
     if n_vehicles == 1
@@ -86,7 +87,8 @@ function solve_mTSP(
             num_nei,
             crossover_functions,
             customer_coordinates,
-            depot_coordinates
+            depot_coordinates,
+            verbose = verbose
         )
 
         avg += P[1].fitness

@@ -1,57 +1,57 @@
-function two_opt_mutation(Chrm::Chromosome, T::Matrix{Float64}, n_nodes::Int)   #2-opt 
+function two_opt_mutation(chrm::Chromosome, T::Matrix{Float64}, n_nodes::Int)   #2-opt 
     r1 = 1
     if rand() < 0.5
-        r1 = argmax([Chrm.tours[i].cost for i=1:length(Chrm.tours)])
+        r1 = argmax([chrm.tours[i].cost for i in 1:length(chrm.tours)])
     else
-        r1 = rand(1:length(Chrm.tours))
+        r1 = rand(1:length(chrm.tours))
     end
-    tour1 = Chrm.tours[r1].Sequence
+    tour1 = chrm.tours[r1].sequence
     if length(tour1) <= 2
-        return Chrm
+        return chrm
     end
-    cost1 = Chrm.tours[r1].cost
+    cost1 = chrm.tours[r1].cost
     nt = length(tour1)
-    k1, k2 = sort(sample(1:length(tour1), 2, replace = false))
+    k1, k2 = sort(sample(1:length(tour1), 2, replace=false))
 
-    new_cost = Calculate_new_cost_2_opt(tour1, cost1, k1, k2, T, n_nodes)
+    new_cost = calculate_new_cost_2_opt(tour1, cost1, k1, k2, T, n_nodes)
 
     tour1[k1:k2] = reverse(tour1[k1:k2])
-    Chrm.tours[r1].cost = new_cost
-    Chrm.genes = Int[]
-    Chrm.fitness = maximum([Chrm.tours[i].cost for i=1:length(Chrm.tours)])
-    for tour in Chrm.tours
-        Chrm.genes = vcat(Chrm.genes, tour.Sequence)
+    chrm.tours[r1].cost = new_cost
+    chrm.genes = Int[]
+    chrm.fitness = maximum([chrm.tours[i].cost for i in 1:length(chrm.tours)])
+    for tour in chrm.tours
+        chrm.genes = vcat(chrm.genes, tour.sequence)
     end
-    return Chrm
+    return chrm
 end
 
-function cross_mutation(Chrm::Chromosome, Customers::Matrix{Float64}, depot::Vector{Float64}, T::Matrix{Float64}, n_nodes::Int)
-    m = length(Chrm.tours)
+function cross_mutation(chrm::Chromosome, customers::Matrix{Float64}, depot::Vector{Float64}, T::Matrix{Float64}, n_nodes::Int)
+    m = length(chrm.tours)
     r1 = 1
     if rand() < 0.5
-        r1 = argmax([Chrm.tours[i].cost for i=1:length(Chrm.tours)])
+        r1 = argmax([chrm.tours[i].cost for i in 1:length(chrm.tours)])
     else
-        r1 = rand(1:length(Chrm.tours))
+        r1 = rand(1:length(chrm.tours))
     end
-#     tour_neighbors = find_tour_neighbors(Chrm.tours, Customers, depot, m)
-#     r2 = tour_neighbors[r1][rand(1:length(tour_neighbors[r1]))]
-    routes = [i for i=1:length(Chrm.tours)]
-    r2 = setdiff(routes, r1)[rand(1:length(Chrm.tours)-1)]
-    t1 = Chrm.tours[r1].Sequence
-    t2 = Chrm.tours[r2].Sequence
-    cost1 = Chrm.tours[r1].cost
-    cost2 = Chrm.tours[r2].cost
+    #     tour_neighbors = find_tour_neighbors(chrm.tours, customers, depot, m)
+    #     r2 = tour_neighbors[r1][rand(1:length(tour_neighbors[r1]))]
+    routes = [i for i in 1:length(chrm.tours)]
+    r2 = setdiff(routes, r1)[rand(1:length(chrm.tours)-1)]
+    t1 = chrm.tours[r1].sequence
+    t2 = chrm.tours[r2].sequence
+    cost1 = chrm.tours[r1].cost
+    cost2 = chrm.tours[r2].cost
     n1 = length(t1)
     n2 = length(t2)
-    
+
     if n1 < 2 || n2 < 2
-        return Chrm
+        return chrm
     end
-    
-    k11, k12 = sort(sample(1:n1, 2, replace = false))
-    k21, k22 = sort(sample(1:n2, 2, replace = false))
-    
-    new_cost1, new_cost2, straight1, straight2 = Calculate_new_cost_cross(t1, cost1, t2, cost2, k11, k12, k21, k22, T, n_nodes)
+
+    k11, k12 = sort(sample(1:n1, 2, replace=false))
+    k21, k22 = sort(sample(1:n2, 2, replace=false))
+
+    new_cost1, new_cost2, straight1, straight2 = calculate_new_cost_cross(t1, cost1, t2, cost2, k11, k12, k21, k22, T, n_nodes)
 
     if straight2
         alpha1 = copy(t1[k11:k12])
@@ -63,89 +63,89 @@ function cross_mutation(Chrm::Chromosome, Customers::Matrix{Float64}, depot::Vec
     else
         alpha2 = reverse(copy(t2[k21:k22]))
     end
-    deleteat!(t1, [i for i=k11:k12])
-    for i=1:k22-k21+1
-        insert!(t1, i+k11-1, alpha2[i])
+    deleteat!(t1, [i for i = k11:k12])
+    for i in 1:k22-k21+1
+        insert!(t1, i + k11 - 1, alpha2[i])
     end
 
-    deleteat!(t2, [i for i=k21:k22])
-    for i=1:k12-k11+1
-        insert!(t2, i+k21-1, alpha1[i])
+    deleteat!(t2, [i for i = k21:k22])
+    for i in 1:k12-k11+1
+        insert!(t2, i + k21 - 1, alpha1[i])
     end
 
-    Chrm.tours[r1].cost = new_cost1
-    Chrm.tours[r2].cost = new_cost2
-    Chrm.genes = Int[]
-    Chrm.fitness = maximum([Chrm.tours[i].cost for i=1:length(Chrm.tours)])
-    for tour in Chrm.tours
-        Chrm.genes = vcat(Chrm.genes, tour.Sequence)
+    chrm.tours[r1].cost = new_cost1
+    chrm.tours[r2].cost = new_cost2
+    chrm.genes = Int[]
+    chrm.fitness = maximum([chrm.tours[i].cost for i in 1:length(chrm.tours)])
+    for tour in chrm.tours
+        chrm.genes = vcat(chrm.genes, tour.sequence)
     end
-    return Chrm
+    return chrm
 end
 
-function mix_neighbors_mutation(Chrm::Chromosome, Customers::Matrix{Float64}, depot::Vector{Float64}, T::Matrix{Float64}, n_nodes::Int)
-    m = length(Chrm.tours)
-    
+function mix_neighbors_mutation(chrm::Chromosome, customers::Matrix{Float64}, depot::Vector{Float64}, T::Matrix{Float64}, n_nodes::Int)
+    m = length(chrm.tours)
+
     r1 = 1
     if rand() < 0.5
-        r1 = argmax([Chrm.tours[i].cost for i=1:length(Chrm.tours)])
+        r1 = argmax([chrm.tours[i].cost for i in 1:length(chrm.tours)])
     else
-        r1 = rand(1:length(Chrm.tours))
+        r1 = rand(1:length(chrm.tours))
     end
-    tour1 = Chrm.tours[r1].Sequence
+    tour1 = chrm.tours[r1].sequence
     if length(tour1) <= 4
-        return Chrm
+        return chrm
     end
-    tour_neighbors = find_tour_neighbors(Chrm.tours, Customers, depot, m)
+    tour_neighbors = find_tour_neighbors(chrm.tours, customers, depot, m)
     r2 = tour_neighbors[r1][1]
-    tour2 = Chrm.tours[r2].Sequence
+    tour2 = chrm.tours[r2].sequence
     if length(tour2) <= 4
-        return Chrm
+        return chrm
     end
-    
+
     if length(tour1) <= length(tour2)
-        idx1 , idx2 = sort(sample(2:length(tour1)-1, 2, replace = false))
+        idx1, idx2 = sort(sample(2:length(tour1)-1, 2, replace=false))
         t1 = vcat(tour2[1:idx1-1], tour1[idx1:idx2], tour2[idx2+1:length(tour2)])
         t2 = vcat(tour1[1:idx1-1], tour2[idx1:idx2], tour1[idx2+1:length(tour1)])
     else
-        idx1 , idx2 = sort(sample(2:length(tour2)-1, 2, replace = false))
+        idx1, idx2 = sort(sample(2:length(tour2)-1, 2, replace=false))
         t1 = vcat(tour1[1:idx1-1], tour2[idx1:idx2], tour1[idx2+1:length(tour1)])
-        t2 = vcat(tour2[1:idx1-1], tour1[idx1:idx2], tour2[idx2+1:length(tour2)])           
-    end    
-    Chrm.tours[r1] = Tour(t1, find_tour_length(t1, T))
-    Chrm.tours[r2] = Tour(t2, find_tour_length(t2, T))
-    Chrm.genes = Int[]
-    Chrm.fitness = maximum([Chrm.tours[i].cost for i=1:length(Chrm.tours)])
-    for tour in Chrm.tours
-        Chrm.genes = vcat(Chrm.genes, tour.Sequence)
+        t2 = vcat(tour2[1:idx1-1], tour1[idx1:idx2], tour2[idx2+1:length(tour2)])
     end
-    return Chrm
+    chrm.tours[r1] = Tour(t1, find_tour_length(t1, T))
+    chrm.tours[r2] = Tour(t2, find_tour_length(t2, T))
+    chrm.genes = Int[]
+    chrm.fitness = maximum([chrm.tours[i].cost for i in 1:length(chrm.tours)])
+    for tour in chrm.tours
+        chrm.genes = vcat(chrm.genes, tour.sequence)
+    end
+    return chrm
 end
 
 
 
-function scatter_mutation(Chrm::Chromosome, T::Matrix{Float64}, n_nodes::Int)
-    m = length(Chrm.tours)
-    
+function scatter_mutation(chrm::Chromosome, T::Matrix{Float64}, n_nodes::Int)
+    m = length(chrm.tours)
+
     moving_nodes = Int[]
-  
-    for tour in Chrm.tours
-        c = sort(sample(1:length(tour.Sequence), rand(1:min(3,length(tour.Sequence))), replace = false))
-        cities = copy(tour.Sequence[c])
-#         Remove_cities_from_one_tour(tour, c, T, n_nodes)
-        deleteat!(tour.Sequence, c)
-        tour.cost = find_tour_length(tour.Sequence, T)
+
+    for tour in chrm.tours
+        c = sort(sample(1:length(tour.sequence), rand(1:min(3, length(tour.sequence))), replace=false))
+        cities = copy(tour.sequence[c])
+        #         Remove_cities_from_one_tour(tour, c, T, n_nodes)
+        deleteat!(tour.sequence, c)
+        tour.cost = find_tour_length(tour.sequence, T)
         moving_nodes = vcat(moving_nodes, cities)
     end
-    for city in moving_nodes 
-        put_city_in_tour(Chrm.tours, city, T, n_nodes)
+    for city in moving_nodes
+        put_city_in_tour(chrm.tours, city, T, n_nodes)
     end
-    Chrm.genes = Int[]
-    Chrm.fitness = maximum([Chrm.tours[i].cost for i=1:length(Chrm.tours)])
-    for tour in Chrm.tours
-        Chrm.genes = vcat(Chrm.genes, tour.Sequence)
+    chrm.genes = Int[]
+    chrm.fitness = maximum([chrm.tours[i].cost for i in 1:length(chrm.tours)])
+    for tour in chrm.tours
+        chrm.genes = vcat(chrm.genes, tour.sequence)
     end
-    return Chrm
+    return chrm
 end
 
 function rearange_nodes(chrm_::Chromosome, T::Matrix{Float64}, n_nodes::Int)
@@ -153,29 +153,29 @@ function rearange_nodes(chrm_::Chromosome, T::Matrix{Float64}, n_nodes::Int)
     deleted_nodes = Int[]
     for tour in c
         dlt_idx = Int[]
-        for (i, node) in enumerate(tour.Sequence)
+        for (i, node) in enumerate(tour.sequence)
             if rand() < 0.05
                 push!(dlt_idx, i)
             end
         end
-        
+
         if !isempty(dlt_idx)
-            deleted_nodes = vcat(deleted_nodes, tour.Sequence[dlt_idx])
-            if length(dlt_idx) == length(tour.Sequence)
+            deleted_nodes = vcat(deleted_nodes, tour.sequence[dlt_idx])
+            if length(dlt_idx) == length(tour.sequence)
                 tour.cost = 0.0
-                tour.Sequence = Int[]
+                tour.sequence = Int[]
             else
                 Remove_cities_from_one_tour(tour, dlt_idx, T, n_nodes)
-                deleteat!(tour.Sequence, dlt_idx)
+                deleteat!(tour.sequence, dlt_idx)
             end
-            
+
         end
-        
+
     end
     if isempty(deleted_nodes)
         return chrm_
     end
-    sort!(c, by=x -> x.cost, rev = true)
+    sort!(c, by=x -> x.cost, rev=true)
     for node in deleted_nodes
         put_city_in_tour(c, node, T, n_nodes)
     end
@@ -184,24 +184,24 @@ function rearange_nodes(chrm_::Chromosome, T::Matrix{Float64}, n_nodes::Int)
         if tour.cost > chrm.fitness
             chrm.fitness = tour.cost
         end
-        for city in tour.Sequence
+        for city in tour.sequence
             push!(chrm.genes, city)
         end
     end
     return chrm
 end
 
-function mutate(Chrm::Chromosome, Customers::Matrix{Float64}, depot::Vector{Float64}, T::Matrix{Float64}, n_nodes::Int)
-    new_chrm = deepcopy(Chrm)
+function mutate(chrm::Chromosome, customers::Matrix{Float64}, depot::Vector{Float64}, T::Matrix{Float64}, n_nodes::Int)
+    new_chrm = deepcopy(chrm)
     r = rand()
     if r < 0
         return two_opt_mutation(new_chrm, T, n_nodes)
     elseif r < 0
-        return cross_mutation(new_chrm, Customers, depot, T, n_nodes)
+        return cross_mutation(new_chrm, customers, depot, T, n_nodes)
     else
         return rearange_nodes(new_chrm, T, n_nodes)
     end
-        
+
 end
 
 
@@ -224,7 +224,7 @@ end
 #     deleteat!(child, idx1:idx2)
 #     idx3 = rand(1:length(child))
 
-#     for i = 1:idx2-idx1+1
+#     for i in 1:idx2-idx1+1
 #         insert!(child, idx3 + i, subtour[i])
 #     end
 # end
@@ -278,7 +278,7 @@ end
 #     deleteat!(child, idx1:idx2)
 #     idx3 = rand(1:length(child))
 #     reverse!(subtour)
-#     for i = 1:idx2-idx1+1
+#     for i in 1:idx2-idx1+1
 #         insert!(child, idx3 + i, subtour[i])
 #     end
 # end
@@ -310,7 +310,7 @@ function find_tour_length(tt::Vector{Int}, T::Matrix{Float64})
     pushfirst!(t, 0)
     push!(t, 0)
     z = 0.0
-    for i = 1:length(t)-1
+    for i in 1:length(t)-1
         z += T[t[i]+1, t[i+1]+1]
     end
     return z
@@ -320,14 +320,14 @@ end
 #     removed_cities = Int[]
 #     for tour in child.tours
 #         indices = Int[]
-#         for i = 1:length(tour.Sequence)
+#         for i in 1:length(tour.sequence)
 #             if rand() < pm
 #                 push!(indices, i)
-#                 push!(removed_cities, tour.Sequence[i])
+#                 push!(removed_cities, tour.sequence[i])
 #             end
 #         end
-#         deleteat!(tour.Sequence, indices)
-#         tour.cost = find_tour_length(tour.Sequence, T)
+#         deleteat!(tour.sequence, indices)
+#         tour.cost = find_tour_length(tour.sequence, T)
 #     end
 #     for city in removed_cities
 #         put_city_in_tour(child.tours, city, T, n_nodes)
@@ -348,9 +348,9 @@ end
 #     m = length(chrm.tours)
 #     chunks = Vector{Vector{Int}}()
 #     for tour in chrm.tours
-#         nt = length(tour.Sequence)
-#         for i = 1:Int(ceil(nt/chunk_length))
-#             push!(chunks, tour.Sequence[(i-1)*chunk_length+1:min(nt,i*chunk_length)])
+#         nt = length(tour.sequence)
+#         for i in 1:Int(ceil(nt/chunk_length))
+#             push!(chunks, tour.sequence[(i-1)*chunk_length+1:min(nt,i*chunk_length)])
 #         end
 #     end
 #     new_tours = Tour[]
@@ -367,10 +367,10 @@ end
 #         reverse_ = false
 #         tours_indices = findall(x->x==0, last_added_tour)
 #         for i in tours_indices
-#             nt = length(new_tours[i].Sequence)
+#             nt = length(new_tours[i].sequence)
 #             last_node = 0
 #             if nt > 0
-#                 last_node = new_tours[i].Sequence[nt]
+#                 last_node = new_tours[i].sequence[nt]
 #             end
 #             for (j,chunk) in enumerate(chunks)
 #                 if length(chunks) > m
@@ -401,9 +401,9 @@ end
 #             end
 #         end
 #         if reverse_
-#             new_tours[best_tour].Sequence = vcat(new_tours[best_tour].Sequence, reverse(chunks[best_chunk]))
+#             new_tours[best_tour].sequence = vcat(new_tours[best_tour].sequence, reverse(chunks[best_chunk]))
 #         else
-#             new_tours[best_tour].Sequence = vcat(new_tours[best_tour].Sequence, chunks[best_chunk])
+#             new_tours[best_tour].sequence = vcat(new_tours[best_tour].sequence, chunks[best_chunk])
 #         end
 #         last_added_tour[best_tour] += 1
 #         deleteat!(chunks, best_chunk)
@@ -413,13 +413,13 @@ end
 #     end
 #     new_chrm = Chromosome(Int[], 0.0, 0.0, new_tours)
 #     for tour in new_tours
-# #         t1 = copy(tour.Sequence)
+# #         t1 = copy(tour.sequence)
 # #         pushfirst!(t1, 0)
 # #         t2, z2 = find_tsp_tour1(T[t1.+1, t1.+1])
-#         tour.cost = find_tour_length(tour.Sequence, T)
+#         tour.cost = find_tour_length(tour.sequence, T)
 # #         tour.cost = z2
-# #         tour.Sequence = tour.Sequence[t2]
-#         new_chrm.genes = vcat(new_chrm.genes, tour.Sequence)
+# #         tour.sequence = tour.sequence[t2]
+#         new_chrm.genes = vcat(new_chrm.genes, tour.sequence)
 #         if tour.cost > new_chrm.fitness
 #             new_chrm.fitness = tour.cost
 #         end
@@ -431,9 +431,9 @@ end
 #     m = length(chrm.tours)
 #     chunks = Vector{Vector{Int}}()
 #     for tour in chrm.tours
-#         nt = length(tour.Sequence)
-#         for i = 1:Int(ceil(nt/chunk_length))
-#             push!(chunks, tour.Sequence[(i-1)*chunk_length+1:min(nt,i*chunk_length)])
+#         nt = length(tour.sequence)
+#         for i in 1:Int(ceil(nt/chunk_length))
+#             push!(chunks, tour.sequence[(i-1)*chunk_length+1:min(nt,i*chunk_length)])
 #         end
 #     end
 #     new_tours = Tour[]
@@ -452,9 +452,9 @@ end
 #         tours_indices = findall(x->x==0, last_added_tour)
 #         best_tour = tours_indices[rand(1:length(tours_indices))]
 #         if reverse_
-#             new_tours[best_tour].Sequence = vcat(new_tours[best_tour].Sequence, reverse(chunks[best_chunk]))
+#             new_tours[best_tour].sequence = vcat(new_tours[best_tour].sequence, reverse(chunks[best_chunk]))
 #         else
-#             new_tours[best_tour].Sequence = vcat(new_tours[best_tour].Sequence, chunks[best_chunk])
+#             new_tours[best_tour].sequence = vcat(new_tours[best_tour].sequence, chunks[best_chunk])
 #         end
 #         last_added_tour[best_tour] += 1
 #         deleteat!(chunks, best_chunk)
@@ -464,13 +464,13 @@ end
 #     end
 #     new_chrm = Chromosome(Int[], 0.0, 0.0, new_tours)
 #     for tour in new_tours
-#         t1 = copy(tour.Sequence)
+#         t1 = copy(tour.sequence)
 #         pushfirst!(t1, 0)
 #         t2, z2 = find_tsp_tour1(T[t1.+1, t1.+1])
-# #         tour.cost = find_tour_length(tour.Sequence, T)
+# #         tour.cost = find_tour_length(tour.sequence, T)
 #         tour.cost = z2
-#         tour.Sequence = tour.Sequence[t2]
-#         new_chrm.genes = vcat(new_chrm.genes, tour.Sequence)
+#         tour.sequence = tour.sequence[t2]
+#         new_chrm.genes = vcat(new_chrm.genes, tour.sequence)
 #         if tour.cost > new_chrm.fitness
 #             new_chrm.fitness = tour.cost
 #         end
@@ -481,7 +481,7 @@ end
 # # function put_one_city_in_one_tour(c::Tour, city::Int, T::Matrix{Float64}, n_nodes::Int)
 # #     least_increase = Inf
 # #     best_position = 0
-# #     tour = c.Sequence
+# #     tour = c.sequence
 # #     nt = length(tour)
 # #     if nt==0
 # #         increase = T[1, city+1] + T[city+1, n_nodes+2]
@@ -512,7 +512,7 @@ end
 # function put_city_in_one_tour(c::Tour, city::Int, T::Matrix{Float64}, n_nodes::Int)
 #     least_increase = Inf
 #     best_position = 0
-#     tour = c.Sequence
+#     tour = c.sequence
 #     nt = length(tour)
 #     if nt==0
 #         least_increase = T[1, city+1] + T[city+1, n_nodes+2]
@@ -536,17 +536,17 @@ end
 #             best_position = nt+1
 #         end
 #     end
-#     insert!(c.Sequence, best_position, city)
+#     insert!(c.sequence, best_position, city)
 #     c.cost += least_increase
 # end   
 
-# function scatter_mutation(chrm::Chromosome, T::Matrix{Float64}, n_nodes::Int, m::Int, demands::Vector{Int}, W::Int, Customers::Matrix{Float64}, depot::Vector{Float64}, h1::Float64)
-#     t1 = chrm.tours[1].Sequence;
+# function scatter_mutation(chrm::Chromosome, T::Matrix{Float64}, n_nodes::Int, m::Int, demands::Vector{Int}, W::Int, customers::Matrix{Float64}, depot::Vector{Float64}, h1::Float64)
+#     t1 = chrm.tours[1].sequence;
 #     sort!(chrm.tours, by=x->x.cost, rev=true)
-#     means = [mean(Customers[t1, :], dims=1)[1,:] for t1 in [chrm.tours[i].Sequence for i=1:length(chrm.tours)]]
+#     means = [mean(customers[t1, :], dims=1)[1,:] for t1 in [chrm.tours[i].sequence for i=1:length(chrm.tours)]]
 
 #     distances = zeros(m, m)
-#     for i = 1:m-1
+#     for i in 1:m-1
 #         for j = i+1:m
 #             distances[i,j] = euclidean(means[i], means[j])
 #             distances[j,i] = distances[i,j]
@@ -573,14 +573,14 @@ end
 #             end
 #         end
 
-#         t1 = copy(chrm.tours[current_tour].Sequence)
+#         t1 = copy(chrm.tours[current_tour].sequence)
 #         tau = rand(1:Int(round(h1*length(t1))))
-        
-#         Candidates = t1[sortperm([euclidean(Customers[i, :], means[next_tour]) for i in t1])][1:tau]
+
+#         Candidates = t1[sortperm([euclidean(customers[i, :], means[next_tour]) for i in t1])][1:tau]
 
 #         cities = findall(x->x in Candidates, t1)
 #         Remove_cities_from_one_tour(chrm.tours[current_tour], cities, T, n_nodes)
-#         deleteat!(chrm.tours[current_tour].Sequence, sort(cities))
+#         deleteat!(chrm.tours[current_tour].sequence, sort(cities))
 #         for city in Candidates
 #             put_city_in_one_tour(chrm.tours[next_tour], city, T, n_nodes)
 #         end
@@ -591,7 +591,7 @@ end
 #     chrm.genes = Int[]
 #     chrm.fitness = 0
 #     for tour in chrm.tours
-#         chrm.genes = vcat(chrm.genes, tour.Sequence)
+#         chrm.genes = vcat(chrm.genes, tour.sequence)
 #         if chrm.fitness < tour.cost
 #             chrm.fitness = tour.cost
 #         end
@@ -604,8 +604,8 @@ end
 # function prob_mutation(chrm::Chromosome, T::Matrix{Float64}, n_nodes::Int, p0::Float64)
 #     tour1 = chrm.tours[1]
 #     tour2 = chrm.tours[2]
-#     t1 = copy(tour1.Sequence)
-#     t2 = copy(tour2.Sequence)
+#     t1 = copy(tour1.sequence)
+#     t2 = copy(tour2.sequence)
 #     D = zeros(length(t1),length(t2))
 #     for i=1:length(t1)
 #         for j=1:length(t2)
@@ -614,7 +614,7 @@ end
 #     end
 #     p1 = zeros(length(t1))
 #     p2 = zeros(length(t2))
-    
+
 #     for (i, node) in enumerate(sortperm(minimum(D, dims=2)[:,1]))
 #         p1[node] = p0/i
 #     end
@@ -635,11 +635,11 @@ end
 #     end
 #     if length(delete1) > 0
 #         Remove_cities_from_one_tour(tour1, delete1, T, n_nodes)
-#         deleteat!(tour1.Sequence, delete1)
+#         deleteat!(tour1.sequence, delete1)
 #     end
 #     if length(delete2) > 0
 #         Remove_cities_from_one_tour(tour2, delete2, T, n_nodes)
-#         deleteat!(tour2.Sequence, delete2)
+#         deleteat!(tour2.sequence, delete2)
 #     end
 #     for i in delete1
 #         put_city_in_one_tour(tour2, t1[i], T, n_nodes)
@@ -650,7 +650,7 @@ end
 #     chrm.genes = Int[]
 #     chrm.fitness = maximum([chrm.tours[i].cost for i=1:length(chrm.tours)])
 #     for tour in chrm.tours
-#         chrm.genes = vcat(chrm.genes, tour.Sequence)
+#         chrm.genes = vcat(chrm.genes, tour.sequence)
 #     end
 #     return chrm
 # end
@@ -659,7 +659,7 @@ end
 # function put_one_seq_in_one_tour(c::Tour, seq::Vector{Int}, T::Matrix{Float64}, n_nodes::Int)
 #     least_increase = Inf
 #     best_position = 0
-#     tour = c.Sequence
+#     tour = c.sequence
 #     nt = length(tour)
 #     if nt==0
 #         increase = T[1, city+1] + T[city+1, n_nodes+2]
@@ -690,8 +690,8 @@ end
 # function prob_chunk_mutation(chrm::Chromosome, T::Matrix{Float64}, n_nodes::Int, p0::Float64)
 #     tour1 = chrm.tours[1]
 #     tour2 = chrm.tours[2]
-#     t1 = copy(tour1.Sequence)
-#     t2 = copy(tour2.Sequence)
+#     t1 = copy(tour1.sequence)
+#     t2 = copy(tour2.sequence)
 #     D = zeros(length(t1),length(t2))
 #     for i=1:length(t1)
 #         for j=1:length(t2)
@@ -700,7 +700,7 @@ end
 #     end
 #     p1 = zeros(length(t1))
 #     p2 = zeros(length(t2))
-    
+
 #     for (i, node) in enumerate(sortperm(minimum(D, dims=2)[:,1]))
 #         p1[node] = p0/i
 #     end
@@ -721,11 +721,11 @@ end
 #     end
 #     if length(delete1) > 0
 #         Remove_cities_from_one_tour(tour1, delete1, T, n_nodes)
-#         deleteat!(tour1.Sequence, delete1)
+#         deleteat!(tour1.sequence, delete1)
 #     end
 #     if length(delete2) > 0
 #         Remove_cities_from_one_tour(tour2, delete2, T, n_nodes)
-#         deleteat!(tour2.Sequence, delete2)
+#         deleteat!(tour2.sequence, delete2)
 #     end
 #     for i in delete1
 #         put_city_in_one_tour(tour2, t1[i], T::Matrix{Float64}, n_nodes::Int)
@@ -736,21 +736,21 @@ end
 #     chrm.genes = Int[]
 #     chrm.fitness = maximum([chrm.tours[i].cost for i=1:length(chrm.tours)])
 #     for tour in chrm.tours
-#         chrm.genes = vcat(chrm.genes, tour.Sequence)
+#         chrm.genes = vcat(chrm.genes, tour.sequence)
 #     end
 #     return chrm
 # end
 
-# function mutation_cross(Chrm::Chromosome, T::Matrix{Float64}, n_nodes::Int)   #Cross Exchange
-#     r1 = argmax([Chrm.tours[i].cost for i=1:length(Chrm.tours)])
-#     routes = [i for i=1:length(Chrm.tours)]
-#     r2 = setdiff(routes, r1)[rand(1:length(Chrm.tours)-1)]
-#     t1 = Chrm.tours[r1].Sequence
-#     t2 = Chrm.tours[r2].Sequence
-#     cost1 = Chrm.tours[r1].cost
-#     cost2 = Chrm.tours[r2].cost
+# function mutation_cross(chrm::Chromosome, T::Matrix{Float64}, n_nodes::Int)   #Cross Exchange
+#     r1 = argmax([chrm.tours[i].cost for i=1:length(chrm.tours)])
+#     routes = [i for i=1:length(chrm.tours)]
+#     r2 = setdiff(routes, r1)[rand(1:length(chrm.tours)-1)]
+#     t1 = chrm.tours[r1].sequence
+#     t2 = chrm.tours[r2].sequence
+#     cost1 = chrm.tours[r1].cost
+#     cost2 = chrm.tours[r2].cost
 #     if length(t1) < 6 || length(t2) < 6
-#         return Chrm
+#         return chrm
 #     end
 #     tau = min(8, Int(round(min(length(t1), length(t2))/2)))
 #     k11 = rand(1:length(t1)-tau)
@@ -760,7 +760,7 @@ end
 #     k21 = rand(1:length(t2)-tau)
 #     l2 = rand(1:tau)
 #     k22 = k21 + l2
-    
+
 #     new_cost1, new_cost2, straight1, straight2 = Calculate_new_cost_cross(t1, cost1, t2, cost2, k11, k12, k21, k22, T, n_nodes)
 
 #     if straight2
@@ -783,12 +783,12 @@ end
 #         insert!(t2, i+k21-1, alpha1[i])
 #     end
 
-#     Chrm.tours[r1].cost = new_cost1
-#     Chrm.tours[r2].cost = new_cost2
-#     Chrm.genes = Int[]
-#     Chrm.fitness = maximum([Chrm.tours[i].cost for i=1:length(Chrm.tours)])
-#     for tour in Chrm.tours
-#         Chrm.genes = vcat(Chrm.genes, tour.Sequence)
+#     chrm.tours[r1].cost = new_cost1
+#     chrm.tours[r2].cost = new_cost2
+#     chrm.genes = Int[]
+#     chrm.fitness = maximum([chrm.tours[i].cost for i=1:length(chrm.tours)])
+#     for tour in chrm.tours
+#         chrm.genes = vcat(chrm.genes, tour.sequence)
 #     end
-#     return Chrm
+#     return chrm
 # end

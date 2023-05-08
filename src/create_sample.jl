@@ -1,7 +1,7 @@
 
 
-function Create_random_sample(n::Int)
-    allNodes = rand(n+1,2)
+function create_random_sample(n::Int)
+    allNodes = rand(n + 1, 2)
     num_of_nodes = n - 1
     T = Matrix{Float64}(undef, num_of_nodes + 2, num_of_nodes + 2)
     depot = allNodes[1, :]
@@ -25,7 +25,7 @@ function Create_random_sample(n::Int)
     return T, depot, Nodes
 end
 
-function Calculate_distance_matrices_TSPLIB(tspeed::Int, allNodes::Matrix{Float64})
+function calculate_distance_matrices_TSPLIB(tspeed::Int, allNodes::Matrix{Float64})
     num_of_nodes = size(allNodes)[1] - 1
     T = Matrix{Float64}(undef, num_of_nodes + 2, num_of_nodes + 2)
     depot = allNodes[1, :]
@@ -49,14 +49,14 @@ function Calculate_distance_matrices_TSPLIB(tspeed::Int, allNodes::Matrix{Float6
     return T
 end
 
-function Read_TSPLIB_instance(sample_name::Symbol, tspeed::Int)
+function read_TSPLIB_instance(sample_name::Symbol, tspeed::Int)
     tsp = readTSPLIB(sample_name)
     dEligible = Int[]
-    T = Calculate_distance_matrices_TSPLIB(tspeed, tsp.nodes)
+    T = calculate_distance_matrices_TSPLIB(tspeed, tsp.nodes)
     return T
 end
 
-function Calculate_TSPLIB(sample::Symbol)
+function calculate_TSPLIB(sample::Symbol)
     tsp = readTSPLIB(sample)
     allNodes = tsp.nodes
     num_of_nodes = size(allNodes)[1] - 1
@@ -74,7 +74,7 @@ function Calculate_TSPLIB(sample::Symbol)
         T[num_of_nodes+2, i+1] = T[1, i+1]
         T[i+1, num_of_nodes+2] = T[1, i+1]
         @inbounds for j in 1:num_of_nodes
-            T[i+1, j+1] = euclidean(Nodes[i, :], Nodes[j, :]) 
+            T[i+1, j+1] = euclidean(Nodes[i, :], Nodes[j, :])
             T[j+1, i+1] = T[i+1, j+1]
         end
     end
@@ -86,19 +86,19 @@ function read_data(dir_name::String, sample_name::String)
     filename = joinpath(dirname(@__DIR__), "data/$(dir_name)/$(sample_name).txt")
     f = open(filename, "r")
     lines = readlines(f)
-    m = parse(Int,split(lines[1]," ")[3])
-    n_nodes = length(lines)-2
-    if length(split(lines[2],"\t")) == 3
-        depot = parse.(Float64, split(lines[2],"\t"))[2:3]
+    m = parse(Int, split(lines[1], " ")[3])
+    n_nodes = length(lines) - 2
+    if length(split(lines[2], "\t")) == 3
+        depot = parse.(Float64, split(lines[2], "\t"))[2:3]
     else
-        depot = parse.(Float64, split(lines[2]," "))[2:3]
+        depot = parse.(Float64, split(lines[2], " "))[2:3]
     end
     customers = zeros(2, n_nodes)
-    for i=1:n_nodes
-        if length(split(lines[2+i],"\t")) == 3
-            customers[:,i] = parse.(Float64, split(lines[2+i],"\t"))[2:3]
+    for i in 1:n_nodes
+        if length(split(lines[2+i], "\t")) == 3
+            customers[:, i] = parse.(Float64, split(lines[2+i], "\t"))[2:3]
         else
-            customers[:,i] = parse.(Float64, split(lines[2+i]," "))[2:3]
+            customers[:, i] = parse.(Float64, split(lines[2+i], " "))[2:3]
         end
     end
     T = Matrix{Float64}(undef, n_nodes + 2, n_nodes + 2)

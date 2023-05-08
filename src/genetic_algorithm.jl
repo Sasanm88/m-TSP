@@ -266,14 +266,16 @@ function perform_genetic_algorithm(
 
     tsp_tours = find_tsp_tour2(TT[1:n_nodes+1, 1:n_nodes+1])
 
-    if n_nodes < 1400
-        tsp_tour, _ = find_tsp_tour1(TT[1:n_nodes+1, 1:n_nodes+1])
-        push!(tsp_tours, tsp_tour)
-    end
+    # if n_nodes < 1400
+    #     tsp_tour, _ = find_tsp_tour1(TT[1:n_nodes+1, 1:n_nodes+1])
+    #     push!(tsp_tours, tsp_tour)
+    # end
 
     Population, old_best = generate_initial_population(TT, K, mu, tsp_tours, customers, depot)
 
     count = 0
+
+    println("The initialization took ", time() - t1, " seconds.")
 
     while improve_count < num_iter
         if time() - t1 >= time_limit

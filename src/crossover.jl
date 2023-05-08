@@ -387,7 +387,7 @@ function tour_crossover2(parent1::Chromosome, parent2::Chromosome, T::Matrix{Flo
         max_intersection = -1
         tour2 = Int[]
         r2 = 0
-        for j = 1:length(P2.tours)
+        for j in 1:length(P2.tours)
             inter = length(intersect(tour1, P2.tours[j].sequence))
             if inter > max_intersection
                 max_intersection = inter
@@ -478,7 +478,7 @@ function tour_crossover3(parent1::Chromosome, parent2::Chromosome, T::Matrix{Flo
         tour2 = Int[]
         mutuals = Int[]
         r2 = 0
-        for j = 1:length(P2.tours)
+        for j in 1:length(P2.tours)
             mutual_cities = intersect(tour1, P2.tours[j].sequence)
             inter = length(mutual_cities)
             if inter > max_intersection
@@ -569,7 +569,7 @@ function tour_crossover4(parent1::Chromosome, parent2::Chromosome, T::Matrix{Flo
         tour2 = Int[]
         mutuals = Int[]
         r2 = 0
-        for j = 1:length(P2.tours)
+        for j in 1:length(P2.tours)
             mutual_cities = intersect(tour1, P2.tours[j].sequence)
             inter = length(mutual_cities)
             if inter > max_intersection
@@ -644,7 +644,7 @@ function tour_crossover5(parent1::Chromosome, parent2::Chromosome, T::Matrix{Flo
         tour2 = Int[]
         mutuals = Int[]
         r2 = 0
-        for j = 1:length(P2.tours)
+        for j in 1:length(P2.tours)
             mutual_cities = intersect(tour1, P2.tours[j].sequence)
             inter = length(mutual_cities)
             if inter > max_intersection

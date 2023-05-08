@@ -80,7 +80,7 @@ function find_difference(c1::Chromosome, c2::Chromosome)  #range between zero an
     n = length(c1.genes)
     A = zeros(Int, m, m)
     for i in 1:m
-        for j = 1:m
+        for j in 1:m
             A[i, j] = length(intersect(Set(c1.tours[i].sequence), Set(c2.tours[j].sequence)))
         end
     end

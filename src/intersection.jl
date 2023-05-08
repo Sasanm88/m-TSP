@@ -70,7 +70,7 @@ function find_intersections(t1::Vector{Int}, t2::Vector{Int}, Customers::Matrix{
     #     intersection_points = Vector{Vector{Int}}()
     for i = 0:length(t1)
         if i == 0 || i == length(t1)
-            loopset = [k for k = 1:length(t2)-1]
+            loopset = [k for k  in 1:length(t2)-1]
         else
             loopset = [k for k = 0:length(t2)]
         end
@@ -200,7 +200,7 @@ function two_opt_on_route(tour::Tour, T::Matrix{Float64}, n_nodes::Int)   #2-opt
     improved = true
     while improved
         improved = false
-        for i1 = 1:nt-1
+        for i1  in 1:nt-1
             if improved
                 break
             end
@@ -249,7 +249,7 @@ function improve_after_removing_intersections(tours::Vector{Tour}, T::Matrix{Flo
                 new_cost1 = calculate_new_cost_remove_one(tour1, cost1, i, T, n_nodes)
                 new_cost2 = Inf
                 best_position = 0
-                for j = 1:length(tour2)+1
+                for j in 1:length(tour2)+1
                     temp = calculate_new_cost_add_one(tour2, cost2, tour1[i], j, T, n_nodes)
                     if temp < new_cost2
                         new_cost2 = temp
@@ -273,7 +273,7 @@ function improve_after_removing_intersections(tours::Vector{Tour}, T::Matrix{Flo
                     end
                     node3 = Customers[tour1[i], :]
                     intersected = false
-                    for j = 1:length(t2)
+                    for j in 1:length(t2)
                         if j == 1
                             node4 = depot
                             node5 = Customers[t2[j], :]

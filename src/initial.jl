@@ -373,7 +373,7 @@ function enrich_the_chromosome!(chrm::Chromosome, T::Matrix{Float64}, customers:
                     became_max = false
                     count2 = 0
                     while k1 < length(tour1) && !became_max
-
+                        
                         cost1 = chrm.tours[r1].cost
                         cost2 = chrm.tours[r2].cost
                         k1 += 1
@@ -412,6 +412,7 @@ function enrich_the_chromosome!(chrm::Chromosome, T::Matrix{Float64}, customers:
                     end
                 end
             end
+            
         end
     end
     for tour in chrm.tours
@@ -427,11 +428,11 @@ end
 function find_closeness(TT::Matrix{Float64}, h::Float64)
     n_nodes = size(TT)[1] - 2
     num = Int(ceil(h * n_nodes))
-    closenessT = zeros(Int, n_nodes + 1, num)
-    @inbounds for i = 2:n_nodes+2
-        a = copy(TT[i, 2:n_nodes+1])
+    closenessT = fill(false, n_nodes + 1, n_nodes + 1)
+    for i = 2:n_nodes+2
+        a = copy(TT[i, 2:n_nodes+2])
         b = sortperm(a)
-        closenessT[i-1, :] = b[2:num+1]
+        closenessT[i-1, b[2:num+1]] .= true
     end
     return closenessT
 end

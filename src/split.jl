@@ -13,9 +13,9 @@ function SPLIT(TT::Matrix{Float64}, K::Int, S::Vector{Int})
     @inbounds for i in 1:n
         R = Int[]
         if i == n
-            R = [i for i in 1:K]
+            R = [j for j in 1:K]
         else
-            R = [i for i in 1:min(i, K - 1)]
+            R = [j for j in 1:min(i, K - 1)]
         end
         V = fill(Inf, length(R))
         P = fill(n + 1, length(R))

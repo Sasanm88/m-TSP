@@ -148,6 +148,58 @@ function scatter_mutation(chrm::Chromosome, T::Matrix{Float64}, n_nodes::Int)
     return chrm
 end
 
+function put_city_in_short_tour(c::Vector{Tour}, city::Int, T::Matrix{Float64}, n_nodes::Int)
+    least_increase = Inf
+    least_real_increase = Inf
+    best_tour = 0
+    best_position = 0
+    costs = [tour.cost for tour in c]
+    penalties = (costs)/maximum(costs) .+1
+
+    for i = 1:length(c)
+        tour = c[i].sequence
+        nt = length(tour)
+        if nt == 0
+            real_increase = T[1, city+1] + T[city+1, n_nodes+2]
+            if real_increase < least_increase
+                least_increase = real_increase
+                least_real_increase = real_increase
+                best_tour = i
+                best_position = 1
+            end
+        else
+            real_increase = T[1, city+1] + T[city+1, tour[1]+1] - T[1, tour[1]+1]
+            increase = penalties[i] * real_increase
+            if increase < least_increase
+                least_increase = increase
+                least_real_increase = real_increase
+                best_tour = i
+                best_position = 1
+            end
+            for j = 2:nt
+                real_increase = T[tour[j-1]+1, city+1] + T[city+1, tour[j]+1] - T[tour[j-1]+1, tour[j]+1]
+                increase = penalties[i] * real_increase
+                if increase < least_increase
+                    least_increase = increase
+                    least_real_increase = real_increase
+                    best_tour = i
+                    best_position = j
+                end
+            end
+            real_increase = T[tour[nt]+1, city+1] + T[city+1, n_nodes+2] - T[tour[nt]+1, n_nodes+2]
+            increase = penalties[i] * real_increase
+            if increase < least_increase
+                least_increase = increase
+                least_real_increase = real_increase
+                best_tour = i
+                best_position = nt + 1
+            end
+        end
+    end
+    insert!(c[best_tour].sequence, best_position, city)
+    c[best_tour].cost += least_real_increase
+end
+
 function rearange_nodes(chrm_::Chromosome, T::Matrix{Float64}, n_nodes::Int)
     c = deepcopy(chrm_.tours)
     deleted_nodes = Int[]
@@ -165,7 +217,7 @@ function rearange_nodes(chrm_::Chromosome, T::Matrix{Float64}, n_nodes::Int)
                 tour.cost = 0.0
                 tour.sequence = Int[]
             else
-                Remove_cities_from_one_tour(tour, dlt_idx, T, n_nodes)
+                remove_cities_from_one_tour(tour, dlt_idx, T, n_nodes)
                 deleteat!(tour.sequence, dlt_idx)
             end
 
@@ -175,9 +227,9 @@ function rearange_nodes(chrm_::Chromosome, T::Matrix{Float64}, n_nodes::Int)
     if isempty(deleted_nodes)
         return chrm_
     end
-    sort!(c, by=x -> x.cost, rev=true)
+
     for node in deleted_nodes
-        put_city_in_tour(c, node, T, n_nodes)
+        put_city_in_short_tour(c, node, T, n_nodes)
     end
     chrm = Chromosome(Int[], 0.0, 0.0, c)
     for tour in c
@@ -191,17 +243,39 @@ function rearange_nodes(chrm_::Chromosome, T::Matrix{Float64}, n_nodes::Int)
     return chrm
 end
 
-function mutate(chrm::Chromosome, customers::Matrix{Float64}, depot::Vector{Float64}, T::Matrix{Float64}, n_nodes::Int)
+function destroy_and_build(chrm_::Chromosome, T::Matrix{Float64}, n_nodes::Int)
+    c = deepcopy(chrm_.tours)
+    r1 = argmax([tour.cost for tour in c])
+    deleted_nodes = copy(c[r1].sequence)
+    c[r1].sequence = Int[]
+    c[r1].cost = 0.0
+    
+    if isempty(deleted_nodes)
+        return chrm_
+    end
+
+    for node in deleted_nodes
+        put_city_in_short_tour(c, node, T, n_nodes)
+    end
+    chrm = Chromosome(Int[], 0.0, 0.0, c)
+    for tour in c
+        if tour.cost > chrm.fitness
+            chrm.fitness = tour.cost
+        end
+        for city in tour.sequence
+            push!(chrm.genes, city)
+        end
+    end
+    return chrm
+end
+
+function mutate(chrm::Chromosome, T::Matrix{Float64}, n_nodes::Int)
     new_chrm = deepcopy(chrm)
-    r = rand()
-    if r < 0
-        return two_opt_mutation(new_chrm, T, n_nodes)
-    elseif r < 0
-        return cross_mutation(new_chrm, customers, depot, T, n_nodes)
+    if rand() < 0.5
+        return destroy_and_build(new_chrm, T, n_nodes)
     else
         return rearange_nodes(new_chrm, T, n_nodes)
     end
-
 end
 
 

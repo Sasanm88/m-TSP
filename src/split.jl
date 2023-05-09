@@ -9,28 +9,23 @@ end
 function SPLIT(TT::Matrix{Float64}, K::Int, S::Vector{Int})
     #In m-TSP, demands is a vector of ones and W is infinity
     n = length(S)
-    labels = Label[]
-    for i in 1:n
+    labels = Vector{Label}(undef, n)
+    @inbounds for i in 1:n
         R = Int[]
         if i == n
             R = [j for j in 1:K]
         else
             R = [j for j in 1:min(i, K - 1)]
         end
-        V = Float64[]
-        P = Int[]
-        C = Float64[]
-        for r in R
-            push!(V, Inf)
-            push!(P, n + 1)
-            push!(C, Inf)
-        end
-        push!(labels, Label(R, V, P, C))
+        V = fill(Inf, length(R))
+        P = fill(n + 1, length(R))
+        C = fill(Inf, length(R))
+        labels[i] = Label(R, V, P, C)
     end
 
 
-    for i in 1:n
-        R = [0]
+    @inbounds for i in 1:n
+        R = Int[0]
         if i > 1
             R = labels[i-1].Ri
         end
@@ -67,12 +62,12 @@ function SPLIT(TT::Matrix{Float64}, K::Int, S::Vector{Int})
         end
     end
     #     return labels
-    trips = Vector{Tour}()
 
     #     rs = argmin(labels[n].Vir)
     rs = K
-    for i in 1:rs
-        push!(trips, Tour(Int[], 0.0))
+    trips = Vector{Tour}(undef, rs)
+    @inbounds for i in 1:rs
+        trips[i] = Tour(Int[], 0.0)
     end
     tt = rs
     j = n

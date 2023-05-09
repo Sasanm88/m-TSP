@@ -203,7 +203,8 @@ function generate_new_generation(TT::Matrix{Float64}, close_nodes::Matrix{Bool},
     population::Vector{Chromosome}, popsize::Tuple{Int64,Int64}, k_tournament::Int64,
     gen_num::Int64, old_best::Float64, improve_count::Int64, mutation_chance::Float64,
     tsp_tours::Vector{Vector{Int}}, roullet::Vector{Int}, num_nei::Int, crossover_functions::Vector{Int},
-    customers::Matrix{Float64}, depot::Vector{Float64}, t0::Float64, time_limit::Float64)
+    customers::Matrix{Float64}, depot::Vector{Float64}, t0::Float64, time_limit::Float64;
+    verbose::Bool=false)
     t1 = time()
 
     mu, sigma = popsize
@@ -242,8 +243,11 @@ function generate_new_generation(TT::Matrix{Float64}, close_nodes::Matrix{Bool},
     t2 = time()
 
 
-    if gen_num % 1000 == 0
-        println("Generation ", gen_num, " the best objective is: ", old_best, "   time left: $(round(t0+time_limit -time())) seconds")
+
+    if verbose
+        if gen_num % 10 == 0
+            println("Generation ", gen_num, " the best objective is: ", old_best, "   time left: $(round(t0+time_limit -time())) seconds")
+        end
     end
     gen_num += 1
     return gen_num, old_best, population, improve_count
@@ -253,9 +257,10 @@ end
 function perform_genetic_algorithm(
     TT::Matrix{Float64}, K::Int, h::Float64, popsize::Tuple{Int64,Int64},
     k_tournament::Int64, num_iter::Int64, time_limit::Float64, mutation_chance::Float64, num_nei::Int, crossover_functions::Vector{Int},
-    customers::Matrix{Float64}, depot::Vector{Float64}
+    customers::Matrix{Float64}, depot::Vector{Float64};
+    verbose=false
 )
-    Random.seed!(Int(round(time())))
+    # Random.seed!(Int(round(time())))
 
     n_nodes = size(TT)[1] - 2
     t1 = time()
@@ -283,15 +288,18 @@ function perform_genetic_algorithm(
         end
 
         Gen_num, old_best, Population, improve_count = generate_new_generation(TT, ClosenessT, K,
-            Population, popsize, k_tournament, Gen_num, old_best, improve_count, mutation_chance, tsp_tours, roullet, num_nei, crossover_functions, customers, depot, t1, time_limit)
+            Population, popsize, k_tournament, Gen_num, old_best, improve_count, mutation_chance, tsp_tours, roullet, num_nei, crossover_functions, customers, depot, t1, time_limit, verbose=verbose)
 
         count += 1
     end
     t2 = time()
 
-    println("The best objective achieved in ", Gen_num, " generations is: ", Population[1].fitness, " and it took ", t2 - t1, " seconds.")
-    #     println("And the best route is: ")
-    #     best_route(Population)
+    if verbose 
+        println("The best objective achieved in ", Gen_num, " generations is: ", Population[1].fitness, " and it took ", t2 - t1, " seconds.")
+        println("And the best route is: ")
+        best_route(Population)
+    end
+
     return Population, roullet
 end
 

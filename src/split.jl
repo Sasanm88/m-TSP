@@ -13,9 +13,9 @@ function SPLIT(TT::Matrix{Float64}, K::Int, S::Vector{Int})
     for i in 1:n
         R = Int[]
         if i == n
-            R = [i for i in 1:K]
+            R = [j for j in 1:K]
         else
-            R = [i for i in 1:min(i, K - 1)]
+            R = [j for j in 1:min(i, K - 1)]
         end
         V = Float64[]
         P = Int[]

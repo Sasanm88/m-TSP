@@ -1,6 +1,6 @@
 
 
-function Ni1!(chrm::Chromosome, TT::Matrix{Float64}, close_nodes::Matrix{Int}, n_nodes::Int)   #Reinsert
+function Ni1!(chrm::Chromosome, TT::Matrix{Float64}, close_nodes::Matrix{Bool}, n_nodes::Int)   #Reinsert
     r1 = 1
     if rand() < 0.5
         r1 = argmax([chrm.tours[i].cost for i in 1:length(chrm.tours)])
@@ -23,15 +23,15 @@ function Ni1!(chrm::Chromosome, TT::Matrix{Float64}, close_nodes::Matrix{Int}, n
     if nt == 2
         candidates = [1, 2]
     else
-        if city1 in close_nodes[n_nodes+1, :] || tour1[1] in close_nodes[city1, :]
+        if close_nodes[n_nodes+1, city1] || close_nodes[city1, tour1[1]]
             push!(candidates, 1)
         end
         for i = 2:nt-1
-            if tour1[i-1] in close_nodes[city1, :] || tour1[i+1] in close_nodes[city1, :]
+            if close_nodes[city1, tour1[i-1]] || close_nodes[city1, tour1[i+1]]
                 push!(candidates, i)
             end
         end
-        if city1 in close_nodes[n_nodes+1, :] || tour1[nt] in close_nodes[city1, :]
+        if close_nodes[n_nodes+1, city1] || close_nodes[city1, tour1[nt]]
             push!(candidates, nt)
         end
     end
@@ -61,7 +61,7 @@ function Ni1!(chrm::Chromosome, TT::Matrix{Float64}, close_nodes::Matrix{Int}, n
 end
 
 
-function Ni2!(chrm::Chromosome, TT::Matrix{Float64}, close_nodes::Matrix{Int}, n_nodes::Int)   #Exchange (permutation between two customers)
+function Ni2!(chrm::Chromosome, TT::Matrix{Float64}, close_nodes::Matrix{Bool}, n_nodes::Int)   #Exchange (permutation between two customers)
     r1 = 1
     if rand() < 0.5
         r1 = argmax([chrm.tours[i].cost for i in 1:length(chrm.tours)])
@@ -82,15 +82,15 @@ function Ni2!(chrm::Chromosome, TT::Matrix{Float64}, close_nodes::Matrix{Int}, n
     for i in 1:nt
         if i != k1
             if i == 1
-                if city1 in close_nodes[n_nodes+1, :] || tour1[2] in close_nodes[city1, :]
+                if close_nodes[n_nodes+1, city1] || close_nodes[city1, tour1[2]]
                     push!(candidates, 1)
                 end
             elseif i == nt
-                if city1 in close_nodes[n_nodes+1, :] || tour1[nt] in close_nodes[city1, :]
+                if close_nodes[n_nodes+1, city1] || close_nodes[city1, tour1[nt]]
                     push!(candidates, nt)
                 end
             else
-                if tour1[i-1] in close_nodes[city1, :] || tour1[i+1] in close_nodes[city1, :]
+                if close_nodes[city1, tour1[i-1]] || close_nodes[city1, tour1[i+1]]
                     push!(candidates, i)
                 end
             end
@@ -118,7 +118,7 @@ function Ni2!(chrm::Chromosome, TT::Matrix{Float64}, close_nodes::Matrix{Int}, n
     #     print("Ni2 ")
 end
 
-function Ni3!(chrm::Chromosome, T::Matrix{Float64}, close_nodes::Matrix{Int}, n_nodes::Int)   #Or-opt2 
+function Ni3!(chrm::Chromosome, T::Matrix{Float64}, close_nodes::Matrix{Bool}, n_nodes::Int)   #Or-opt2 
     r1 = 1
     if rand() < 0.5
         r1 = argmax([chrm.tours[i].cost for i in 1:length(chrm.tours)])
@@ -139,15 +139,15 @@ function Ni3!(chrm::Chromosome, T::Matrix{Float64}, close_nodes::Matrix{Int}, n_
     if nt == 3
         candidates = [1, 2]
     else
-        if city1 in close_nodes[n_nodes+1, :] || tour1[1] in close_nodes[city2, :]
+        if close_nodes[n_nodes+1, city1] || close_nodes[city2, tour1[1]]
             push!(candidates, 1)
         end
         for i = 2:nt-2
-            if tour1[i-1] in close_nodes[city1, :] || tour1[i+1] in close_nodes[city2, :]
+            if close_nodes[city1, tour1[i-1]] || close_nodes[city2, tour1[i+1]]
                 push!(candidates, i)
             end
         end
-        if city2 in close_nodes[n_nodes+1, :] || tour1[nt] in close_nodes[city1, :]
+        if close_nodes[n_nodes+1, city2] || close_nodes[city1, tour1[nt]]
             push!(candidates, nt - 1)
         end
     end
@@ -178,7 +178,7 @@ function Ni3!(chrm::Chromosome, T::Matrix{Float64}, close_nodes::Matrix{Int}, n_
 end
 
 
-function Ni4!(chrm::Chromosome, T::Matrix{Float64}, close_nodes::Matrix{Int}, n_nodes::Int)   #Or-opt3 
+function Ni4!(chrm::Chromosome, T::Matrix{Float64}, close_nodes::Matrix{Bool}, n_nodes::Int)   #Or-opt3 
     r1 = 1
     if rand() < 0.5
         r1 = argmax([chrm.tours[i].cost for i in 1:length(chrm.tours)])
@@ -199,15 +199,15 @@ function Ni4!(chrm::Chromosome, T::Matrix{Float64}, close_nodes::Matrix{Int}, n_
     if nt == 4
         candidates = [1, 2]
     else
-        if city1 in close_nodes[n_nodes+1, :] || tour1[1] in close_nodes[city3, :]
+        if close_nodes[n_nodes+1, city1] || close_nodes[city3, tour1[1]]
             push!(candidates, 1)
         end
         for i = 2:nt-3
-            if tour1[i-1] in close_nodes[city1, :] || tour1[i+2] in close_nodes[city3, :]
+            if close_nodes[city1, tour1[i-1]] || close_nodes[city3, tour1[i+2]]
                 push!(candidates, i)
             end
         end
-        if city3 in close_nodes[n_nodes+1, :] || tour1[nt] in close_nodes[city1, :]
+        if close_nodes[n_nodes+1, city3] || close_nodes[city1, tour1[nt]]
             push!(candidates, nt - 2)
         end
     end
@@ -236,7 +236,7 @@ function Ni4!(chrm::Chromosome, T::Matrix{Float64}, close_nodes::Matrix{Int}, n_
     return
 end
 
-function Ni5!(chrm::Chromosome, T::Matrix{Float64}, close_nodes::Matrix{Int}, n_nodes::Int)   #2-opt 
+function Ni5!(chrm::Chromosome, T::Matrix{Float64}, close_nodes::Matrix{Bool}, n_nodes::Int)   #2-opt 
     r1 = 1
     if rand() < 0.5
         r1 = argmax([chrm.tours[i].cost for i in 1:length(chrm.tours)])
@@ -256,30 +256,30 @@ function Ni5!(chrm::Chromosome, T::Matrix{Float64}, close_nodes::Matrix{Int}, n_
 
     if i1 == 1
         for i = 2:nt-1
-            if tour1[i] in close_nodes[n_nodes+1, :] || tour1[1] in close_nodes[tour1[i1+1], :]
+            if close_nodes[n_nodes+1, tour1[i]] || close_nodes[tour1[i1+1], tour1[1]]
                 push!(candidates, i)
             end
         end
     elseif i1 == nt
         for i = 2:nt-1
-            if tour1[i] in close_nodes[n_nodes+1, :] || tour1[nt] in close_nodes[tour1[i1-1], :]
+            if close_nodes[n_nodes+1, tour1[i]] || close_nodes[tour1[i1-1], tour1[nt]]
                 push!(candidates, i)
             end
         end
     else
-        if tour1[i1] in close_nodes[n_nodes+1, :] || tour1[1] in close_nodes[tour1[i1+1], :]
+        if close_nodes[n_nodes+1, tour1[i1]] || close_nodes[tour1[i1+1], tour1[1] ]
             push!(candidates, 1)
         end
-        if tour1[i1] in close_nodes[n_nodes+1, :] || tour1[nt] in close_nodes[tour1[i1-1], :]
+        if close_nodes[n_nodes+1, tour1[i1]] || close_nodes[tour1[i1-1], tour1[nt]]
             push!(candidates, nt)
         end
         for i = 2:nt-1
             if i > i1
-                if tour1[i1] in close_nodes[tour1[i+1], :] || tour1[i] in close_nodes[tour1[i1-1], :]
+                if close_nodes[tour1[i+1], tour1[i1]] || close_nodes[tour1[i1-1], tour1[i]]
                     push!(candidates, i)
                 end
             elseif i < i1
-                if tour1[i1] in close_nodes[tour1[i-1], :] || tour1[i] in close_nodes[tour1[i1+1], :]
+                if close_nodes[tour1[i-1], tour1[i1]] || close_nodes[tour1[i1+1], tour1[i]]
                     push!(candidates, i)
                 end
             end
@@ -308,7 +308,7 @@ function Ni5!(chrm::Chromosome, T::Matrix{Float64}, close_nodes::Matrix{Int}, n_
     return
 end
 
-function Ni6!(chrm::Chromosome, T::Matrix{Float64}, close_nodes::Matrix{Int}, n_nodes::Int)   #3-opt 
+function Ni6!(chrm::Chromosome, T::Matrix{Float64}, close_nodes::Matrix{Bool}, n_nodes::Int)   #3-opt 
     r1 = 1
     if rand() < 0.5
         r1 = argmax([chrm.tours[i].cost for i in 1:length(chrm.tours)])
@@ -341,7 +341,7 @@ function Ni6!(chrm::Chromosome, T::Matrix{Float64}, close_nodes::Matrix{Int}, n_
     end
 end
 
-function Ni7!(chrm::Chromosome, T::Matrix{Float64}, close_nodes::Matrix{Int}, n_nodes::Int)   #3-permute 
+function Ni7!(chrm::Chromosome, T::Matrix{Float64}, close_nodes::Matrix{Bool}, n_nodes::Int)   #3-permute 
     r1 = 1
     if rand() < 0.5
         r1 = argmax([chrm.tours[i].cost for i in 1:length(chrm.tours)])

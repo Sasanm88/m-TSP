@@ -18,6 +18,7 @@ include("neighborhood.jl")
 include("neighborhood_intra.jl")
 include("costs.jl")
 include("intersection.jl")
+include("enrichment.jl")
 
 
 

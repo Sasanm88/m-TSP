@@ -331,6 +331,36 @@ function calculate_new_cost_exchange_one(tour1::Vector{Int}, cost::Float64, city
     return cost
 end
 
+function calculate_new_cost_exchange_one_no_copy(tour::Vector{Int}, cost::Float64, city::Int, position1::Int,
+    position2::Int, T::Matrix{Float64}, n_nodes::Int)
+    nt = length(tour)
+    if position1 == position2
+        return cost
+    end
+    if position1 == 1
+        cost = cost - T[1, city+1] - T[city+1, tour[2]+1] + T[1, tour[2]+1]
+    elseif position1 == nt
+        cost = cost - T[city+1, n_nodes+2] - T[tour[nt-1]+1, city+1] + T[tour[nt-1]+1, n_nodes+2]
+    else
+        cost = cost - T[tour[position1-1]+1, city+1] - T[city+1, tour[position1+1]+1] + T[tour[position1-1]+1, tour[position1+1]+1]
+    end
+
+    if position2 > position1
+        if position2 == nt
+            cost = cost + T[tour[nt]+1, city+1] + T[city+1, n_nodes+2] - T[tour[nt]+1, n_nodes+2]
+        else
+            cost = cost + T[tour[position2]+1, city+1] + T[city+1, tour[position2+1]+1] - T[tour[position2]+1, tour[position2+1]+1]
+        end
+    else
+        if position2 == 1
+            cost = cost + T[1, city+1] + T[tour[1]+1, city+1] - T[1, tour[1]+1]
+        else
+            cost = cost + T[tour[position2-1]+1, city+1] + T[city+1, tour[position2]+1] - T[tour[position2-1]+1, tour[position2]+1]
+        end
+    end
+    return cost
+end
+
 function calculate_new_cost_cross(tour1::Vector{Int}, cost1::Float64, tour2::Vector{Int}, cost2::Float64, k11::Int, k12::Int, k21::Int, k22::Int, T::Matrix{Float64}, n_nodes::Int)
     c1 = sum(T[tour1[i]+1, tour1[i+1]+1] for i in k11:k12-1)
     c2 = sum(T[tour2[i]+1, tour2[i+1]+1] for i in k21:k22-1)

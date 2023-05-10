@@ -244,8 +244,8 @@ function generate_new_generation(TT::Matrix{Float64}, close_nodes::Matrix{Bool},
 
 
 
-    if verbose
-        if gen_num % 10 == 0
+    if true #verbose
+        if gen_num % 1000 == 0
             println("Generation ", gen_num, " the best objective is: ", old_best, "   time left: $(round(t0+time_limit -time())) seconds")
         end
     end

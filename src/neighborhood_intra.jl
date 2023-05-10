@@ -42,7 +42,7 @@ function Ni1!(chrm::Chromosome, TT::Matrix{Float64}, close_nodes::Matrix{Bool}, 
 
     k2 = candidates[rand(1:length(candidates))]
     #     k2 = rand(1:length(tour1))
-    new_cost1 = calculate_new_cost_exchange_one(tour1, cost1, city1, k1, k2, TT, n_nodes)
+    new_cost1 = calculate_new_cost_exchange_one_no_copy(tour1, cost1, city1, k1, k2, TT, n_nodes)
 
     if new_cost1 >= cost1
         return

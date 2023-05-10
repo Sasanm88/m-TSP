@@ -107,10 +107,11 @@ function N1!(chrm::Chromosome, TT::Matrix{Float64}, close_nodes::Matrix{Bool}, n
     deleteat!(tour1, k1)
     chrm.tours[r1].cost = new_cost1
     chrm.tours[r2].cost = new_cost2
-    chrm.genes = Int[]
     chrm.fitness = maximum([chrm.tours[i].cost for i in 1:length(chrm.tours)])
+    index = 0
     for tour in chrm.tours
-        chrm.genes = vcat(chrm.genes, tour.sequence)
+        chrm.genes[index+1:index+length(tour.sequence)] = tour.sequence
+        index += length(tour.sequence)
     end
     return
 end
@@ -162,10 +163,11 @@ function N2!(chrm::Chromosome, TT::Matrix{Float64}, close_nodes::Matrix{Int}, n_
     tour2[k2] = city1
     chrm.tours[r1].cost = new_cost1
     chrm.tours[r2].cost = new_cost2
-    chrm.genes = Int[]
     chrm.fitness = maximum([chrm.tours[i].cost for i in 1:length(chrm.tours)])
+    index = 0
     for tour in chrm.tours
-        chrm.genes = vcat(chrm.genes, tour.sequence)
+        chrm.genes[index+1:index+length(tour.sequence)] = tour.sequence
+        index += length(tour.sequence)
     end
     return
 end
@@ -239,11 +241,12 @@ function N3!(chrm::Chromosome, TT::Matrix{Float64}, close_nodes::Matrix{Bool}, n
     deleteat!(tour1, [k1, k1 + 1])
     chrm.tours[r1].cost = new_cost1
     chrm.tours[r2].cost = new_cost2
-    chrm.genes = Int[]
-    for tour in chrm.tours
-        chrm.genes = vcat(chrm.genes, tour.sequence)
-    end
     chrm.fitness = maximum([chrm.tours[i].cost for i in 1:length(chrm.tours)])
+    index = 0
+    for tour in chrm.tours
+        chrm.genes[index+1:index+length(tour.sequence)] = tour.sequence
+        index += length(tour.sequence)
+    end
     return
 end
 
@@ -319,10 +322,11 @@ function N4!(chrm::Chromosome, TT::Matrix{Float64}, close_nodes::Matrix{Bool}, n
     end
     chrm.tours[r1].cost = new_cost1
     chrm.tours[r2].cost = new_cost2
-    chrm.genes = Int[]
     chrm.fitness = maximum([chrm.tours[i].cost for i in 1:length(chrm.tours)])
+    index = 0
     for tour in chrm.tours
-        chrm.genes = vcat(chrm.genes, tour.sequence)
+        chrm.genes[index+1:index+length(tour.sequence)] = tour.sequence
+        index += length(tour.sequence)
     end
     return
 end
@@ -400,11 +404,12 @@ function N5!(chrm::Chromosome, TT::Matrix{Float64}, close_nodes::Matrix{Bool}, n
     deleteat!(tour1, [k1, k1 + 1, k1 + 2])
     chrm.tours[r1].cost = new_cost1
     chrm.tours[r2].cost = new_cost2
-    chrm.genes = Int[]
-    for tour in chrm.tours
-        chrm.genes = vcat(chrm.genes, tour.sequence)
-    end
     chrm.fitness = maximum([chrm.tours[i].cost for i in 1:length(chrm.tours)])
+    index = 0
+    for tour in chrm.tours
+        chrm.genes[index+1:index+length(tour.sequence)] = tour.sequence
+        index += length(tour.sequence)
+    end
     return
 end
 
@@ -485,10 +490,11 @@ function N6!(chrm::Chromosome, TT::Matrix{Float64}, close_nodes::Matrix{Bool}, n
     end
     chrm.tours[r1].cost = new_cost1
     chrm.tours[r2].cost = new_cost2
-    chrm.genes = Int[]
     chrm.fitness = maximum([chrm.tours[i].cost for i in 1:length(chrm.tours)])
+    index = 0
     for tour in chrm.tours
-        chrm.genes = vcat(chrm.genes, tour.sequence)
+        chrm.genes[index+1:index+length(tour.sequence)] = tour.sequence
+        index += length(tour.sequence)
     end
     return
 end
@@ -567,10 +573,11 @@ function N7!(chrm::Chromosome, TT::Matrix{Float64}, close_nodes::Matrix{Bool}, n
     end
     chrm.tours[r1].cost = new_cost1
     chrm.tours[r2].cost = new_cost2
-    chrm.genes = Int[]
     chrm.fitness = maximum([chrm.tours[i].cost for i in 1:length(chrm.tours)])
+    index = 0
     for tour in chrm.tours
-        chrm.genes = vcat(chrm.genes, tour.sequence)
+        chrm.genes[index+1:index+length(tour.sequence)] = tour.sequence
+        index += length(tour.sequence)
     end
     return
 end
@@ -640,10 +647,11 @@ function N_cross!(chrm::Chromosome, T::Matrix{Float64}, close_nodes::Matrix{Int}
 
     chrm.tours[r1].cost = new_cost1
     chrm.tours[r2].cost = new_cost2
-    chrm.genes = Int[]
     chrm.fitness = maximum([chrm.tours[i].cost for i in 1:length(chrm.tours)])
+    index = 0
     for tour in chrm.tours
-        chrm.genes = vcat(chrm.genes, tour.sequence)
+        chrm.genes[index+1:index+length(tour.sequence)] = tour.sequence
+        index += length(tour.sequence)
     end
     return
 end

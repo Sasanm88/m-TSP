@@ -1,5 +1,4 @@
 
-
 function Ni1!(chrm::Chromosome, TT::Matrix{Float64}, close_nodes::Matrix{Bool}, n_nodes::Int)   #Reinsert
     r1 = 1
     if rand() < 0.5
@@ -27,8 +26,14 @@ function Ni1!(chrm::Chromosome, TT::Matrix{Float64}, close_nodes::Matrix{Bool}, 
             push!(candidates, 1)
         end
         for i = 2:nt-1
-            if close_nodes[city1, tour1[i-1]] || close_nodes[city1, tour1[i+1]]
-                push!(candidates, i)
+            if i > k1
+                if close_nodes[city1, tour1[i]] || close_nodes[city1, tour1[i+1]]
+                    push!(candidates, i)
+                end
+            elseif i < k1
+                if close_nodes[city1, tour1[i]] || close_nodes[city1, tour1[i-1]]
+                    push!(candidates, i)
+                end
             end
         end
         if close_nodes[n_nodes+1, city1] || close_nodes[city1, tour1[nt]]
@@ -42,7 +47,7 @@ function Ni1!(chrm::Chromosome, TT::Matrix{Float64}, close_nodes::Matrix{Bool}, 
 
     k2 = candidates[rand(1:length(candidates))]
     #     k2 = rand(1:length(tour1))
-    new_cost1 = calculate_new_cost_exchange_one_no_copy(tour1, cost1, city1, k1, k2, TT, n_nodes)
+    new_cost1 = calculate_new_cost_exchange_one(tour1, cost1, city1, k1, k2, TT, n_nodes)
 
     if new_cost1 >= cost1
         return
@@ -52,12 +57,12 @@ function Ni1!(chrm::Chromosome, TT::Matrix{Float64}, close_nodes::Matrix{Bool}, 
     insert!(tour1, k2, city1)
 
     chrm.tours[r1].cost = new_cost1
-    chrm.genes = Int[]
     chrm.fitness = maximum([chrm.tours[i].cost for i in 1:length(chrm.tours)])
+    index = 0
     for tour in chrm.tours
-        chrm.genes = vcat(chrm.genes, tour.sequence)
+        chrm.genes[index+1:index+length(tour.sequence)] = tour.sequence
+        index += length(tour.sequence)
     end
-    # print("Ni1  ")
 end
 
 
@@ -110,12 +115,12 @@ function Ni2!(chrm::Chromosome, TT::Matrix{Float64}, close_nodes::Matrix{Bool}, 
     tour1[k1] = city2
     tour1[k2] = city1
     chrm.tours[r1].cost = new_cost1
-    chrm.genes = Int[]
     chrm.fitness = maximum([chrm.tours[i].cost for i in 1:length(chrm.tours)])
+    index = 0
     for tour in chrm.tours
-        chrm.genes = vcat(chrm.genes, tour.sequence)
+        chrm.genes[index+1:index+length(tour.sequence)] = tour.sequence
+        index += length(tour.sequence)
     end
-    #     print("Ni2 ")
 end
 
 function Ni3!(chrm::Chromosome, T::Matrix{Float64}, close_nodes::Matrix{Bool}, n_nodes::Int)   #Or-opt2 
@@ -143,8 +148,14 @@ function Ni3!(chrm::Chromosome, T::Matrix{Float64}, close_nodes::Matrix{Bool}, n
             push!(candidates, 1)
         end
         for i = 2:nt-2
-            if close_nodes[city1, tour1[i-1]] || close_nodes[city2, tour1[i+1]]
-                push!(candidates, i)
+            if i > k1
+                if close_nodes[city1, tour1[i+1]] || close_nodes[city2, tour1[i+2]]
+                    push!(candidates, i)
+                end
+            elseif i < k1
+                if close_nodes[city1, tour1[i-1]] || close_nodes[city2, tour1[i]]
+                    push!(candidates, i)
+                end
             end
         end
         if close_nodes[n_nodes+1, city2] || close_nodes[city1, tour1[nt]]
@@ -168,10 +179,11 @@ function Ni3!(chrm::Chromosome, T::Matrix{Float64}, close_nodes::Matrix{Bool}, n
     insert!(tour1, k2, city1)
     insert!(tour1, k2 + 1, city2)
     chrm.tours[r1].cost = z1
-    chrm.genes = Int[]
     chrm.fitness = maximum([chrm.tours[i].cost for i in 1:length(chrm.tours)])
+    index = 0
     for tour in chrm.tours
-        chrm.genes = vcat(chrm.genes, tour.sequence)
+        chrm.genes[index+1:index+length(tour.sequence)] = tour.sequence
+        index += length(tour.sequence)
     end
 
     return
@@ -203,8 +215,14 @@ function Ni4!(chrm::Chromosome, T::Matrix{Float64}, close_nodes::Matrix{Bool}, n
             push!(candidates, 1)
         end
         for i = 2:nt-3
-            if close_nodes[city1, tour1[i-1]] || close_nodes[city3, tour1[i+2]]
-                push!(candidates, i)
+            if i > k1
+                if close_nodes[city1, tour1[i+2]] || close_nodes[city3, tour1[i+3]]
+                    push!(candidates, i)
+                end
+            elseif i < k1
+                if close_nodes[city1, tour1[i-1]] || close_nodes[city3, tour1[i]]
+                    push!(candidates, i)
+                end
             end
         end
         if close_nodes[n_nodes+1, city3] || close_nodes[city1, tour1[nt]]
@@ -227,10 +245,11 @@ function Ni4!(chrm::Chromosome, T::Matrix{Float64}, close_nodes::Matrix{Bool}, n
     insert!(tour1, k2 + 1, city2)
     insert!(tour1, k2 + 2, city3)
     chrm.tours[r1].cost = new_cost1
-    chrm.genes = Int[]
     chrm.fitness = maximum([chrm.tours[i].cost for i in 1:length(chrm.tours)])
+    index = 0
     for tour in chrm.tours
-        chrm.genes = vcat(chrm.genes, tour.sequence)
+        chrm.genes[index+1:index+length(tour.sequence)] = tour.sequence
+        index += length(tour.sequence)
     end
 
     return
@@ -299,10 +318,11 @@ function Ni5!(chrm::Chromosome, T::Matrix{Float64}, close_nodes::Matrix{Bool}, n
     end
     tour1[k1:k2] = reverse(tour1[k1:k2])
     chrm.tours[r1].cost = new_cost
-    chrm.genes = Int[]
     chrm.fitness = maximum([chrm.tours[i].cost for i in 1:length(chrm.tours)])
+    index = 0
     for tour in chrm.tours
-        chrm.genes = vcat(chrm.genes, tour.sequence)
+        chrm.genes[index+1:index+length(tour.sequence)] = tour.sequence
+        index += length(tour.sequence)
     end
 
     return
@@ -334,10 +354,12 @@ function Ni6!(chrm::Chromosome, T::Matrix{Float64}, close_nodes::Matrix{Bool}, n
         tour1[k2+1:k3-1] = reverse(tour1[k2+1:k3-1])
     end
     chrm.tours[r1].cost = new_cost
-    chrm.genes = Int[]
     chrm.fitness = maximum([chrm.tours[i].cost for i in 1:length(chrm.tours)])
+    index = 0
     for tour in chrm.tours
-        chrm.genes = vcat(chrm.genes, tour.sequence)
+        l = length(tour.sequence)
+        chrm.genes[index+1:index+l] = tour.sequence
+        index += l
     end
 end
 
@@ -365,10 +387,12 @@ function Ni7!(chrm::Chromosome, T::Matrix{Float64}, close_nodes::Matrix{Bool}, n
     end
     tour1[k1:k1+2] = temp2
     chrm.tours[r1].cost = new_cost
-    chrm.genes = Int[]
     chrm.fitness = maximum([chrm.tours[i].cost for i in 1:length(chrm.tours)])
+    index = 0
     for tour in chrm.tours
-        chrm.genes = vcat(chrm.genes, tour.sequence)
+        l = length(tour.sequence)
+        chrm.genes[index+1:index+l] = tour.sequence
+        index += l
     end
 
 end

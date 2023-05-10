@@ -11,7 +11,7 @@ function Draw_Solution(chrm::Chromosome, depot::Vector{Float64}, Customers::Matr
     min_y = Inf
     max_y = 0.0
     for j=1:m 
-        seq = chrm.tours[j].Sequence
+        seq = chrm.tours[j].sequence
         x1 = [depot[1]]
         y1 = [depot[2]]
         labels1 = ["0"]

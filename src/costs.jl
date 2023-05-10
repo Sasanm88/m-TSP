@@ -522,6 +522,38 @@ function calculate_new_cost_or_opt2(tour1::Vector{Int}, cost::Float64, city1::In
     return cost
 end
 
+function calculate_new_cost_or_opt2_no_copy(tour::Vector{Int}, cost::Float64, city1::Int, position1::Int,
+    city2::Int, position2::Int, T::Matrix{Float64}, n_nodes::Int)
+
+    if position1 == position2
+        return cost
+    end
+
+    nt = length(tour)
+    if position1 == 1
+        cost = cost - T[1, city1+1] - T[city2+1, tour[3]+1] + T[1, tour[3]+1]
+    elseif position1 == nt - 1
+        cost = cost - T[city2+1, n_nodes+2] - T[tour[nt-2]+1, city1+1] + T[tour[nt-2]+1, n_nodes+2]
+    else
+        cost = cost - T[tour[position1-1]+1, city1+1] - T[city2+1, tour[position1+2]+1] + T[tour[position1-1]+1, tour[position1+2]+1]
+    end
+
+    if position1 < position2
+        if position2 == nt - 1
+            cost = cost + T[tour[nt]+1, city1+1] + T[city2+1, n_nodes+2] - T[tour[nt]+1, n_nodes+2]
+        else 
+            cost = cost + T[tour[position2+1]+1, city1+1] + T[city2+1, tour[position2+2]+1] - T[tour[position2+1]+1, tour[position2+2]+1]
+        end
+    else
+        if position2 == 1
+            cost = cost + T[1, city1+1] + T[city2+1, tour[1]+1] - T[1, tour[1]+1]
+        else
+            cost = cost + T[tour[position2-1]+1, city1+1] + T[city2+1, tour[position2]+1] - T[tour[position2-1]+1, tour[position2]+1]
+        end
+    end
+    return cost
+end
+
 
 function calculate_new_cost_or_opt3(tour1::Vector{Int}, cost::Float64, city1::Int, city2::Int, city3::Int, position1::Int,
     position2::Int, T::Matrix{Float64}, n_nodes::Int)
@@ -547,6 +579,36 @@ function calculate_new_cost_or_opt3(tour1::Vector{Int}, cost::Float64, city1::In
         cost = cost + T[tour[nt-3]+1, city1+1] + T[city3+1, n_nodes+2] - T[tour[nt-3]+1, n_nodes+2]
     else
         cost = cost + T[tour[position2-1]+1, city1+1] + T[city3+1, tour[position2]+1] - T[tour[position2-1]+1, tour[position2]+1]
+    end
+    return cost
+end
+
+function calculate_new_cost_or_opt3_no_copy(tour::Vector{Int}, cost::Float64, city1::Int, city2::Int, city3::Int, position1::Int,
+    position2::Int, T::Matrix{Float64}, n_nodes::Int)
+
+    if position1 == position2
+        return cost
+    end
+    nt = length(tour)
+    if position1 == 1
+        cost = cost - T[1, city1+1] - T[city3+1, tour[4]+1] + T[1, tour[4]+1]
+    elseif position1 == nt - 2
+        cost = cost - T[city3+1, n_nodes+2] - T[tour[nt-3]+1, city1+1] + T[tour[nt-3]+1, n_nodes+2]
+    else
+        cost = cost - T[tour[position1-1]+1, city1+1] - T[city3+1, tour[position1+3]+1] + T[tour[position1-1]+1, tour[position1+3]+1]
+    end
+    if position2 < position1
+        if position2 == 1
+            cost = cost + T[1, city1+1] + T[city3+1, tour[1]+1] - T[1, tour[1]+1]
+        else
+            cost = cost + T[tour[position2-1]+1, city1+1] + T[city3+1, tour[position2]+1] - T[tour[position2-1]+1, tour[position2]+1]
+        end
+    else
+        if position2 == nt - 2
+            cost = cost + T[tour[nt]+1, city1+1] + T[city3+1, n_nodes+2] - T[tour[nt]+1, n_nodes+2]
+        else
+            cost = cost + T[tour[position2+2]+1, city1+1] + T[city3+1, tour[position2+3]+1] - T[tour[position2+2]+1, tour[position2+3]+1]
+        end
     end
     return cost
 end

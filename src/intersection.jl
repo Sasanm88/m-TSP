@@ -1,4 +1,4 @@
-function segments_intersect_orient(A::Vector{Float64}, B::Vector{Float64}, C::Vector{Float64}, D::Vector{Float64})
+function segments_intersect_orient(A::AbstractVector{Float64}, B::AbstractVector{Float64}, C::AbstractVector{Float64}, D::AbstractVector{Float64})
     # Unpack the coordinates of the first segment into separate variables
     x1, y1 = A
     x2, y2 = B
@@ -74,31 +74,30 @@ function find_intersections(t1::Vector{Int}, t2::Vector{Int}, Customers::Matrix{
         else
             loopset = [k for k = 0:length(t2)]
         end
+
+        if i == 0
+            node1 = @view depot[:, 1]  # essentially same as `node1 = depot`, but for type stability
+            node2 = @view Customers[t1[i+1], :]
+        elseif i == length(t1)
+            node1 = @view Customers[t1[i], :]
+            node2 = @view depot[:, 1]
+        else
+            node1 = @view Customers[t1[i], :]
+            node2 = @view Customers[t1[i+1], :]
+        end    
+
         for j in loopset
             intersected = false
-            node1 = Float64[]
-            node2 = Float64[]
-            node3 = Float64[]
-            node4 = Float64[]
-            if i == 0
-                node1 = depot
-                node2 = Customers[t1[i+1], :]
-            elseif i == length(t1)
-                node1 = Customers[t1[i], :]
-                node2 = depot
-            else
-                node1 = Customers[t1[i], :]
-                node2 = Customers[t1[i+1], :]
-            end
+
             if j == 0
-                node3 = depot
-                node4 = Customers[t2[j+1], :]
+                node3 = @view depot[:, 1]
+                node4 = @view Customers[t2[j+1], :]
             elseif j == length(t2)
-                node3 = Customers[t2[j], :]
-                node4 = depot
+                node3 = @view Customers[t2[j], :]
+                node4 = @view depot[:, 1]
             else
-                node3 = Customers[t2[j], :]
-                node4 = Customers[t2[j+1], :]
+                node3 = @view Customers[t2[j], :]
+                node4 = @view Customers[t2[j+1], :]
             end
 
             if segments_intersect_orient(node1, node2, node3, node4)

@@ -7,8 +7,8 @@ from timeit import default_timer as timer
 
 
 
-n = 10
-m = 3
+n = 500
+m = 50
 
 
 x = np.random.rand(n) * 1000

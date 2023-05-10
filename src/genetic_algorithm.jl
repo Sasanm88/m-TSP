@@ -242,8 +242,6 @@ function generate_new_generation(TT::Matrix{Float64}, close_nodes::Matrix{Bool},
     end
     t2 = time()
 
-
-
     if verbose
         if gen_num % 10 == 0
             println("Generation ", gen_num, " the best objective is: ", old_best, "   time left: $(round(t0+time_limit -time())) seconds")
@@ -273,14 +271,20 @@ function perform_genetic_algorithm(
 
     tsp_tours = find_tsp_tour2(TT[1:n_nodes+1, 1:n_nodes+1])
 
+
     if n_nodes < 1200 #&& K < 10
         tsp_tour, _ = find_tsp_tour1(TT[1:n_nodes+1, 1:n_nodes+1])
         push!(tsp_tours, tsp_tour)
     end
 
+
     Population, old_best = generate_initial_population(TT, K, mu, tsp_tours, customers, depot)
 
     count = 0
+
+    if verbose
+        println("The initialization took ", time() - t1, " seconds.")
+    end
 
     while improve_count < num_iter
         if time() - t1 >= time_limit

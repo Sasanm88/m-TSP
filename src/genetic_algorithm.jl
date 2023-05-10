@@ -275,7 +275,9 @@ function perform_genetic_algorithm(
 
     count = 0
 
-    println("The initialization took ", time() - t1, " seconds.")
+    if verbose
+        println("The initialization took ", time() - t1, " seconds.")
+    end
 
     while improve_count < num_iter
         if time() - t1 >= time_limit

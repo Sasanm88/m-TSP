@@ -47,7 +47,7 @@ function Ni1!(chrm::Chromosome, TT::Matrix{Float64}, close_nodes::Matrix{Bool}, 
 
     k2 = candidates[rand(1:length(candidates))]
     #     k2 = rand(1:length(tour1))
-    new_cost1 = calculate_new_cost_exchange_one_no_copy(tour1, cost1, city1, k1, k2, TT, n_nodes)
+    new_cost1 = calculate_new_cost_exchange_one(tour1, cost1, city1, k1, k2, TT, n_nodes)
 
     if new_cost1 >= cost1
         return
@@ -170,7 +170,7 @@ function Ni3!(chrm::Chromosome, T::Matrix{Float64}, close_nodes::Matrix{Bool}, n
     #     k2 = rand(1:length(tour1)-1)   #Way to improve 
     k2 = candidates[rand(1:length(candidates))]
 
-    z1 = calculate_new_cost_or_opt2_no_copy(tour1, cost1, city1, k1, city2, k2, T, n_nodes)
+    z1 = calculate_new_cost_or_opt2(tour1, cost1, city1, k1, city2, k2, T, n_nodes)
 
     if z1 >= cost1
         return
@@ -235,7 +235,7 @@ function Ni4!(chrm::Chromosome, T::Matrix{Float64}, close_nodes::Matrix{Bool}, n
     end
 
     k2 = candidates[rand(1:length(candidates))]
-    new_cost1 = calculate_new_cost_or_opt3_no_copy(tour1, cost1, city1, city2, city3, k1, k2, T, n_nodes)
+    new_cost1 = calculate_new_cost_or_opt3(tour1, cost1, city1, city2, city3, k1, k2, T, n_nodes)
 
     if new_cost1 >= cost1
         return

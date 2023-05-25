@@ -1,7 +1,7 @@
 using Plots
 
 
-function Draw_Solution(chrm::Chromosome, depot::Vector{Float64}, Customers::Matrix{Float64}, title_::String, obj::Float64)
+function Draw_Solution(chrm::Chromosome, depot::Vector{Float64}, Customers::Matrix{Float64}, obj::Float64)
     x = Vector{Vector{Float64}}()
     y = Vector{Vector{Float64}}()
     labels = Vector{Vector{String}}()
@@ -43,13 +43,13 @@ function Draw_Solution(chrm::Chromosome, depot::Vector{Float64}, Customers::Matr
     max_x = max_x + magnify*(max_x-min_x)
     min_y = min_y - magnify*(max_y-min_y)
     max_y = max_y + magnify*(max_y-min_y)
-    tit = title_ * " Cmax = " * string(round(obj, digits=1))
-    p = plot(x[1], y[1], marker =:circle, title = tit, label = "t1", xlim=(min_x, max_x), ylim=(min_y, max_y))
+    tit = "minmax objective = " * string(round(obj, digits=1))
+    p = plot(x[1], y[1], marker =:circle, title = tit, label = "tour1", xlim=(min_x, max_x), ylim=(min_y, max_y))
     for i=1:m
-        annotate!.(x[i][1:length(x[i])-1]*1.02, y[i][1:length(y[i])-1]*1.02, text.(labels[i], :left,8))
+        annotate!.(x[i][1:length(x[i])-1].+20, y[i][1:length(y[i])-1].+20, text.(labels[i], :left,6))
     end
     for i=2:m
-        p = plot!(x[i], y[i], marker =:circle, label = "t"*string(i))
+        p = plot!(x[i], y[i], marker =:circle, label = "tour"*string(i))
     end 
     for (j,tour) in enumerate(chrm.tours)
         println("Tour ", j, ":" , tour.cost)

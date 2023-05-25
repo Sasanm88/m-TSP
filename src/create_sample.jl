@@ -82,6 +82,44 @@ function calculate_TSPLIB(sample::Symbol)
     return T, depot, Nodes
 end
 
+function pseudo_euclidean(a::Vector{Float64}, b::Vector{Float64})
+    xd = a[1] - b[1]
+    yd = a[2] - b[2]
+    r = sqrt((xd^2+yd^2)/10)
+    t = round(r)
+    if t < r
+        return t+1
+    else
+        return t
+    end
+end
+
+function calculate_TSPLIB_pseudo(sample::Symbol)
+    tsp = readTSPLIB(sample)
+    allNodes = tsp.nodes
+    num_of_nodes = size(allNodes)[1] - 1
+    T = Matrix{Float64}(undef, num_of_nodes + 2, num_of_nodes + 2)
+    depot = allNodes[1, :]
+    Nodes = allNodes[2:num_of_nodes+1, :]
+
+    T[1, 1] = 0.0
+    T[num_of_nodes+2, num_of_nodes+2] = 0.0
+    T[1, num_of_nodes+2] = 0.0
+    T[num_of_nodes+2, 1] = 0.0
+    @inbounds for i in 1:num_of_nodes
+        T[1, i+1] = pseudo_euclidean(depot, Nodes[i, :])
+        T[i+1, 1] = T[1, i+1]
+        T[num_of_nodes+2, i+1] = T[1, i+1]
+        T[i+1, num_of_nodes+2] = T[1, i+1]
+        @inbounds for j in 1:num_of_nodes
+            T[i+1, j+1] = pseudo_euclidean(Nodes[i, :], Nodes[j, :])
+            T[j+1, i+1] = T[i+1, j+1]
+        end
+    end
+
+    return T, depot, Nodes
+end
+
 function read_data(dir_name::String, sample_name::String)
     filename = joinpath(dirname(@__DIR__), "data/$(dir_name)/$(sample_name).txt")
     f = open(filename, "r")

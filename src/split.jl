@@ -32,7 +32,7 @@ function SPLIT(TT::Matrix{Float64}, K::Int, S::Vector{Int})
         for r in R
             Current_V = 0.0
             if i > 1
-                Current_V = labels[i].Vir[r]
+                Current_V = labels[i-1].Vir[r]
             end
             if Current_V < Inf    #This is V^i_r
                 load = 0

@@ -176,20 +176,21 @@ end
 
 function educate_and_add_the_offspring!(offspring::Chromosome, population::Vector{Chromosome}, TT::Matrix{Float64}, Close_nodes::Matrix{Bool}, Customers::Matrix{Float64}, depot::Vector{Float64}, old_best::Float64, roullet::Vector{Int}, 
         n_nodes::Int, improve_count::Int)
-    if n_nodes < 700 && length(offspring.tours) < 20
-        if rand() < 0.3 
+    if n_nodes > 700 && length(offspring.tours) < 10
+        if rand() < 0.1
             solve_all_intersections!(offspring, Customers, depot, TT)
-            enrich_the_chromosome2!(offspring, TT, Customers, depot, n_nodes)
-        end
-        if rand() < 0.3 
-            solve_all_intersections!(offspring, Customers, depot, TT)
-            enrich_the_chromosome2!(offspring, TT, Customers, depot, n_nodes)
         end
     else
-        if rand() < 0.1 && improve_count > 100
+        if rand() < 0.3 
             solve_all_intersections!(offspring, Customers, depot, TT)
+            enrich_the_chromosome2!(offspring, TT, Customers, depot, n_nodes)
+        end
+        if rand() < 0.3 
+            solve_all_intersections!(offspring, Customers, depot, TT)
+            enrich_the_chromosome2!(offspring, TT, Customers, depot, n_nodes)
         end
     end
+
     enrich_the_chromosome2!(offspring, TT, Customers, depot, n_nodes)
     if improve_count > 100
         Improve_chromosome!(offspring, TT, Close_nodes, n_nodes, roullet, old_best, 1000)
@@ -273,7 +274,7 @@ function perform_genetic_algorithm(
 
     tsp_tours = find_tsp_tour2(TT[1:n_nodes+1, 1:n_nodes+1])
 
-    if n_nodes < 1200 #&& K < 10
+    if n_nodes < 1200
         tsp_tour, _ = find_tsp_tour1(TT[1:n_nodes+1, 1:n_nodes+1])
         push!(tsp_tours, tsp_tour)
     end
@@ -296,8 +297,8 @@ function perform_genetic_algorithm(
 
     if verbose 
         println("The best objective achieved in ", Gen_num, " generations is: ", Population[1].fitness, " and it took ", t2 - t1, " seconds.")
-        println("And the best route is: ")
-        best_route(Population)
+#         println("And the best route is: ")
+#         best_route(Population)
     end
 
     return Population, roullet

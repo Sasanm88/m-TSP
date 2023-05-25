@@ -128,7 +128,7 @@ function Solve_instances(dir_name::String, sample_names::Vector{String})
         n = size(T)[1] - 2
         demands = ones(Int, n)
         W = 1000
-        h = 0.3
+        h = 0.1
         popsize = (10, 20)
         k_tournament = 2
         num_iter = 1000000
@@ -139,7 +139,7 @@ function Solve_instances(dir_name::String, sample_names::Vector{String})
         avg = 0.0
         best = Inf
         worst = 0.0
-        crossover_functions = Int[2, 3]
+        crossover_functions = Int[2]
 
         t1 = time()
         for i in 1:num_runs

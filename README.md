@@ -67,8 +67,9 @@ api.init_julia()
 from julia import HGSmTSP
 
 import numpy as np 
-x = np.random.rand(100) * 1000
-y = np.random.rand(100) * 1000
+n_nodes = 10
+x = np.random.rand(n_nodes) * 1000
+y = np.random.rand(n_nodes) * 1000
 dist_mtx = np.sqrt((x[:,None] - x[None,:])**2 + (y[:,None] - y[None,:])**2)
 
 

@@ -15,10 +15,6 @@ coordinates = rand(n_nodes, 2) .* 1000
 dist_mtx = zeros(n_nodes, n_nodes)
 for i in 1:n_nodes
     for j in 1:n_nodes
-
-
-        t0 = time()
-
         dist_mtx[i, j] = norm(coordinates[i, :] - coordinates[j, :])
     end
 end

@@ -111,62 +111,50 @@ function solve_mTSP(
 end
 
 
-
-function Solve_instances(dir_name::String, sample_names::Vector{String})
-
-    best_chrm = Chromosome(Int[], 0.0, 0.0, Tour[])
-    worst_chrm = Chromosome(Int[], 0.0, 0.0, Tour[])
-    all_chrms = Chromosome[]
-
-    row = 0
-    for sample_name in sample_names
-        row += 1
-        println(sample_name)
-        m, T, depot_, customers = read_data(dir_name, sample_name)
-        Customers = copy(transpose(customers))
-        depot = Float64.(depot_)
+function solve_instances_set1(num_customers::Int, num_salesmen::Int, num_instances::Int, verbose::Bool)
+    for instance in 1:num_instances
+        T, depot, Customers = create_random_sample(num_customers)
         n = size(T)[1] - 2
-        demands = ones(Int, n)
-        W = 1000
-        h = 0.1
+        h = 0.3
         popsize = (10, 20)
         k_tournament = 2
-        num_iter = 1000000
-        time_limit = (n + 1) * 240 / 100
+        num_iter = 2500
+        time_limit = Inf
         Mutation_Chance = 0.0
-        num_runs = 20
+        num_runs = 10
         num_nei = 2
         avg = 0.0
         best = Inf
         worst = 0.0
-        crossover_functions = Int[2]
+        crossover_functions = [2]
 
-        t1 = time()
-        for i in 1:num_runs
-            P, roullet = perform_genetic_algorithm(T, m, h, popsize,
-                k_tournament, num_iter, time_limit, Mutation_Chance, num_nei, crossover_functions, Customers, depot)
 
-            avg += P[1].fitness
-            push!(all_chrms, P[1])
-            if P[1].fitness < best
-                best = P[1].fitness
-                best_chrm = P[1]
+        P = Chromosome[]
+        for run in num_runs
+            avg = 0.0
+            best = Inf
+            worst = 0.0
+            t1 = time()
+            for i in 1:num_runs
+                P, roullet = perform_genetic_algorithm(T, num_salesmen, h, popsize,
+                    k_tournament, num_iter, time_limit, Mutation_Chance, num_nei, crossover_functions, Customers, depot, verbose = verbose)
+                avg += P[1].fitness
+                if P[1].fitness < best
+                    best = P[1].fitness
+                end
+                if P[1].fitness > worst
+                    worst = P[1].fitness
+                end
             end
-            if P[1].fitness > worst
-                worst = P[1].fitness
-                worst_chrm = P[1]
-            end
+            t2 = time()
+            println("Results for instance number ", instance, " ,m=", num_salesmen)
+            println("Best: ", round(best, digits=1), "  Average: ", round(avg / num_runs, digits=1),
+                "  Worst: ", round(worst, digits=1), " , run time= ", round((t2 - t1) / num_runs, digits=1))
         end
-        t2 = time()
-        println("Results for ", sample_name, " ,m=", m)
-        println("Best: ", round(best, digits=2), "  Average: ", round(avg / num_runs, digits=2),
-            "  Worst: ", round(worst, digits=2), " , run time= ", round((t2 - t1) / num_runs, digits=0))
     end
-
-    return best_chrm
 end
 
-function test(instances::Vector{Symbol}, Ms::Vector{Int})
+function solve_instances_set2(instances::Vector{Symbol}, Ms::Vector{Int}, verbose::Bool)
     for instance in instances
         for K in Ms
             T = read_TSPLIB_instance(instance, 1)
@@ -198,7 +186,7 @@ function test(instances::Vector{Symbol}, Ms::Vector{Int})
                 t1 = time()
                 for i in 1:num_runs
                     P, roullet = perform_genetic_algorithm(T, K, h, popsize,
-                        k_tournament, num_iter, time_limit, Mutation_Chance, num_nei, crossover_functions, Customers, depot)
+                        k_tournament, num_iter, time_limit, Mutation_Chance, num_nei, crossover_functions, Customers, depot, verbose = verbose)
                     avg += P[1].fitness
                     if P[1].fitness < best
                         best = P[1].fitness
@@ -216,14 +204,60 @@ function test(instances::Vector{Symbol}, Ms::Vector{Int})
     end
 end
 
-# dir_name = "set1"
-# sample_names = ["mtsp150_3", "mtsp150_5", "mtsp150_10", "kroa200_3", "kroa200_5","kroa200_10", "lin318_3", "lin318_5", "lin318_10"]
+function solve_instances_set3_4(dir_name::String, sample_names::Vector{String}, verbose::Bool)
 
-# Solve_instances(dir_name, sample_names)
+    best_chrm = Chromosome(Int[], 0.0, 0.0, Tour[])
+    worst_chrm = Chromosome(Int[], 0.0, 0.0, Tour[])
+    all_chrms = Chromosome[]
 
-# instances = [:eil51]
-# Ms = [2,3,5,7]
-# test(instances, Ms)
+    row = 0
+    for sample_name in sample_names
+        row += 1
+        println(sample_name)
+        m, T, depot_, customers = read_data(dir_name, sample_name)
+        Customers = copy(transpose(customers))
+        depot = Float64.(depot_)
+        n = size(T)[1] - 2
+        demands = ones(Int, n)
+        W = 1000
+        h = 0.1
+        popsize = (10, 20)
+        k_tournament = 2
+        num_iter = 1000000
+        time_limit = (n + 1) / 5
+        Mutation_Chance = 0.0
+        num_runs = 20
+        num_nei = 2
+        avg = 0.0
+        best = Inf
+        worst = 0.0
+        crossover_functions = Int[2]
+
+        t1 = time()
+        for i in 1:num_runs
+            P, roullet = perform_genetic_algorithm(T, m, h, popsize,
+                k_tournament, num_iter, time_limit, Mutation_Chance, num_nei, crossover_functions, Customers, depot, verbose = verbose)
+
+            avg += P[1].fitness
+            push!(all_chrms, P[1])
+            if P[1].fitness < best
+                best = P[1].fitness
+                best_chrm = P[1]
+            end
+            if P[1].fitness > worst
+                worst = P[1].fitness
+                worst_chrm = P[1]
+            end
+        end
+        t2 = time()
+        println("Results for ", sample_name, " ,m=", m)
+        println("Best: ", round(best, digits=2), "  Average: ", round(avg / num_runs, digits=2),
+            "  Worst: ", round(worst, digits=2), " , run time= ", round((t2 - t1) / num_runs, digits=0))
+    end
+
+    return best_chrm
+end
+
 
 
 

@@ -1,6 +1,6 @@
 This page contains the HGA code proposed in the following paper: 
 
-Mahmoudinazlou, S., & Kwon, C. (2023). A Hybrid Genetic Algorithm for the min-max Multiple Traveling Salesman Problem. arXiv preprint arXiv:2307.07120.
+Mahmoudinazlou, S., & Kwon, C. (2024). A hybrid genetic algorithm for the min–max Multiple Traveling Salesman Problem. Computers & Operations Research, 162, 106455.
 
 ## How to Install as a Julia package?
 
